@@ -21,8 +21,8 @@ export function HeroSection({ sections }: HeroSectionProps) {
   const primaryCta = getEditableButton(
     sections,
     "hero",
-    "Get Started Now",
-    "/pricing",
+    "Get Set Up",
+    "/pricing#setup",
     0
   );
   const secondaryCta = getEditableButton(
@@ -67,7 +67,7 @@ export function HeroSection({ sections }: HeroSectionProps) {
               sections,
               "hero",
               "p",
-              "Everything Your Business Needs — One Platform",
+              "You Didn't Start a Business to Be an Admin Worker",
               0
             )}
           </motion.p>
@@ -84,13 +84,13 @@ export function HeroSection({ sections }: HeroSectionProps) {
                 sections,
                 "hero",
                 "h1",
-                "Your digital foundation.",
+                "Your Personal Business Assistant.",
                 0
               )}
             </span>
             <br />
             <span className="text-gold" data-field-id={getFieldId(sections, "hero", "h2", 0) || undefined}>
-              {getEditableText(sections, "hero", "h2", "Handled.", 0)}
+              {getEditableText(sections, "hero", "h2", "Always On. Always Yours.", 0)}
             </span>
           </motion.h1>
 
@@ -106,7 +106,7 @@ export function HeroSection({ sections }: HeroSectionProps) {
               sections,
               "hero",
               "p",
-              "Professional digital infrastructure for your business — built by developers, managed for you, growing with you. Focus on what you do best. We handle the rest.",
+              "One platform. One assistant. Website, CRM, email, WhatsApp, automations — all managed by your own AI agent. Stop juggling tools. Start growing.",
               1
             )}
           </motion.p>
