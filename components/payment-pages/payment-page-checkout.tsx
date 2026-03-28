@@ -53,6 +53,9 @@ const translations: Record<string, Record<string, string>> = {
     thankYou: "Thank you for your purchase. You'll receive a confirmation email shortly.",
     acceptTerms: "Please accept the terms and conditions",
     qty: "Qty",
+    perMonth: "/mo",
+    perYear: "/yr",
+    perQuarter: "/quarter",
     coupon: "Coupon",
     couponPlaceholder: "Enter coupon code",
     applyCoupon: "Apply",
@@ -104,6 +107,9 @@ const translations: Record<string, Record<string, string>> = {
     thankYou: "תודה על הרכישה. תקבלו אישור במייל בקרוב.",
     acceptTerms: "יש לאשר את תנאי השימוש",
     qty: "כמות",
+    perMonth: "/חודש",
+    perYear: "/שנה",
+    perQuarter: "/רבעון",
     coupon: "קופון",
     couponPlaceholder: "הזן קוד קופון",
     applyCoupon: "החל",
@@ -166,10 +172,49 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
   const [couponInput, setCouponInput] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
+
+  // Auto-apply pre-assigned coupon from payment page config
+  const getPreAppliedCoupon = () => {
+    const coupon = paymentPage.coupon;
+    if (!coupon?.code || !coupon?.discountType) return null;
+    let discountAmount = 0;
+    if (coupon.discountType === "percentage") {
+      discountAmount = paymentPage.subtotal * (coupon.discountValue / 100);
+    } else {
+      discountAmount = Math.min(coupon.discountValue, paymentPage.subtotal);
+    }
+    return { code: coupon.code, discountAmount };
+  };
+
   const [appliedCoupon, setAppliedCoupon] = useState<{
     code: string;
     discountAmount: number;
-  } | null>(null);
+  } | null>(getPreAppliedCoupon);
+
+  const getBillingLabel = (billingCycle: string | null | undefined) => {
+    if (!billingCycle) return "";
+    switch (billingCycle) {
+      case "monthly": return t.perMonth;
+      case "yearly": return t.perYear;
+      case "quarterly": return t.perQuarter;
+      default: return "";
+    }
+  };
+
+  const hasSubscriptionItems = paymentPage.items.some(
+    (item: any) => item.product?.billing_cycle
+  );
+  // Only show billing label on total when ALL items are subscriptions (no mix of one-time + subscription)
+  const allItemsAreSubscriptions = paymentPage.items.every(
+    (item: any) => item.product?.billing_cycle
+  );
+
+  // Split view: separate monthly and one-time totals when both exist
+  const monthlyItems = paymentPage.items.filter((item: any) => item.product?.billing_cycle === "monthly");
+  const oneTimeItems = paymentPage.items.filter((item: any) => item.product?.billing_cycle !== "monthly");
+  const hasBothTypes = monthlyItems.length > 0 && oneTimeItems.length > 0;
+  const monthlyEffectiveTotal = monthlyItems.reduce((sum: number, item: any) => sum + (item.effectivePrice ?? 0) * (item.quantity ?? 1), 0);
+  const oneTimeEffectiveTotal = oneTimeItems.reduce((sum: number, item: any) => sum + (item.effectivePrice ?? 0) * (item.quantity ?? 1), 0);
 
   // SUMIT SDK
   const [sumitConfig, setSumitConfig] = useState<any>(null);
@@ -520,12 +565,12 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                               {formatPrice(item.originalPrice, currency)}
                             </span>
                             <span className="text-sm font-medium text-green-600">
-                              {formatPrice(item.effectivePrice, currency)}
+                              {formatPrice(item.effectivePrice, currency)}{getBillingLabel(item.product?.billing_cycle)}
                             </span>
                           </>
                         ) : (
                           <span className="text-sm font-medium">
-                            {formatPrice(item.effectivePrice, currency)}
+                            {formatPrice(item.effectivePrice, currency)}{getBillingLabel(item.product?.billing_cycle)}
                           </span>
                         )}
                       </div>
@@ -580,27 +625,55 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
 
             {/* Price summary */}
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t.subtotal}:</span>
-                <span>{formatPrice(paymentPage.subtotal, currency)}</span>
-              </div>
-              {paymentPage.discount > 0 && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <span>{t.discount}:</span>
-                  <span>-{formatPrice(paymentPage.discount, currency)}</span>
-                </div>
+              {hasBothTypes ? (
+                /* Split view: separate monthly and one-time lines */
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{isRTL ? "חודשי" : "Monthly"}:</span>
+                    <span>{formatPrice(monthlyEffectiveTotal, currency)}{getBillingLabel("monthly")}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{isRTL ? "חד פעמי" : "One-time"}:</span>
+                    <span>{formatPrice(oneTimeEffectiveTotal, currency)}</span>
+                  </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>{t.coupon} ({appliedCoupon.code}):</span>
+                      <span>-{formatPrice(appliedCoupon.discountAmount, currency)}</span>
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>{isRTL ? "סה״כ להיום" : "Total today"}:</span>
+                    <span>{formatPrice(effectiveTotal, currency)}</span>
+                  </div>
+                </>
+              ) : (
+                /* Single category: standard subtotal/discount/total */
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{t.subtotal}:</span>
+                    <span>{formatPrice(paymentPage.subtotal, currency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}</span>
+                  </div>
+                  {paymentPage.discount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>{t.discount}:</span>
+                      <span>-{formatPrice(paymentPage.discount, currency)}</span>
+                    </div>
+                  )}
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>{t.coupon} ({appliedCoupon.code}):</span>
+                      <span>-{formatPrice(appliedCoupon.discountAmount, currency)}</span>
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>{t.total}:</span>
+                    <span>{formatPrice(effectiveTotal, currency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}</span>
+                  </div>
+                </>
               )}
-              {appliedCoupon && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <span>{t.coupon} ({appliedCoupon.code}):</span>
-                  <span>-{formatPrice(appliedCoupon.discountAmount, currency)}</span>
-                </div>
-              )}
-              <Separator />
-              <div className="flex justify-between text-lg font-bold">
-                <span>{t.total}:</span>
-                <span>{formatPrice(effectiveTotal, currency)}</span>
-              </div>
             </div>
 
             {hasRestrictions && (
@@ -645,14 +718,15 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">{t.email} *</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone">{t.phone} *</Label>
-                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="email">{t.email} *</Label>
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">{t.phone} *</Label>
+                  <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -817,10 +891,15 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                 <Checkbox
                   id="terms"
                   checked={termsAccepted}
-                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                  onCheckedChange={(checked) => setTermsAccepted(!!checked)}
                 />
-                <label htmlFor="terms" className="text-sm text-muted-foreground leading-tight">
-                  {t.termsAgree}{" "}
+                <div className="text-sm text-muted-foreground leading-tight">
+                  <span
+                    className="cursor-pointer"
+                    onClick={() => setTermsAccepted(!termsAccepted)}
+                  >
+                    {t.termsAgree}
+                  </span>{" "}
                   <a href={`${websiteUrl}/terms`} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
                     {t.termsLink}
                   </a>
@@ -828,7 +907,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                   <a href={`${websiteUrl}/privacy`} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
                     {t.privacyLink}
                   </a>
-                </label>
+                </div>
               </div>
 
               {/* Submit — only shown for free orders or after card fields are revealed */}
@@ -846,7 +925,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                 ) : requiresPayment ? (
                   <>
                     <Lock className="h-4 w-4 me-2" />
-                    {t.pay} {formatPrice(effectiveTotal, currency)}
+                    {t.pay} {formatPrice(effectiveTotal, currency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}
                   </>
                 ) : (
                   t.placeOrder

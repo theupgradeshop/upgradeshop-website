@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PaymentPageCheckout } from "@/components/payment-pages/payment-page-checkout";
+import { HideChrome } from "@/components/payment-pages/hide-chrome";
 
 const PLATFORM_URL = process.env.NEXT_PUBLIC_UPGRADESHOP_API_URL || "https://app.staging.upgradeshop.ai";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://anahata.staging.upgradeshop.ai";
@@ -57,7 +58,11 @@ export default async function PaymentPagePage({ params }: PageProps) {
 
   return (
     <div className="bg-background">
-      <div className="max-w-[1280px] mx-auto px-4 py-8">
+      <HideChrome
+        hideHeader={paymentPage.hideHeader ?? true}
+        hideFooter={paymentPage.hideFooter ?? true}
+      />
+      <div className="max-w-[1280px] mx-auto px-4 pt-16 pb-8">
         <PaymentPageCheckout paymentPage={paymentPage} slug={slug} />
       </div>
     </div>

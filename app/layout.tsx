@@ -66,9 +66,9 @@ export default function RootLayout({
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <CartProvider>
           <ScrollListener />
-          <Header />
+          <div id="site-header"><Header /></div>
           <main className="flex-1">{children}</main>
-          <Footer />
+          <div id="site-footer"><Footer /></div>
         </CartProvider>
       </body>
     </html>
