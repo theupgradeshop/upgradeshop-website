@@ -12,6 +12,8 @@ import {
   getFieldId,
   getSection,
 } from "@/lib/pages-api";
+import { WaitlistBenefits } from "@/components/waitlist/waitlist-benefits";
+import { WaitlistForm } from "@/components/waitlist/waitlist-form";
 
 interface HeroSectionProps {
   sections: PageSection[];
@@ -21,8 +23,8 @@ export function HeroSection({ sections }: HeroSectionProps) {
   const primaryCta = getEditableButton(
     sections,
     "hero",
-    "Get Set Up",
-    "/pricing#setup",
+    "Get Priority Access",
+    "#waitlist",
     0
   );
   const secondaryCta = getEditableButton(
@@ -84,13 +86,13 @@ export function HeroSection({ sections }: HeroSectionProps) {
                 sections,
                 "hero",
                 "h1",
-                "Your Personal Business Assistant.",
+                "Stop doing admin work.",
                 0
               )}
             </span>
             <br />
             <span className="text-gold" data-field-id={getFieldId(sections, "hero", "h2", 0) || undefined}>
-              {getEditableText(sections, "hero", "h2", "Always On. Always Yours.", 0)}
+              {getEditableText(sections, "hero", "h2", "Start growing.", 0)}
             </span>
           </motion.h1>
 
@@ -149,6 +151,18 @@ export function HeroSection({ sections }: HeroSectionProps) {
             <span data-field-id={getFieldId(sections, "hero", "p", 2) || undefined}>
               {getEditableText(sections, "hero", "p", "Questions? Chat with us anytime.", 2)}
             </span>
+          </motion.div>
+
+          {/* Waitlist capture block */}
+          <motion.div
+            id="waitlist"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="mt-16 pt-12 border-t border-border/30"
+          >
+            <WaitlistBenefits />
+            <WaitlistForm />
           </motion.div>
         </div>
       </Container>
