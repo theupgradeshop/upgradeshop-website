@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./language-switcher";
 import { Menu, X, ArrowRight, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnnouncementBar } from "@/components/announcement-bar";
 
 const navLinks = [
   { href: "#how-it-works", label: "How It Works" },
@@ -28,14 +29,16 @@ export function Header() {
   }, []);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 transition-all duration-300 bg-background",
-        isScrolled
-          ? "border-b border-border shadow-sm"
-          : ""
-      )}
-    >
+    <>
+      <AnnouncementBar />
+      <header
+        className={cn(
+          "sticky top-0 z-50 transition-all duration-300 bg-background",
+          isScrolled
+            ? "border-b border-border shadow-sm"
+            : ""
+        )}
+      >
       <Container>
         <nav className="flex justify-between items-center py-4">
           {/* Logo */}
@@ -139,6 +142,7 @@ export function Header() {
           </div>
         )}
       </Container>
-    </header>
+      </header>
+    </>
   );
 }
