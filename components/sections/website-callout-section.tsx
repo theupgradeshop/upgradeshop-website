@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Check, ArrowRight, X } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { PageSection, getSection } from "@/lib/pages-api";
@@ -12,30 +13,13 @@ interface WebsiteCalloutSectionProps {
 }
 
 export function WebsiteCalloutSection({ sections }: WebsiteCalloutSectionProps) {
+  const t = useTranslations("websiteCallout");
   const section = getSection(sections, "websites-callout");
 
-  const neverDo = [
-    "Forced to touch a website editor",
-    "Watch tutorial videos",
-    "Hire a freelancer for every change",
-    "Debug why something broke",
-  ];
-
-  const included = [
-    "Home, About, Contact, Services pages",
-    "Forms connected to CRM automatically",
-    "Blog — AI writes & publishes",
-    "Payment gateway included",
-    "SSL, mobile-optimized, responsive",
-    "Human review before going live",
-  ];
-
-  const ecommerceIncluded = [
-    "Product pages, shop & collections",
-    "Cart & checkout flow",
-    "Abandoned cart recovery",
-    "Activate the Store module to enable",
-  ];
+  const neverDo = t.raw("neverDo") as string[];
+  const included = t.raw("aiCardIncluded") as string[];
+  const ecommerceIncluded = t.raw("aiCardEcommerce") as string[];
+  const proCardIncluded = t.raw("proCardIncluded") as string[];
 
   return (
     <section
@@ -56,11 +40,11 @@ export function WebsiteCalloutSection({ sections }: WebsiteCalloutSectionProps) 
           className="text-center mb-14"
         >
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal mb-4 leading-tight">
-            Your website,{" "}
-            <span className="text-gold">handled.</span>
+            {t("heading")}{" "}
+            <span className="text-gold">{t("headingGold")}</span>
           </h2>
           <p className="text-xl text-primary-foreground/70 max-w-2xl mx-auto">
-            Every subscription includes an AI-built website. Your agent manages ongoing updates. You never touch an editor — ever.
+            {t("body")}
           </p>
         </motion.div>
 
@@ -75,9 +59,9 @@ export function WebsiteCalloutSection({ sections }: WebsiteCalloutSectionProps) 
             className="bg-white/5 border border-white/10 rounded-2xl p-8"
           >
             <div className="mb-5">
-              <span className="text-xs font-bold uppercase tracking-wider text-gold">Included with any subscription</span>
-              <h3 className="font-display text-2xl font-normal text-primary-foreground mt-2 mb-1">AI-Built Website</h3>
-              <p className="text-primary-foreground/50 text-sm">Describe your business. The agent builds it.</p>
+              <span className="text-xs font-bold uppercase tracking-wider text-gold">{t("aiCardLabel")}</span>
+              <h3 className="font-display text-2xl font-normal text-primary-foreground mt-2 mb-1">{t("aiCardTitle")}</h3>
+              <p className="text-primary-foreground/50 text-sm">{t("aiCardBody")}</p>
             </div>
             <ul className="space-y-2.5 mb-5">
               {included.map((item, i) => (
@@ -109,9 +93,9 @@ export function WebsiteCalloutSection({ sections }: WebsiteCalloutSectionProps) 
             className="bg-gold/10 border border-gold/30 rounded-2xl p-8"
           >
             <div className="mb-5">
-              <span className="text-xs font-bold uppercase tracking-wider text-gold">One-time service</span>
-              <h3 className="font-display text-2xl font-normal text-primary-foreground mt-2 mb-1">Professional Developer Build</h3>
-              <p className="text-primary-foreground/50 text-sm">Custom branded, database-connected</p>
+              <span className="text-xs font-bold uppercase tracking-wider text-gold">{t("proCardLabel")}</span>
+              <h3 className="font-display text-2xl font-normal text-primary-foreground mt-2 mb-1">{t("proCardTitle")}</h3>
+              <p className="text-primary-foreground/50 text-sm">{t("proCardBody")}</p>
             </div>
             <div className="space-y-2.5 mb-5">
               <div className="flex items-center justify-between bg-white/5 rounded-lg px-4 py-3">
@@ -127,20 +111,14 @@ export function WebsiteCalloutSection({ sections }: WebsiteCalloutSectionProps) 
               </div>
             </div>
             <ul className="space-y-2.5">
-              {[
-                "Custom branded design by a developer",
-                "Brand-specific section template library",
-                "Every section database-connected",
-                "Unlimited pages via template system",
-                "Developer access via ticket system",
-              ].map((item, i) => (
+              {proCardIncluded.map((item, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <Check className="h-4 w-4 text-gold flex-shrink-0 mt-0.5" />
                   <span className="text-sm text-primary-foreground/80">{item}</span>
                 </li>
               ))}
             </ul>
-            <p className="text-xs text-primary-foreground/30 mt-4">Large catalogs or complex migrations may require a custom quote.</p>
+            <p className="text-xs text-primary-foreground/30 mt-4">{t("proCardNote")}</p>
           </motion.div>
         </div>
 
@@ -166,7 +144,7 @@ export function WebsiteCalloutSection({ sections }: WebsiteCalloutSectionProps) 
             className="bg-gold hover:bg-gold-dark text-foreground font-medium"
           >
             <Link href="#waitlist">
-              Get Priority Access
+              {t("cta")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

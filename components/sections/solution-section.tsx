@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Check, Users, Zap, TrendingUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/layout/container";
 import { PageSection, getEditableText, getFieldId, getSection } from "@/lib/pages-api";
 
@@ -10,25 +11,28 @@ interface SolutionSectionProps {
 }
 
 export function SolutionSection({ sections }: SolutionSectionProps) {
+  const t = useTranslations("solution");
   const solutionSection = getSection(sections, "solution");
   const sectionId = solutionSection?.id;
   const sectionKey = solutionSection?.sectionKey;
 
+  const checklist = t.raw("checklist") as string[];
+
   const benefits = [
     {
       icon: Users,
-      title: "We build it for you",
-      description: "Real developers create your infrastructure professionally. No DIY, no templates.",
+      title: t("card1Title"),
+      description: t("card1Body"),
     },
     {
       icon: Zap,
-      title: "We manage it for you",
-      description: "Max, our AI, handles day-to-day. Our team ensures quality. You just describe what you need.",
+      title: t("card2Title"),
+      description: t("card2Body"),
     },
     {
       icon: TrendingUp,
-      title: "We keep improving it",
-      description: "Request features and we build them. Free. Your infrastructure grows with your business.",
+      title: t("card3Title"),
+      description: t("card3Body"),
     },
   ];
 
@@ -47,7 +51,7 @@ export function SolutionSection({ sections }: SolutionSectionProps) {
             transition={{ duration: 0.5 }}
           >
             <div className="inline-block px-3 py-1 bg-gold/10 text-gold-dark text-sm font-medium rounded-full mb-6" data-field-id={getFieldId(sections, "solution", "p", 1) || undefined}>
-              {getEditableText(sections, "solution", "p", "The Third Option", 1)}
+              {getEditableText(sections, "solution", "p", t("badge"), 1)}
             </div>
 
             <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground mb-6 leading-tight" data-field-id={getFieldId(sections, "solution", "h2", 0) || undefined}>
@@ -55,12 +59,12 @@ export function SolutionSection({ sections }: SolutionSectionProps) {
                 sections,
                 "solution",
                 "h2",
-                "Not a tool. Not a platform.",
+                t("heading"),
                 0
               )}
               <br />
               <span className="text-gold" data-field-id={getFieldId(sections, "solution", "h2", 1) || undefined}>
-                {getEditableText(sections, "solution", "h2", "A partner.", 1)}
+                {getEditableText(sections, "solution", "h2", t("headingGold"), 1)}
               </span>
             </h2>
 
@@ -69,18 +73,14 @@ export function SolutionSection({ sections }: SolutionSectionProps) {
                 sections,
                 "solution",
                 "p",
-                "The Upgrade Shop is your dedicated digital infrastructure partner. We handle everything — professionally — so you can focus on what you do best.",
+                t("body"),
                 0
               )}
             </p>
 
             {/* Quick value props */}
             <div className="space-y-3">
-              {[
-                "One unified system instead of 7+ platforms",
-                "Professional quality without the agency price tag",
-                "Always-on support via Max, our AI partner",
-              ].map((item, index) => (
+              {checklist.map((item, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: -10 }}
@@ -142,7 +142,7 @@ export function SolutionSection({ sections }: SolutionSectionProps) {
               sections,
               "solution",
               "quote",
-              '"You focus on what you do best. We handle everything else."',
+              t("quote"),
               0
             )}
           </blockquote>

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { ChevronDown, MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/layout/container";
 import { PageSection, getEditableText, getFieldId, getSection } from "@/lib/pages-api";
 import { cn } from "@/lib/utils";
@@ -12,43 +13,14 @@ interface FAQSectionProps {
 }
 
 export function FAQSection({ sections }: FAQSectionProps) {
+  const t = useTranslations("faq");
   const faqSection = getSection(sections, "faq");
   const sectionId = faqSection?.id;
   const sectionKey = faqSection?.sectionKey;
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  const faqs = [
-    {
-      question: "How is this different from Wix or Squarespace?",
-      answer:
-        "With Wix or Squarespace, you're doing the work yourself — picking templates, editing layouts, learning the platform. With The Upgrade Shop, we build everything for you professionally. You describe what you need, and real developers create it. You never touch an editor.",
-    },
-    {
-      question: "What if I need something custom?",
-      answer:
-        "That's exactly what we're built for. When you request a feature for a module you're subscribed to, we build it. For free. Your subscription doesn't just maintain — it improves based on your specific needs.",
-    },
-    {
-      question: "Can I start small and add more later?",
-      answer:
-        "Absolutely. Start with just what you need — maybe just a website, or just CRM. Add more modules as your business grows. Everything works together seamlessly, so there's no penalty for starting small.",
-    },
-    {
-      question: "What does 'Max handles it' actually mean?",
-      answer:
-        "Max is our AI partner who helps manage your day-to-day updates and requests. Need a text change on your website? Tell Max. Need a new email campaign? Tell Max. For anything that needs human expertise, Max routes it to our development team. You always have a responsive partner, 24/7.",
-    },
-    {
-      question: "How long does it take to get started?",
-      answer:
-        "Most clients are up and running within days, not weeks. We handle all the technical setup, content migration, and configuration. You just provide the direction.",
-    },
-    {
-      question: "What if I want to cancel?",
-      answer:
-        "No long-term contracts. Cancel anytime. Your data is always yours — we'll help you export everything if you ever decide to leave. We're confident you won't want to, but the door is never locked.",
-    },
-  ];
+  const faqItems = t.raw("items") as Array<{ q: string; a: string }>;
+  const faqs = faqItems.map((item) => ({ question: item.q, answer: item.a }));
 
   return (
     <section className="py-24 md:py-24 bg-background relative overflow-hidden" data-section-id={sectionId} data-section-key={sectionKey}>
@@ -63,7 +35,7 @@ export function FAQSection({ sections }: FAQSectionProps) {
           >
             <div className="sticky top-24">
               <div className="inline-block px-3 py-1 bg-gold/10 text-gold-dark text-sm font-medium rounded-full mb-6" data-field-id={getFieldId(sections, "faq", "p", 1) || undefined}>
-                {getEditableText(sections, "faq", "p", "FAQ", 1)}
+                {getEditableText(sections, "faq", "p", t("badge"), 1)}
               </div>
 
               <h2 className="font-display text-3xl md:text-4xl font-normal text-foreground mb-6" data-field-id={getFieldId(sections, "faq", "h2", 0) || undefined}>
@@ -71,7 +43,7 @@ export function FAQSection({ sections }: FAQSectionProps) {
                   sections,
                   "faq",
                   "h2",
-                  "Common questions",
+                  t("heading"),
                   0
                 )}
               </h2>
@@ -80,7 +52,7 @@ export function FAQSection({ sections }: FAQSectionProps) {
                   sections,
                   "faq",
                   "p",
-                  "Can't find what you're looking for? We're always here to help.",
+                  t("body"),
                   0
                 )}
               </p>
@@ -91,10 +63,10 @@ export function FAQSection({ sections }: FAQSectionProps) {
                 </div>
                 <div>
                   <p className="font-medium text-foreground" data-field-id={getFieldId(sections, "faq", "p", 2) || undefined}>
-                    {getEditableText(sections, "faq", "p", "Still have questions?", 2)}
+                    {getEditableText(sections, "faq", "p", t("supportNote"), 2)}
                   </p>
                   <p className="text-sm text-foreground" data-field-id={getFieldId(sections, "faq", "p", 3) || undefined}>
-                    {getEditableText(sections, "faq", "p", "Chat with us anytime", 3)}
+                    {getEditableText(sections, "faq", "p", t("supportNote"), 3)}
                   </p>
                 </div>
               </div>

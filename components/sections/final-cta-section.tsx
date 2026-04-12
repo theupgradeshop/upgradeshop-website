@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/layout/container";
 import { WaitlistForm } from "@/components/waitlist/waitlist-form";
 import {
@@ -16,15 +17,12 @@ interface FinalCTASectionProps {
 }
 
 export function FinalCTASection({ sections }: FinalCTASectionProps) {
+  const t = useTranslations("finalCta");
   const finalCtaSection = getSection(sections, "final-cta");
   const sectionId = finalCtaSection?.id;
   const sectionKey = finalCtaSection?.sectionKey;
 
-  const trustIndicators = [
-    "No long-term contracts",
-    "Cancel anytime",
-    "Your data is always yours",
-  ];
+  const trustIndicators = t.raw("trustIndicators") as string[];
 
   return (
     <section className="py-24 md:py-24 bg-foreground text-primary-foreground relative overflow-hidden" data-section-id={sectionId} data-section-key={sectionKey}>
@@ -49,7 +47,7 @@ export function FinalCTASection({ sections }: FinalCTASectionProps) {
                 sections,
                 "final-cta",
                 "h2",
-                "Ready to focus on what matters?",
+                t("heading"),
                 0
               )}
             </h2>
@@ -58,7 +56,7 @@ export function FinalCTASection({ sections }: FinalCTASectionProps) {
                 sections,
                 "final-cta",
                 "p",
-                "Your digital infrastructure shouldn't be a project you manage. Let us handle it so you can focus on your craft.",
+                t("body"),
                 0
               )}
             </p>

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { MousePointerClick, Hammer, Coffee } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/layout/container";
 import { PageSection, getEditableText, getFieldId, getSection } from "@/lib/pages-api";
 
@@ -10,30 +11,28 @@ interface HowItWorksSectionProps {
 }
 
 export function HowItWorksSection({ sections }: HowItWorksSectionProps) {
+  const t = useTranslations("howItWorks");
   const howItWorksSection = getSection(sections, "how-it-works");
   const sectionId = howItWorksSection?.id;
   const sectionKey = howItWorksSection?.sectionKey;
   const steps = [
     {
-      number: "01",
+      number: t("step1.number"),
       icon: MousePointerClick,
-      title: "Choose what you need",
-      description:
-        "Start with one module or get everything. Pick what makes sense for your business right now.",
+      title: t("step1.title"),
+      description: t("step1.body"),
     },
     {
-      number: "02",
+      number: t("step2.number"),
       icon: Hammer,
-      title: "We set it up",
-      description:
-        "Real developers build your infrastructure professionally. No DIY, no templates, no guesswork.",
+      title: t("step2.title"),
+      description: t("step2.body"),
     },
     {
-      number: "03",
+      number: t("step3.number"),
       icon: Coffee,
-      title: "You run your business",
-      description:
-        "Max and our team handle the rest. Updates, changes, improvements — just describe what you need.",
+      title: t("step3.title"),
+      description: t("step3.body"),
     },
   ];
 
@@ -56,7 +55,7 @@ export function HowItWorksSection({ sections }: HowItWorksSectionProps) {
           className="text-center max-w-3xl mx-auto mb-16"
         >
           <div className="inline-block px-3 py-1 bg-gold/10 text-gold-dark text-sm font-medium rounded-full mb-6" data-field-id={getFieldId(sections, "how-it-works", "p", 1) || undefined}>
-            {getEditableText(sections, "how-it-works", "p", "Simple Process", 1)}
+            {getEditableText(sections, "how-it-works", "p", t("badge"), 1)}
           </div>
 
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground mb-6" data-field-id={getFieldId(sections, "how-it-works", "h2", 0) || undefined}>
@@ -64,7 +63,7 @@ export function HowItWorksSection({ sections }: HowItWorksSectionProps) {
               sections,
               "how-it-works",
               "h2",
-              "How it works",
+              t("heading"),
               0
             )}
           </h2>
@@ -73,7 +72,7 @@ export function HowItWorksSection({ sections }: HowItWorksSectionProps) {
               sections,
               "how-it-works",
               "p",
-              "Getting started is simple. Getting results is even simpler.",
+              t("body"),
               0
             )}
           </p>

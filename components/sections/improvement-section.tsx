@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Sparkles, Plus, ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/layout/container";
 import { PageSection, getEditableText, getFieldId, getSection } from "@/lib/pages-api";
 
@@ -10,25 +11,26 @@ interface ImprovementSectionProps {
 }
 
 export function ImprovementSection({ sections }: ImprovementSectionProps) {
+  const t = useTranslations("improvement");
   const improvementSection = getSection(sections, "improvement");
   const sectionId = improvementSection?.id;
   const sectionKey = improvementSection?.sectionKey;
   const examples = [
     {
-      request: "Need a custom booking flow?",
-      result: "Built. Free.",
+      request: t("card1.question"),
+      result: t("card1.answer"),
     },
     {
-      request: "Need specific CRM fields for your industry?",
-      result: "Built. Free.",
+      request: t("card2.question"),
+      result: t("card2.answer"),
     },
     {
-      request: "Need a particular automation trigger?",
-      result: "Built. Free.",
+      request: t("card3.question"),
+      result: t("card3.answer"),
     },
     {
-      request: "Need a new page design for a campaign?",
-      result: "Built. Free.",
+      request: t("card4.question"),
+      result: t("card4.answer"),
     },
   ];
 
@@ -57,7 +59,7 @@ export function ImprovementSection({ sections }: ImprovementSectionProps) {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold/20 rounded-full">
               <Plus className="h-4 w-4 text-gold-dark" />
               <span className="text-sm font-medium text-gold-dark" data-field-id={getFieldId(sections, "improvement", "p", 2) || undefined}>
-                {getEditableText(sections, "improvement", "p", "The Promise That Sets Us Apart", 2)}
+                {getEditableText(sections, "improvement", "p", t("badge"), 2)}
               </span>
             </div>
           </motion.div>
@@ -75,7 +77,7 @@ export function ImprovementSection({ sections }: ImprovementSectionProps) {
                 sections,
                 "improvement",
                 "h2",
-                "Your subscription doesn't decay.",
+                t("heading"),
                 0
               )}
               <br />
@@ -84,7 +86,7 @@ export function ImprovementSection({ sections }: ImprovementSectionProps) {
                   sections,
                   "improvement",
                   "h2",
-                  "It appreciates.",
+                  t("headingGold"),
                   1
                 )}
               </span>
@@ -94,7 +96,7 @@ export function ImprovementSection({ sections }: ImprovementSectionProps) {
                 sections,
                 "improvement",
                 "p",
-                "When you request a feature for a module you're subscribed to, we build it. For free. Forever.",
+                t("body"),
                 0
               )}
             </p>
@@ -142,7 +144,7 @@ export function ImprovementSection({ sections }: ImprovementSectionProps) {
                   sections,
                   "improvement",
                   "p",
-                  "Software that gets better because you use it — not worse because it ages.",
+                  t("closing"),
                   1
                 )}
               </p>

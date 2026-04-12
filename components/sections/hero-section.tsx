@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,8 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ sections }: HeroSectionProps) {
+  const t = useTranslations("hero");
+
   const primaryCta = getEditableButton(
     sections,
     "hero",
@@ -30,7 +33,7 @@ export function HeroSection({ sections }: HeroSectionProps) {
   const secondaryCta = getEditableButton(
     sections,
     "hero",
-    "See How It Works",
+    t("secondaryCta"),
     "#how-it-works",
     1
   );
@@ -69,7 +72,7 @@ export function HeroSection({ sections }: HeroSectionProps) {
               sections,
               "hero",
               "p",
-              "You Didn't Start a Business to Be an Admin Worker",
+              t("eyebrow"),
               0
             )}
           </motion.p>
@@ -86,13 +89,13 @@ export function HeroSection({ sections }: HeroSectionProps) {
                 sections,
                 "hero",
                 "h1",
-                "Stop doing admin work.",
+                t("headline"),
                 0
               )}
             </span>
             <br />
             <span className="text-gold" data-field-id={getFieldId(sections, "hero", "h2", 0) || undefined}>
-              {getEditableText(sections, "hero", "h2", "Start growing.", 0)}
+              {getEditableText(sections, "hero", "h2", t("headlineGold"), 0)}
             </span>
           </motion.h1>
 
@@ -108,7 +111,7 @@ export function HeroSection({ sections }: HeroSectionProps) {
               sections,
               "hero",
               "p",
-              "One platform. One assistant. Website, CRM, email, WhatsApp, automations — all managed by your own AI agent. Stop juggling tools. Start growing.",
+              t("subheadline"),
               1
             )}
           </motion.p>
@@ -149,7 +152,7 @@ export function HeroSection({ sections }: HeroSectionProps) {
           >
             <MessageCircle className="h-4 w-4" />
             <span data-field-id={getFieldId(sections, "hero", "p", 2) || undefined}>
-              {getEditableText(sections, "hero", "p", "Questions? Chat with us anytime.", 2)}
+              {getEditableText(sections, "hero", "p", t("trustNote"), 2)}
             </span>
           </motion.div>
 

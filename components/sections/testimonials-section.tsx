@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Quote, Star, Play } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/layout/container";
 import { PageSection, getEditableText, getFieldId, getSection } from "@/lib/pages-api";
 
@@ -10,42 +11,33 @@ interface TestimonialsSectionProps {
 }
 
 export function TestimonialsSection({ sections }: TestimonialsSectionProps) {
+  const t = useTranslations("testimonials");
   const testimonialsSection = getSection(sections, "testimonials");
   const sectionId = testimonialsSection?.id;
   const sectionKey = testimonialsSection?.sectionKey;
   // Placeholder testimonials - will be replaced with real ones
   const testimonials = [
     {
-      quote:
-        "Finally, I can focus on my clients instead of fighting with technology. The Upgrade Shop handles everything.",
-      author: "Coming Soon",
-      role: "Therapist",
+      quote: t("testimonial1.quote"),
+      author: t("testimonial1.name"),
+      role: t("testimonial1.role"),
       avatar: null,
     },
     {
-      quote:
-        "I went from juggling 5 different tools to having everything in one place. Game changer.",
-      author: "Coming Soon",
-      role: "Consultant",
+      quote: t("testimonial2.quote"),
+      author: t("testimonial2.name"),
+      role: t("testimonial2.role"),
       avatar: null,
     },
     {
-      quote:
-        "The continuous improvement promise is real. I asked for a feature, and they built it within days.",
-      author: "Coming Soon",
-      role: "Small Business Owner",
+      quote: t("testimonial3.quote"),
+      author: t("testimonial3.name"),
+      role: t("testimonial3.role"),
       avatar: null,
     },
   ];
 
-  const industries = [
-    "Therapists",
-    "Consultants",
-    "Lawyers",
-    "Coaches",
-    "Healthcare",
-    "Creative Services",
-  ];
+  const industries = t("industries").split(" · ");
 
   return (
     <section className="py-24 md:py-24 bg-background relative overflow-hidden" data-section-id={sectionId} data-section-key={sectionKey}>
@@ -67,7 +59,7 @@ export function TestimonialsSection({ sections }: TestimonialsSectionProps) {
           className="text-center max-w-3xl mx-auto mb-16"
         >
           <div className="inline-block px-3 py-1 bg-gold/10 text-gold-dark text-sm font-medium rounded-full mb-6" data-field-id={getFieldId(sections, "testimonials", "p", 1) || undefined}>
-            {getEditableText(sections, "testimonials", "p", "Real Stories", 1)}
+            {getEditableText(sections, "testimonials", "p", t("badge"), 1)}
           </div>
 
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground mb-6" data-field-id={getFieldId(sections, "testimonials", "h2", 0) || undefined}>
@@ -75,7 +67,7 @@ export function TestimonialsSection({ sections }: TestimonialsSectionProps) {
               sections,
               "testimonials",
               "h2",
-              "Trusted by professionals",
+              t("heading"),
               0
             )}
           </h2>
@@ -84,7 +76,7 @@ export function TestimonialsSection({ sections }: TestimonialsSectionProps) {
               sections,
               "testimonials",
               "p",
-              "Hear from business owners who made the switch.",
+              t("body"),
               0
             )}
           </p>
@@ -151,7 +143,7 @@ export function TestimonialsSection({ sections }: TestimonialsSectionProps) {
               <Play className="h-8 w-8 text-foreground fill-foreground" />
             </div>
             <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-primary-foreground/60 text-sm" data-field-id={getFieldId(sections, "testimonials", "p", 8) || undefined}>
-              {getEditableText(sections, "testimonials", "p", "Video testimonials coming soon", 8)}
+              {getEditableText(sections, "testimonials", "p", t("videoPlaceholder"), 8)}
             </p>
           </div>
         </motion.div>
@@ -165,7 +157,7 @@ export function TestimonialsSection({ sections }: TestimonialsSectionProps) {
           className="text-center"
         >
           <p className="text-foreground mb-4" data-field-id={getFieldId(sections, "testimonials", "p", 9) || undefined}>
-            {getEditableText(sections, "testimonials", "p", "Trusted by professionals in", 9)}
+            {getEditableText(sections, "testimonials", "p", t("trustedLabel"), 9)}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             {industries.map((industry, index) => (

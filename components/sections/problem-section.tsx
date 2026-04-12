@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Clock, DollarSign, Puzzle, Wrench } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/layout/container";
 import { PageSection, getEditableText, getFieldId, getSection } from "@/lib/pages-api";
 
@@ -10,23 +11,24 @@ interface ProblemSectionProps {
 }
 
 export function ProblemSection({ sections }: ProblemSectionProps) {
+  const t = useTranslations("problem");
   const problemSection = getSection(sections, "problem");
   const sectionId = problemSection?.id;
   const sectionKey = problemSection?.sectionKey;
 
+  const diyItems = t.raw("diyItems") as string[];
+  const enterpriseItems = t.raw("enterpriseItems") as string[];
+
   const diyProblems = [
-    {
-      icon: Wrench,
-      text: "Hours spent tinkering instead of running your business",
-    },
-    { icon: Clock, text: "Watching YouTube tutorials at midnight" },
-    { icon: Puzzle, text: "Limited capabilities that break when you need them" },
+    { icon: Wrench, text: diyItems[0] },
+    { icon: Clock, text: diyItems[1] },
+    { icon: Puzzle, text: diyItems[2] },
   ];
 
   const enterpriseProblems = [
-    { icon: DollarSign, text: "$5k-$50k for agencies + monthly subscriptions" },
-    { icon: Puzzle, text: "Juggling 7+ different platforms and logins" },
-    { icon: Wrench, text: "Integrations that constantly break" },
+    { icon: DollarSign, text: enterpriseItems[0] },
+    { icon: Puzzle, text: enterpriseItems[1] },
+    { icon: Wrench, text: enterpriseItems[2] },
   ];
 
   return (
@@ -48,7 +50,7 @@ export function ProblemSection({ sections }: ProblemSectionProps) {
               sections,
               "problem",
               "h2",
-              "You're told you have two choices",
+              t("heading"),
               0
             )}
           </h2>
@@ -57,7 +59,7 @@ export function ProblemSection({ sections }: ProblemSectionProps) {
               sections,
               "problem",
               "p",
-              "Neither of them work for business owners who value their time.",
+              t("body"),
               0
             )}
           </p>
@@ -81,7 +83,7 @@ export function ProblemSection({ sections }: ProblemSectionProps) {
                 sections,
                 "problem",
                 "h3",
-                "DIY Platforms",
+                t("diyTitle"),
                 0
               )}
             </h3>
@@ -90,7 +92,7 @@ export function ProblemSection({ sections }: ProblemSectionProps) {
                 sections,
                 "problem",
                 "p",
-                "Wix, Shopify, WordPress, HubSpot free tier...",
+                t("diySubtitle"),
                 1
               )}
             </p>
@@ -114,7 +116,7 @@ export function ProblemSection({ sections }: ProblemSectionProps) {
                   sections,
                   "problem",
                   "quote",
-                  '"Cheap upfront, but you become your own tech department."',
+                  t("diyNote"),
                   0
                 )}
               </p>
@@ -137,7 +139,7 @@ export function ProblemSection({ sections }: ProblemSectionProps) {
                 sections,
                 "problem",
                 "h3",
-                "Enterprise Solutions",
+                t("enterpriseTitle"),
                 1
               )}
             </h3>
@@ -146,7 +148,7 @@ export function ProblemSection({ sections }: ProblemSectionProps) {
                 sections,
                 "problem",
                 "p",
-                "Agencies, Salesforce, multiple specialists...",
+                t("enterpriseSubtitle"),
                 3
               )}
             </p>
@@ -170,7 +172,7 @@ export function ProblemSection({ sections }: ProblemSectionProps) {
                   sections,
                   "problem",
                   "quote",
-                  '"Expensive, complex, and you still have to manage it all."',
+                  t("enterpriseNote"),
                   1
                 )}
               </p>
@@ -191,12 +193,9 @@ export function ProblemSection({ sections }: ProblemSectionProps) {
               sections,
               "problem",
               "p",
-              "Both options rob you of the one thing you can't get back:",
+              t("closing"),
               1
-            )}{" "}
-            <span className="text-gold font-semibold" data-field-id={getFieldId(sections, "problem", "p", 2) || undefined}>
-              {getEditableText(sections, "problem", "p", "your time.", 2)}
-            </span>
+            )}
           </p>
         </motion.div>
       </Container>

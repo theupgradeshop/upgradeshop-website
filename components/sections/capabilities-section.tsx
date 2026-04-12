@@ -13,6 +13,7 @@ import {
   Badge,
   Bot,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/layout/container";
 import { PageSection, getEditableText, getFieldId, getSection } from "@/lib/pages-api";
 
@@ -21,6 +22,7 @@ interface CapabilitiesSectionProps {
 }
 
 export function CapabilitiesSection({ sections }: CapabilitiesSectionProps) {
+  const t = useTranslations("capabilities");
   const capabilitiesSection = getSection(sections, "capabilities");
   const sectionId = capabilitiesSection?.id;
   const sectionKey = capabilitiesSection?.sectionKey;
@@ -28,66 +30,57 @@ export function CapabilitiesSection({ sections }: CapabilitiesSectionProps) {
   const capabilities = [
     {
       icon: Bot,
-      title: "Personal AI Agent",
-      description:
-        "Named by you, included from day one. Manages your platform and serves your customers — 24/7, across every module you own.",
+      title: t("aiAgent.title"),
+      description: t("aiAgent.description"),
       highlight: true,
-      badge: "Included free",
+      badge: t("aiAgent.badge"),
     },
     {
       icon: Globe,
-      title: "Website & Funnels",
-      description:
-        "AI-built website included with any subscription. Add funnels and landing pages to convert visitors into customers.",
+      title: t("website.title"),
+      description: t("website.description"),
       highlight: false,
     },
     {
       icon: Users,
-      title: "CRM & Customer Management",
-      description:
-        "Track leads, manage relationships, and close deals. All your customer data in one place.",
+      title: t("crm.title"),
+      description: t("crm.description"),
       highlight: false,
     },
     {
       icon: Mail,
-      title: "Email Marketing",
-      description:
-        "Automated campaigns that convert. Beautiful templates, smart segmentation, easy management.",
+      title: t("email.title"),
+      description: t("email.description"),
       highlight: false,
     },
     {
       icon: MessageCircle,
-      title: "WhatsApp Integration",
-      description:
-        "Meet customers where they are. Business messaging that feels personal, scales professionally.",
+      title: t("whatsapp.title"),
+      description: t("whatsapp.description"),
       highlight: false,
     },
     {
       icon: MessagesSquare,
-      title: "Facebook & Instagram",
-      description:
-        "Social presence managed. Content scheduling, engagement tracking, ad integration.",
+      title: t("social.title"),
+      description: t("social.description"),
       highlight: false,
     },
     {
       icon: FolderKanban,
-      title: "Project Management",
-      description:
-        "Keep your work organized. Tasks, timelines, and collaboration — all connected.",
+      title: t("projects.title"),
+      description: t("projects.description"),
       highlight: false,
     },
     {
       icon: BarChart3,
-      title: "SEO & Analytics",
-      description:
-        "Know what's working. Search visibility, traffic insights, performance tracking.",
+      title: t("seo.title"),
+      description: t("seo.description"),
       highlight: false,
     },
     {
       icon: Zap,
-      title: "Automations & Integrations",
-      description:
-        "Connect everything. Automate the repetitive. Focus on what matters.",
+      title: t("automations.title"),
+      description: t("automations.description"),
       highlight: false,
     },
   ];
@@ -108,7 +101,7 @@ export function CapabilitiesSection({ sections }: CapabilitiesSectionProps) {
           className="text-center max-w-3xl mx-auto mb-16"
         >
           <div className="inline-block px-3 py-1 bg-gold/10 text-gold-dark text-sm font-medium rounded-full mb-6" data-field-id={getFieldId(sections, "capabilities", "p", 2) || undefined}>
-            {getEditableText(sections, "capabilities", "p", "One Unified System", 2)}
+            {getEditableText(sections, "capabilities", "p", t("badge"), 2)}
           </div>
 
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground mb-6" data-field-id={getFieldId(sections, "capabilities", "h2", 0) || undefined}>
@@ -116,11 +109,11 @@ export function CapabilitiesSection({ sections }: CapabilitiesSectionProps) {
               sections,
               "capabilities",
               "h2",
-              "Everything you need.",
+              t("heading"),
               0
             )}{" "}
             <span className="text-gold" data-field-id={getFieldId(sections, "capabilities", "h2", 1) || undefined}>
-              {getEditableText(sections, "capabilities", "h2", "Connected.", 1)}
+              {getEditableText(sections, "capabilities", "h2", t("headingGold"), 1)}
             </span>
           </h2>
           <p className="text-lg text-foreground" data-field-id={getFieldId(sections, "capabilities", "p", 0) || undefined}>
@@ -128,7 +121,7 @@ export function CapabilitiesSection({ sections }: CapabilitiesSectionProps) {
               sections,
               "capabilities",
               "p",
-              "Stop juggling 7+ different platforms. One system, one login, one partner handling it all.",
+              t("body"),
               0
             )}
           </p>
@@ -154,7 +147,7 @@ export function CapabilitiesSection({ sections }: CapabilitiesSectionProps) {
                 <div className="absolute -top-3 left-6 inline-flex items-center gap-1 px-3 py-1 bg-gold text-foreground text-xs font-semibold rounded-full">
                   <Badge className="h-3 w-3" />
                   <span data-field-id={getFieldId(sections, "capabilities", "p", 3) || undefined}>
-                    {getEditableText(sections, "capabilities", "p", capability.badge, 3)}
+                    {getEditableText(sections, "capabilities", "p", capability.badge!, 3)}
                   </span>
                 </div>
               )}
@@ -197,7 +190,7 @@ export function CapabilitiesSection({ sections }: CapabilitiesSectionProps) {
               sections,
               "capabilities",
               "p",
-              "Start with what you need. Add more as you grow. Everything works together seamlessly.",
+              t("closing"),
               1
             )}
           </p>

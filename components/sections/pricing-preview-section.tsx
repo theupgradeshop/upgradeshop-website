@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Bot } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { PageSection, getSection } from "@/lib/pages-api";
@@ -13,6 +14,7 @@ interface PricingPreviewSectionProps {
 }
 
 export function PricingPreviewSection({ sections }: PricingPreviewSectionProps) {
+  const t = useTranslations("pricingPreview");
   const section = getSection(sections, "pricing-preview");
 
   return (
@@ -32,14 +34,14 @@ export function PricingPreviewSection({ sections }: PricingPreviewSectionProps) 
           className="text-center max-w-3xl mx-auto mb-12"
         >
           <div className="inline-block px-3 py-1 bg-gold/10 text-gold-dark text-sm font-medium rounded-full mb-6">
-            Transparent Pricing
+            {t("badge")}
           </div>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground mb-6">
-            Transparent, modular pricing.{" "}
-            <span className="text-gold">Pay only for what you need.</span>
+            {t("heading")}{" "}
+            <span className="text-gold">{t("headingGold")}</span>
           </h2>
           <p className="text-lg text-foreground">
-            Two plans: Starter ($170/mo) and Ecommerce ($260/mo). Both include your AI-built website, CRM, email, automations, and personal AI agent. Add modules as you grow.
+            {t("body")}
           </p>
         </motion.div>
 
@@ -56,13 +58,13 @@ export function PricingPreviewSection({ sections }: PricingPreviewSectionProps) 
             </div>
             <div className="flex-1 min-w-0">
               <span className="text-gold text-xs font-bold uppercase tracking-wider">
-                Included with every subscription
+                {t("aiAgentBanner.label")}
               </span>
               <p className="font-semibold text-primary-foreground mt-0.5">
-                Your AI agent — named by you, from day one.
+                {t("aiAgentBanner.title")}
               </p>
               <p className="text-sm text-primary-foreground/55 mt-0.5">
-                Manages your platform, handles updates, and serves your customers 24/7.
+                {t("aiAgentBanner.body")}
               </p>
             </div>
           </div>
@@ -98,14 +100,14 @@ export function PricingPreviewSection({ sections }: PricingPreviewSectionProps) 
           className="text-center"
         >
           <p className="text-foreground/50 text-sm mb-5">
-            Professional Website builds, AI Actions packages, Founder Launch setup, and website add-ons on the pricing page.
+            {t("note")}
           </p>
           <Button
             asChild
             className="bg-gold hover:bg-gold-dark text-foreground font-medium"
           >
             <Link href="#waitlist">
-              Get Priority Access
+              {t("cta")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
