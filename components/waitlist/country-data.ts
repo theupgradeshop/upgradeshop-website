@@ -1,0 +1,88 @@
+export interface Country {
+  name: string;
+  iso: string;
+  dialCode: string;
+}
+
+export function getFlagEmoji(iso: string): string {
+  return iso
+    .toUpperCase()
+    .split("")
+    .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
+    .join("");
+}
+
+export const countries: Country[] = [
+  { name: "Israel", iso: "IL", dialCode: "972" },
+  { name: "United States", iso: "US", dialCode: "1" },
+  { name: "United Kingdom", iso: "GB", dialCode: "44" },
+  { name: "Canada", iso: "CA", dialCode: "1" },
+  { name: "Australia", iso: "AU", dialCode: "61" },
+  { name: "Germany", iso: "DE", dialCode: "49" },
+  { name: "France", iso: "FR", dialCode: "33" },
+  { name: "Spain", iso: "ES", dialCode: "34" },
+  { name: "Italy", iso: "IT", dialCode: "39" },
+  { name: "Netherlands", iso: "NL", dialCode: "31" },
+  { name: "Belgium", iso: "BE", dialCode: "32" },
+  { name: "Switzerland", iso: "CH", dialCode: "41" },
+  { name: "Austria", iso: "AT", dialCode: "43" },
+  { name: "Sweden", iso: "SE", dialCode: "46" },
+  { name: "Norway", iso: "NO", dialCode: "47" },
+  { name: "Denmark", iso: "DK", dialCode: "45" },
+  { name: "Finland", iso: "FI", dialCode: "358" },
+  { name: "Portugal", iso: "PT", dialCode: "351" },
+  { name: "Ireland", iso: "IE", dialCode: "353" },
+  { name: "Poland", iso: "PL", dialCode: "48" },
+  { name: "Czech Republic", iso: "CZ", dialCode: "420" },
+  { name: "Romania", iso: "RO", dialCode: "40" },
+  { name: "Greece", iso: "GR", dialCode: "30" },
+  { name: "Turkey", iso: "TR", dialCode: "90" },
+  { name: "India", iso: "IN", dialCode: "91" },
+  { name: "Japan", iso: "JP", dialCode: "81" },
+  { name: "South Korea", iso: "KR", dialCode: "82" },
+  { name: "China", iso: "CN", dialCode: "86" },
+  { name: "Singapore", iso: "SG", dialCode: "65" },
+  { name: "Hong Kong", iso: "HK", dialCode: "852" },
+  { name: "New Zealand", iso: "NZ", dialCode: "64" },
+  { name: "South Africa", iso: "ZA", dialCode: "27" },
+  { name: "Brazil", iso: "BR", dialCode: "55" },
+  { name: "Mexico", iso: "MX", dialCode: "52" },
+  { name: "Argentina", iso: "AR", dialCode: "54" },
+  { name: "Colombia", iso: "CO", dialCode: "57" },
+  { name: "Chile", iso: "CL", dialCode: "56" },
+  { name: "UAE", iso: "AE", dialCode: "971" },
+  { name: "Saudi Arabia", iso: "SA", dialCode: "966" },
+  { name: "Egypt", iso: "EG", dialCode: "20" },
+  { name: "Nigeria", iso: "NG", dialCode: "234" },
+  { name: "Kenya", iso: "KE", dialCode: "254" },
+  { name: "Thailand", iso: "TH", dialCode: "66" },
+  { name: "Malaysia", iso: "MY", dialCode: "60" },
+  { name: "Philippines", iso: "PH", dialCode: "63" },
+  { name: "Indonesia", iso: "ID", dialCode: "62" },
+  { name: "Vietnam", iso: "VN", dialCode: "84" },
+  { name: "Ukraine", iso: "UA", dialCode: "380" },
+  { name: "Russia", iso: "RU", dialCode: "7" },
+  { name: "Hungary", iso: "HU", dialCode: "36" },
+  { name: "Croatia", iso: "HR", dialCode: "385" },
+  { name: "Bulgaria", iso: "BG", dialCode: "359" },
+  { name: "Slovakia", iso: "SK", dialCode: "421" },
+  { name: "Slovenia", iso: "SI", dialCode: "386" },
+  { name: "Estonia", iso: "EE", dialCode: "372" },
+  { name: "Latvia", iso: "LV", dialCode: "371" },
+  { name: "Lithuania", iso: "LT", dialCode: "370" },
+  { name: "Cyprus", iso: "CY", dialCode: "357" },
+  { name: "Malta", iso: "MT", dialCode: "356" },
+  { name: "Luxembourg", iso: "LU", dialCode: "352" },
+  { name: "Iceland", iso: "IS", dialCode: "354" },
+  { name: "Morocco", iso: "MA", dialCode: "212" },
+  { name: "Jordan", iso: "JO", dialCode: "962" },
+  { name: "Lebanon", iso: "LB", dialCode: "961" },
+  { name: "Kuwait", iso: "KW", dialCode: "965" },
+  { name: "Qatar", iso: "QA", dialCode: "974" },
+  { name: "Peru", iso: "PE", dialCode: "51" },
+  { name: "Uruguay", iso: "UY", dialCode: "598" },
+  { name: "Pakistan", iso: "PK", dialCode: "92" },
+  { name: "Taiwan", iso: "TW", dialCode: "886" },
+  { name: "Serbia", iso: "RS", dialCode: "381" },
+  { name: "Kazakhstan", iso: "KZ", dialCode: "7" },
+];
