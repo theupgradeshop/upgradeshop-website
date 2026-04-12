@@ -1,4 +1,10 @@
 /**
+ * NOTE: Language/locale is now determined by the URL via next-intl middleware.
+ * These localStorage-based functions are kept for backward compatibility with
+ * the currency system. New code should use useLocale() from next-intl.
+ */
+
+/**
  * i18n utilities for UpgradeShop marketing website
  *
  * Provides language selection with localStorage persistence

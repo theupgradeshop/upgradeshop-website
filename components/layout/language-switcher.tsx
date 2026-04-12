@@ -1,39 +1,27 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useLocale } from "next-intl";
+import { useRouter, usePathname } from "next/navigation";
 import { Globe, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Language,
-  LANGUAGES,
-  getCurrentLanguage,
-  saveLanguage,
-  updateHtmlAttributes,
-} from "@/lib/i18n";
+import { LANGUAGES, type Language } from "@/lib/i18n";
 
 interface LanguageSwitcherProps {
   className?: string;
   variant?: "desktop" | "mobile";
-  onLanguageChange?: (lang: Language) => void;
 }
 
 export function LanguageSwitcher({
   className,
   variant = "desktop",
-  onLanguageChange,
 }: LanguageSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState<Language>("en");
+  const currentLocale = useLocale() as Language;
+  const router = useRouter();
+  const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // Get current language on mount
-    const lang = getCurrentLanguage();
-    setCurrentLang(lang);
-    updateHtmlAttributes(lang);
-  }, []);
-
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -48,23 +36,28 @@ export function LanguageSwitcher({
   }, []);
 
   const handleLanguageSelect = (lang: Language) => {
-    setCurrentLang(lang);
-    saveLanguage(lang);
-    updateHtmlAttributes(lang);
     setIsOpen(false);
-    onLanguageChange?.(lang);
+    if (lang === currentLocale) return;
 
-    // Trigger a page reload to apply currency changes across all components
-    // This ensures all price displays update correctly
-    window.location.reload();
+    // Remove current locale prefix if present
+    let pathWithoutLocale = pathname;
+    if (pathname.startsWith("/he")) {
+      pathWithoutLocale = pathname.slice(3) || "/";
+    }
+
+    // Navigate to the new locale path
+    const newPath = lang === "en" ? pathWithoutLocale : `/he${pathWithoutLocale}`;
+    router.push(newPath);
   };
 
-  const currentConfig = LANGUAGES[currentLang];
+  const currentConfig = LANGUAGES[currentLocale];
 
   if (variant === "mobile") {
     return (
       <div className={cn("flex flex-col gap-2", className)}>
-        <span className="text-sm text-foreground/60 font-medium">Language</span>
+        <span className="text-sm text-foreground/60 font-medium">
+          {LANGUAGES.en.name} / {LANGUAGES.he.nativeName}
+        </span>
         <div className="flex gap-2">
           {Object.values(LANGUAGES).map((lang) => (
             <button
@@ -72,7 +65,7 @@ export function LanguageSwitcher({
               onClick={() => handleLanguageSelect(lang.code)}
               className={cn(
                 "flex-1 py-2 px-4 rounded-lg border transition-colors font-medium",
-                currentLang === lang.code
+                currentLocale === lang.code
                   ? "bg-gold border-gold text-foreground"
                   : "bg-background border-border text-foreground/70 hover:border-gold/50"
               )}
@@ -93,7 +86,9 @@ export function LanguageSwitcher({
         aria-label="Select language"
       >
         <Globe className="h-4 w-4" />
-        <span className="text-sm font-medium">{currentConfig.code.toUpperCase()}</span>
+        <span className="text-sm font-medium">
+          {currentConfig.code.toUpperCase()}
+        </span>
         <ChevronDown
           className={cn(
             "h-3 w-3 transition-transform",
@@ -110,13 +105,13 @@ export function LanguageSwitcher({
               onClick={() => handleLanguageSelect(lang.code)}
               className={cn(
                 "w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors",
-                currentLang === lang.code
+                currentLocale === lang.code
                   ? "bg-gold/10 text-foreground"
                   : "hover:bg-sand text-foreground/70 hover:text-foreground"
               )}
             >
               <span className="font-medium">{lang.nativeName}</span>
-              {currentLang === lang.code && (
+              {currentLocale === lang.code && (
                 <Check className="h-4 w-4 text-gold" />
               )}
             </button>
