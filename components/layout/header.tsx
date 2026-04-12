@@ -82,8 +82,8 @@ export function Header() {
               asChild
               className="bg-gold hover:bg-gold-dark text-foreground font-medium rounded-xl"
             >
-              <Link href="/pricing">
-                Get Started
+              <Link href="#waitlist">
+                Get Priority Access
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -130,10 +130,10 @@ export function Header() {
                   className="bg-gold hover:bg-gold-dark text-foreground font-medium rounded-xl w-full"
                 >
                   <Link
-                    href="/pricing"
+                    href="#waitlist"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Get Started
+                    Get Priority Access
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

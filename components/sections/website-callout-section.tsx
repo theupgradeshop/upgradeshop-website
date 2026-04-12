@@ -165,8 +165,8 @@ export function WebsiteCalloutSection({ sections }: WebsiteCalloutSectionProps) 
             asChild
             className="bg-gold hover:bg-gold-dark text-foreground font-medium"
           >
-            <Link href="/pricing#website">
-              See Website Options
+            <Link href="#waitlist">
+              Get Priority Access
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

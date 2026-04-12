@@ -146,9 +146,9 @@ export function ExamplesSection({ sections }: ExamplesSectionProps) {
             variant="outline"
             className="border-2 border-foreground/20 hover:border-foreground/40"
           >
-            <Link href="/examples">
+            <Link href="#waitlist">
               <span data-field-id={getFieldId(sections, "examples", "button", 1) || undefined}>
-                {getEditableText(sections, "examples", "button", "View All Examples", 1)}
+                {getEditableText(sections, "examples", "button", "Get Priority Access", 1)}
               </span>
               <ExternalLink className="ml-2 h-4 w-4" />
             </Link>
