@@ -1,1 +1,177 @@
-{}
+{
+  "announcement": {
+    "text": "Launching Black Friday 2026 — Join the waitlist for founder pricing",
+    "cta": "Get Priority Access"
+  },
+  "nav": {
+    "howItWorks": "How It Works",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "chat": "Chat",
+    "chatWithUs": "Chat with us",
+    "getStarted": "Get Priority Access",
+    "language": "Language"
+  },
+  "waitlist": {
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@business.com",
+    "phoneLabel": "WhatsApp Number",
+    "phonePlaceholder": "Phone number",
+    "countryCode": "Code",
+    "submit": "Get Priority Access",
+    "submitting": "Joining...",
+    "successTitle": "You're on the list!",
+    "successMessage": "Max, our AI agent, will message you on WhatsApp shortly.",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "errorDuplicate": "You're already on the waitlist!",
+    "benefits": {
+      "title": "Join the waitlist",
+      "priorityAccess": "Priority access — invited first as early access spots open in September",
+      "founderPricing": "Founder pricing — permanent rate, locked forever. Only for pre-launch members.",
+      "insideAccess": "Inside access — see what's being built before anyone else"
+    }
+  },
+  "hero": {
+    "eyebrow": "You Didn't Start a Business to Be an Admin Worker",
+    "headline": "Stop doing admin work.",
+    "headlineGold": "Start growing.",
+    "subheadline": "One platform. One assistant. Website, CRM, email, WhatsApp, automations — all managed by your own AI agent. Stop juggling tools. Start growing.",
+    "secondaryCta": "See How It Works",
+    "trustNote": "Questions? Chat with us anytime."
+  },
+  "problem": {
+    "heading": "You're told you have two choices",
+    "body": "Neither of them work for business owners who value their time.",
+    "diyTitle": "Option 1: DIY Platforms",
+    "diySubtitle": "Wix, Shopify, WordPress, HubSpot free tier...",
+    "diyItems": ["Hours spent tinkering instead of running your business", "Watching YouTube tutorials at midnight", "Limited capabilities that break when you need them"],
+    "diyNote": "Cheap upfront, but you become your own tech department.",
+    "enterpriseTitle": "Option 2: Enterprise Solutions",
+    "enterpriseSubtitle": "Agencies, Salesforce, multiple specialists...",
+    "enterpriseItems": ["$5k-$50k for agencies + monthly subscriptions", "Juggling 7+ different platforms and logins", "Integrations that constantly break"],
+    "enterpriseNote": "Expensive, complex, and you still have to manage it all.",
+    "closing": "Both options rob you of the one thing you can't get back: your time."
+  },
+  "solution": {
+    "badge": "The Third Option",
+    "heading": "Not a tool. Not a platform.",
+    "headingGold": "A partner.",
+    "body": "The Upgrade Shop is your dedicated digital infrastructure partner. We handle everything — professionally — so you can focus on what you do best.",
+    "checklist": ["One unified system instead of 7+ platforms", "Professional quality without the agency price tag", "Always-on support via Max, our AI partner"],
+    "card1Title": "We build it for you",
+    "card1Body": "Real developers create your infrastructure professionally. No DIY, no templates.",
+    "card2Title": "We manage it for you",
+    "card2Body": "Max, our AI, handles day-to-day. Our team ensures quality. You just describe what you need.",
+    "card3Title": "We keep improving it",
+    "card3Body": "Request features and we build them. Free. Your infrastructure grows with your business.",
+    "quote": "You focus on what you do best. We handle everything else."
+  },
+  "websiteCallout": {
+    "heading": "Your website,",
+    "headingGold": "handled.",
+    "body": "Every subscription includes an AI-built website. Your agent manages ongoing updates. You never touch an editor — ever.",
+    "aiCardLabel": "Included with any subscription",
+    "aiCardTitle": "AI-Built Website",
+    "aiCardBody": "Describe your business. The agent builds it.",
+    "aiCardIncluded": ["Home, About, Contact, Services pages", "Forms connected to CRM automatically", "Blog — AI writes & publishes", "Payment gateway included", "SSL, mobile-optimized, responsive", "Human review before going live"],
+    "aiCardEcommerce": ["Product pages, shop & collections", "Cart & checkout flow", "Abandoned cart recovery", "Activate the Store module to enable"],
+    "proCardLabel": "One-time service",
+    "proCardTitle": "Professional Developer Build",
+    "proCardBody": "Custom branded, database-connected.",
+    "proCardMarketing": "Marketing website — $1,700",
+    "proCardEcommerce": "E-commerce website — $2,600",
+    "proCardIncluded": ["Custom branded design by a developer", "Brand-specific section template library", "Every section database-connected", "Unlimited pages via template system", "Developer access via ticket system"],
+    "proCardNote": "Large catalogs or complex migrations may require a custom quote.",
+    "neverDo": ["Forced to touch a website editor", "Watch tutorial videos", "Hire a freelancer for every change", "Debug why something broke"],
+    "cta": "Get Priority Access"
+  },
+  "capabilities": {
+    "badge": "One Unified System",
+    "heading": "Everything you need.",
+    "headingGold": "Connected.",
+    "body": "Stop juggling 7+ different platforms. One system, one login, one partner handling it all.",
+    "aiAgent": { "title": "Personal AI Agent", "badge": "Included free", "description": "Named by you, included from day one. Manages your platform and serves your customers — 24/7, across every module you own." },
+    "website": { "title": "Website & Funnels", "description": "AI-built website included with any subscription. Add funnels and landing pages to convert visitors into customers." },
+    "crm": { "title": "CRM & Customer Management", "description": "Track leads, manage relationships, and close deals. All your customer data in one place." },
+    "email": { "title": "Email Marketing", "description": "Automated campaigns that convert. Beautiful templates, smart segmentation, easy management." },
+    "whatsapp": { "title": "WhatsApp Integration", "description": "Meet customers where they are. Business messaging that feels personal, scales professionally." },
+    "social": { "title": "Facebook & Instagram", "description": "Social presence managed. Content scheduling, engagement tracking, ad integration." },
+    "projects": { "title": "Project Management", "description": "Keep your work organized. Tasks, timelines, and collaboration — all connected." },
+    "seo": { "title": "SEO & Analytics", "description": "Know what's working. Search visibility, traffic insights, performance tracking." },
+    "automations": { "title": "Automations & Integrations", "description": "Connect everything. Automate the repetitive. Focus on what matters." },
+    "closing": "Start with what you need. Add more as you grow. Everything works together seamlessly."
+  },
+  "improvement": {
+    "badge": "The Promise That Sets Us Apart",
+    "heading": "Your subscription doesn't decay.",
+    "headingGold": "It appreciates.",
+    "body": "When you request a feature for a module you're subscribed to, we build it. For free. Forever.",
+    "card1": { "question": "Need a custom booking flow?", "answer": "Built. Free." },
+    "card2": { "question": "Need specific CRM fields for your industry?", "answer": "Built. Free." },
+    "card3": { "question": "Need a particular automation trigger?", "answer": "Built. Free." },
+    "card4": { "question": "Need a new page design for a campaign?", "answer": "Built. Free." },
+    "closing": "Software that gets better because you use it — not worse because it ages."
+  },
+  "howItWorks": {
+    "badge": "Simple Process",
+    "heading": "How it works",
+    "body": "Getting started is simple. Getting results is even simpler.",
+    "step1": { "number": "01", "title": "Choose what you need", "body": "Start with one module or get everything. Pick what makes sense for your business right now." },
+    "step2": { "number": "02", "title": "We set it up", "body": "Real developers build your infrastructure professionally. No DIY, no templates, no guesswork." },
+    "step3": { "number": "03", "title": "You run your business", "body": "Max and our team handle the rest. Updates, changes, improvements — just describe what you need." }
+  },
+  "pricingPreview": {
+    "badge": "Transparent Pricing",
+    "heading": "Transparent, modular pricing.",
+    "headingGold": "Pay only for what you need.",
+    "body": "Two plans: Starter ($170/mo) and Ecommerce ($260/mo). Both include your AI-built website, CRM, email, automations, and personal AI agent. Add modules as you grow.",
+    "aiAgentBanner": { "label": "Included with every subscription", "title": "Your AI agent — named by you, from day one.", "body": "Manages your platform, handles updates, and serves your customers 24/7." },
+    "note": "Professional Website builds, AI Actions packages, Founder Launch setup, and website add-ons on the pricing page.",
+    "cta": "Get Priority Access"
+  },
+  "testimonials": {
+    "badge": "Real Stories",
+    "heading": "Trusted by professionals",
+    "body": "Hear from business owners who made the switch.",
+    "testimonial1": { "quote": "Finally, I can focus on my clients instead of fighting with technology. The Upgrade Shop handles everything.", "name": "Coming Soon", "role": "Therapist" },
+    "testimonial2": { "quote": "I went from juggling 5 different tools to having everything in one place. Game changer.", "name": "Coming Soon", "role": "Consultant" },
+    "testimonial3": { "quote": "The continuous improvement promise is real. I asked for a feature, and they built it within days.", "name": "Coming Soon", "role": "Small Business Owner" },
+    "videoPlaceholder": "Video testimonials coming soon",
+    "trustedLabel": "Trusted by professionals in",
+    "industries": "Therapists · Consultants · Lawyers · Coaches · Healthcare · Creative Services"
+  },
+  "examples": {
+    "badge": "Our Work",
+    "heading": "See what we build",
+    "body": "Real websites for real businesses. Professional quality, managed for you.",
+    "example1": { "title": "Therapy Practice Website", "industry": "Healthcare", "body": "A warm, professional website for a therapy practice. Built to establish trust and make booking easy." },
+    "example2": { "title": "Consulting Firm Landing Page", "industry": "Professional Services", "body": "Clean, conversion-focused landing page that clearly communicates value and drives inquiries." },
+    "example3": { "title": "Coaching Business Site", "industry": "Coaching", "body": "Personal brand website that captures the coach's unique approach and methodology." },
+    "cta": "Get Priority Access"
+  },
+  "faq": {
+    "badge": "FAQ",
+    "heading": "Common questions",
+    "body": "Can't find what you're looking for? We're always here to help.",
+    "supportNote": "Still have questions? Chat with us anytime.",
+    "items": [
+      { "q": "How is this different from Wix or Squarespace?", "a": "With Wix or Squarespace, you're doing the work yourself — picking templates, editing layouts, learning the platform. With The Upgrade Shop, we build everything for you professionally. You describe what you need, and real developers create it. You never touch an editor." },
+      { "q": "What if I need something custom?", "a": "That's exactly what we're built for. When you request a feature for a module you're subscribed to, we build it. For free. Your subscription doesn't just maintain — it improves based on your specific needs." },
+      { "q": "Can I start small and add more later?", "a": "Absolutely. Start with just what you need — maybe just a website, or just CRM. Add more modules as your business grows. Everything works together seamlessly, so there's no penalty for starting small." },
+      { "q": "What does \"Max handles it\" actually mean?", "a": "Max is our AI partner who helps manage your day-to-day updates and requests. Need a text change on your website? Tell Max. Need a new email campaign? Tell Max. For anything that needs human expertise, Max routes it to our development team. You always have a responsive partner, 24/7." },
+      { "q": "How long does it take to get started?", "a": "Most clients are up and running within days, not weeks. We handle all the technical setup, content migration, and configuration. You just provide the direction." },
+      { "q": "What if I want to cancel?", "a": "No long-term contracts. Cancel anytime. Your data is always yours — we'll help you export everything if you ever decide to leave. We're confident you won't want to, but the door is never locked." }
+    ]
+  },
+  "finalCta": {
+    "heading": "Ready to focus on what matters?",
+    "body": "Your digital infrastructure shouldn't be a project you manage. Let us handle it so you can focus on your craft.",
+    "trustIndicators": ["No long-term contracts", "Cancel anytime", "Your data is always yours"]
+  },
+  "footer": {
+    "description": "Your Digital Foundation, Handled",
+    "product": "Product",
+    "company": "Company",
+    "copyright": "© {year} The Upgrade Shop. All rights reserved."
+  }
+}
