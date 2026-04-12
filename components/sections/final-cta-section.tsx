@@ -1,14 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, MessageCircle, Check } from "lucide-react";
-import Link from "next/link";
+import { Check } from "lucide-react";
 import { Container } from "@/components/layout/container";
-import { Button } from "@/components/ui/button";
+import { WaitlistForm } from "@/components/waitlist/waitlist-form";
 import {
   PageSection,
   getEditableText,
-  getEditableButton,
   getFieldId,
   getSection,
 } from "@/lib/pages-api";
@@ -21,13 +19,6 @@ export function FinalCTASection({ sections }: FinalCTASectionProps) {
   const finalCtaSection = getSection(sections, "final-cta");
   const sectionId = finalCtaSection?.id;
   const sectionKey = finalCtaSection?.sectionKey;
-  const primaryCta = getEditableButton(
-    sections,
-    "final-cta",
-    "Get Started Now",
-    "/pricing",
-    0
-  );
 
   const trustIndicators = [
     "No long-term contracts",
@@ -73,31 +64,15 @@ export function FinalCTASection({ sections }: FinalCTASectionProps) {
             </p>
           </motion.div>
 
-          {/* CTAs */}
+          {/* Waitlist Form */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10"
+            className="mb-10"
           >
-            <Button
-              asChild
-              size="lg"
-              className="bg-gold hover:bg-gold-dark text-foreground font-medium px-8 py-6 text-base rounded-xl shadow-lg shadow-gold/30 hover:shadow-xl hover:shadow-gold/40 transition-all duration-300"
-              data-field-id={getFieldId(sections, "final-cta", "button", 0) || undefined}
-            >
-              <Link href={primaryCta.url}>
-                {primaryCta.text}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <div className="flex items-center gap-2 text-primary-foreground/60">
-              <MessageCircle className="h-4 w-4" />
-              <span className="text-sm" data-field-id={getFieldId(sections, "final-cta", "p", 1) || undefined}>
-                {getEditableText(sections, "final-cta", "p", "or chat with us now", 1)}
-              </span>
-            </div>
+            <WaitlistForm variant="dark" />
           </motion.div>
 
           {/* Trust indicators */}
