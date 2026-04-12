@@ -30,7 +30,7 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
   const [isSuccess, setIsSuccess] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const defaultCountryCode = locale === "he" ? "972" : "";
+  const defaultCountryCode = locale === "he" ? countries.find(c => c.iso === "IL")?.dialCode ?? "" : "";
 
   const {
     register,

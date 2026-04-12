@@ -6,8 +6,31 @@ const SITE_DOMAIN =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, "") ||
   "staging.upgradeshop.ai";
 
+// Simple in-memory rate limiting (5 requests per IP per 10 minutes)
+const RATE_LIMIT_WINDOW = 10 * 60 * 1000; // 10 minutes
+const RATE_LIMIT_MAX = 5;
+const ipRequests = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const requests = ipRequests.get(ip) || [];
+  const recent = requests.filter((t) => now - t < RATE_LIMIT_WINDOW);
+  if (recent.length >= RATE_LIMIT_MAX) return true;
+  recent.push(now);
+  ipRequests.set(ip, recent);
+  return false;
+}
+
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    if (isRateLimited(ip)) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { email, phone, language } = body;
 
@@ -26,6 +49,8 @@ export async function POST(request: Request) {
       );
     }
 
+    const safeLanguage = ["en", "he"].includes(language) ? language : "en";
+
     const apiUrl = `${PLATFORM_URL}/api/public/contacts/find-or-create?domain=${SITE_DOMAIN}`;
     const res = await fetch(apiUrl, {
       method: "POST",
@@ -33,9 +58,10 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         email,
         phone,
+        wa_id: phone, // pre-built international number, bypass normalizeToWaId
         source: "waitlist",
         tags: ["waitlist"],
-        language: language || "en",
+        language: safeLanguage,
       }),
     });
 

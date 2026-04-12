@@ -145,7 +145,7 @@ export function ExamplesSection({ sections }: ExamplesSectionProps) {
             variant="outline"
             className="border-2 border-foreground/20 hover:border-foreground/40"
           >
-            <Link href="#waitlist">
+            <Link href="/#waitlist">
               <span data-field-id={getFieldId(sections, "examples", "button", 1) || undefined}>
                 {getEditableText(sections, "examples", "button", t("cta"), 1)}
               </span>

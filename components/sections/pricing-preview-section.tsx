@@ -106,7 +106,7 @@ export function PricingPreviewSection({ sections }: PricingPreviewSectionProps) 
             asChild
             className="bg-gold hover:bg-gold-dark text-foreground font-medium"
           >
-            <Link href="#waitlist">
+            <Link href="/#waitlist">
               {t("cta")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

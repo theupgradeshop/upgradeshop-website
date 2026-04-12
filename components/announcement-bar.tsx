@@ -9,7 +9,7 @@ export function AnnouncementBar() {
   return (
     <div className="bg-gold text-foreground py-2.5 px-4 text-center relative z-50">
       <Link
-        href="#waitlist"
+        href="/#waitlist"
         className="text-sm md:text-base font-medium hover:underline underline-offset-2"
       >
         {t("text")}

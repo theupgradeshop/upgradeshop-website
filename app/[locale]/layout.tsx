@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CartProvider } from "@/components/cart/cart-provider";
 import { ScrollListener } from "@/components/scroll-listener";
+import { SetHtmlLang } from "@/components/set-html-lang";
 
 type Props = {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <div dir={dir}>
       <NextIntlClientProvider messages={messages}>
+        <SetHtmlLang />
         <CartProvider>
           <ScrollListener />
           <div id="site-header">
