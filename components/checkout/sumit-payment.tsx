@@ -180,7 +180,7 @@ export function SumitPayment({
         CompanyID: companyId,
         APIPublicKey: apiPublicKey,
         FormSelector: "#sumit-payment-form",
-        Environment: isTest ? "dev" : "api",
+        Environment: "api",
         ErrorsClass: ".og-errors",
         ResponseLanguage: "he",
         ResponseCallback: handleTokenResponse,

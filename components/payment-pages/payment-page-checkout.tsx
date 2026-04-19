@@ -312,7 +312,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
         CompanyID: sumitConfig.companyId,
         APIPublicKey: sumitConfig.apiPublicKey,
         FormSelector: "#sumit-payment-form",
-        Environment: sumitConfig.isTest ? "dev" : "api",
+        Environment: "api",
         ErrorsClass: ".og-errors",
         ResponseLanguage: lang === "he" ? "he" : "en",
         ResponseCallback: handleTokenResponse,
