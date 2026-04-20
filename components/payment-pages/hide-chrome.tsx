@@ -1,25 +1,17 @@
-"use client";
-
-import { useEffect } from "react";
-
 interface HideChromeProps {
   hideHeader: boolean;
   hideFooter: boolean;
 }
 
 export function HideChrome({ hideHeader, hideFooter }: HideChromeProps) {
-  useEffect(() => {
-    const header = document.getElementById("site-header");
-    const footer = document.getElementById("site-footer");
+  const rules = [
+    hideHeader ? "#site-header { display: none !important; }" : "",
+    hideFooter ? "#site-footer { display: none !important; }" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-    if (header) header.style.display = hideHeader ? "none" : "";
-    if (footer) footer.style.display = hideFooter ? "none" : "";
+  if (!rules) return null;
 
-    return () => {
-      if (header) header.style.display = "";
-      if (footer) footer.style.display = "";
-    };
-  }, [hideHeader, hideFooter]);
-
-  return null;
+  return <style>{rules}</style>;
 }
