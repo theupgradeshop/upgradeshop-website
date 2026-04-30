@@ -216,6 +216,12 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
   const monthlyEffectiveTotal = monthlyItems.reduce((sum: number, item: any) => sum + (item.effectivePrice ?? 0) * (item.quantity ?? 1), 0);
   const oneTimeEffectiveTotal = oneTimeItems.reduce((sum: number, item: any) => sum + (item.effectivePrice ?? 0) * (item.quantity ?? 1), 0);
 
+  // Apply coupon to monthly first (subscription coupon), overflow to one-time
+  const couponDiscount = appliedCoupon?.discountAmount || 0;
+  const monthlyAfterCoupon = Math.max(0, monthlyEffectiveTotal - couponDiscount);
+  const couponRemainder = Math.max(0, couponDiscount - monthlyEffectiveTotal);
+  const oneTimeAfterCoupon = Math.max(0, oneTimeEffectiveTotal - couponRemainder);
+
   // SUMIT SDK
   const [sumitConfig, setSumitConfig] = useState<any>(null);
   const [sdkLoaded, setSdkLoaded] = useState(false);
@@ -357,7 +363,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
           amount: Number(order.total),
           currency: order.currency,
           customer: {
-            name: `${firstName} ${lastName}`.trim(),
+            name: company?.trim() || `${firstName} ${lastName}`.trim(),
             email,
             phone,
           },
@@ -626,26 +632,17 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
             {/* Price summary */}
             <div className="space-y-2">
               {hasBothTypes ? (
-                /* Split view: separate monthly and one-time lines */
+                /* Split view: prominent today total with per-category breakdown */
                 <>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{isRTL ? "חודשי" : "Monthly"}:</span>
-                    <span>{formatPrice(monthlyEffectiveTotal, currency)}{getBillingLabel("monthly")}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{isRTL ? "חד פעמי" : "One-time"}:</span>
-                    <span>{formatPrice(oneTimeEffectiveTotal, currency)}</span>
-                  </div>
-                  {appliedCoupon && (
-                    <div className="flex justify-between text-sm text-green-600">
-                      <span>{t.coupon} ({appliedCoupon.code}):</span>
-                      <span>-{formatPrice(appliedCoupon.discountAmount, currency)}</span>
-                    </div>
-                  )}
                   <Separator />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>{isRTL ? "סה״כ להיום" : "Total today"}:</span>
-                    <span>{formatPrice(effectiveTotal, currency)}</span>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-lg font-bold">{isRTL ? "סה״כ להיום" : "Total today"}:</span>
+                    <span className="text-2xl font-bold">{formatPrice(effectiveTotal, currency)}</span>
+                  </div>
+                  <div className={`flex gap-3 text-sm text-muted-foreground ${isRTL ? "justify-end" : ""}`}>
+                    <span>{formatPrice(oneTimeAfterCoupon, currency)} {isRTL ? "חד פעמי" : "one-time"}</span>
+                    <span>·</span>
+                    <span>{formatPrice(monthlyAfterCoupon, currency)}{getBillingLabel("monthly")} {isRTL ? "מנוי" : "subscription"}</span>
                   </div>
                 </>
               ) : (
