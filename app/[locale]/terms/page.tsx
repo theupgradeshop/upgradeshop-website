@@ -4,6 +4,22 @@ export const metadata: Metadata = {
   title: "Terms of Service | The Upgrade Shop",
   description:
     "Terms of Service for The Upgrade Shop platform. Understand your rights, responsibilities, subscription terms, AI agent services, and managed service agreement when using our platform.",
+  openGraph: {
+    title: "Terms of Service | The Upgrade Shop",
+    description:
+      "Terms of Service for The Upgrade Shop platform. Subscription terms, AI agent services, managed service agreement, and your rights.",
+    url: "https://upgradeshop.ai/terms",
+    siteName: "The Upgrade Shop",
+    images: [
+      {
+        url: "https://upgradeshop.ai/images/brand/logo/logo_webp/upgrade_shop_logo_black_on_cream-_no_bg.webp",
+        width: 1200,
+        height: 630,
+        alt: "The Upgrade Shop",
+      },
+    ],
+    type: "website",
+  },
 };
 
 export default function TermsPage() {
