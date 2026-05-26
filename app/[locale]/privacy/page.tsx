@@ -3,7 +3,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacy Policy | The Upgrade Shop",
   description:
-    "Privacy policy for The Upgrade Shop platform. How we collect, use, store, and protect your personal data and the data you authorize us to access on connected platforms including Facebook and Instagram.",
+    "Privacy policy for The Upgrade Shop platform. How we collect, use, store, and protect your personal data and the data you authorize us to access on connected platforms including Facebook, Instagram, WhatsApp, and Google.",
   openGraph: {
     title: "Privacy Policy | The Upgrade Shop",
     description:
@@ -29,565 +29,641 @@ export default function PrivacyPage() {
         <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
           Privacy Policy
         </h1>
-        <p className="text-foreground/60 mb-2">
-          Effective date: May 18, 2026
-        </p>
-        <p className="text-foreground/60 mb-12">
-          Last updated: May 18, 2026
-        </p>
+        <p className="text-foreground/60 mb-2">Effective date: May 26, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: May 26, 2026</p>
 
-        <div className="prose prose-lg max-w-none text-foreground/80 space-y-12">
+        <div className="space-y-12 text-foreground/80">
+
+          {/* 1 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              1. Introduction
+              1. Who We Are
             </h2>
-            <p className="mb-4">
-              This Privacy Policy explains how The Upgrade Shop ("we", "us",
-              "our") collects, uses, stores, shares, and protects personal
-              information when you use our platform at upgradeshop.ai and
-              app.upgradeshop.ai (the "Platform"), and when you connect
-              third-party accounts to the Platform (including Facebook,
-              Instagram, and other services).
+            <p className="leading-relaxed mb-4">
+              The Upgrade Shop (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or
+              &ldquo;us&rdquo;) is an AI-managed digital infrastructure
+              platform for small and medium-sized businesses, registered in
+              Israel under ח.פ. 300330123, with registered address at Har
+              Hatzofim 11, Holon, Israel.
             </p>
-            <p className="mb-4">
-              We act as a data controller for personal information you provide
-              directly to us as a customer of the Platform. For personal
-              information of your own end-users that you process through the
-              Platform (for example, contacts in your CRM or leads from your
-              advertising), we act as a data processor on your behalf, and
-              you remain the controller.
-            </p>
-            <p>
-              By using the Platform, you agree to the practices described in
-              this Privacy Policy. If you do not agree, please do not use the
-              Platform.
+            <p className="leading-relaxed">
+              We provide business owners with a single platform covering
+              website management, CRM, email marketing, WhatsApp Business
+              messaging, social media automation, online store, digital
+              courses infrastructure, funnels, dispatch management, and a
+              personal AI agent — all accessible through our dashboard at{" "}
+              <strong>app.upgradeshop.ai</strong>.
             </p>
           </section>
 
+          {/* 2 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              2. Who We Are
+              2. Scope of This Policy — Two Roles We Play
             </h2>
-            <p className="mb-4">
-              The Platform is operated by:
+            <p className="leading-relaxed mb-4">
+              Depending on the context, we act in one of two legal roles with
+              respect to personal data:
             </p>
-            <ul className="list-disc list-inside mb-4 space-y-1">
-              <li>
-                Legal entity: <strong>The Upgrade Shop</strong>
-              </li>
-              <li>
-                Company registration (ח.פ.): <strong>300330123</strong>
-              </li>
-              <li>
-                Registered office: <strong>Har Hatzofim 11, Holon, Israel</strong>
-              </li>
-              <li>Country of incorporation: Israel</li>
-              <li>
-                General contact: hello@upgradeshop.ai
-              </li>
-              <li>
-                Privacy and data protection contact: privacy@upgradeshop.ai
-              </li>
-            </ul>
-            <p>
-              The Upgrade Shop is the developer of the Facebook and Instagram
-              app integration referred to in this Privacy Policy as the "Meta
-              App". The Meta App is registered in the Meta for Developers
-              platform and operates under the same legal entity described
-              above.
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              2.1 Data Controller — for our direct users
+            </h3>
+            <p className="leading-relaxed mb-4">
+              When a business owner creates an account on The Upgrade Shop and
+              uses our dashboard, we are the <strong>data controller</strong>{" "}
+              for that person&rsquo;s data. This policy describes how we
+              handle that data.
+            </p>
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              2.2 Data Processor — for our customers&rsquo; end users
+            </h3>
+            <p className="leading-relaxed mb-4">
+              When a business owner uses our platform to manage their own
+              customers — storing contacts in the CRM, sending WhatsApp
+              messages, running email campaigns, hosting a website, operating
+              an online store, or managing course students — the business
+              owner is the <strong>data controller</strong> for their
+              customers&rsquo; personal data, and we act as their{" "}
+              <strong>data processor</strong>.
+            </p>
+            <p className="leading-relaxed">
+              In that capacity we process end-user data only on the business
+              owner&rsquo;s documented instructions and in accordance with our
+              Data Processing Agreement. Business owners are responsible for
+              having a lawful basis to collect their customers&rsquo; data and
+              for providing their customers with an appropriate privacy notice.
             </p>
           </section>
 
+          {/* 3 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              3. Information We Collect
+              3. Information We Collect About You (Dashboard Users)
             </h2>
 
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
-              3.1 Information you provide directly
+              3.1 Account and registration data
             </h3>
-            <p className="mb-3">
-              When you create an account, subscribe to a plan, or use the
-              Platform, we collect:
-            </p>
-            <ul className="list-disc list-inside mb-6 space-y-1">
-              <li>Name, email address, phone number</li>
-              <li>Business name, business type, business address</li>
-              <li>
-                Payment information (processed by our payment partners, see
-                Section 9)
-              </li>
-              <li>
-                Content you create using the Platform (websites, products,
-                courses, emails, automations, AI agent configurations)
-              </li>
-              <li>
-                Contacts you import or that are submitted through forms,
-                leads, or messages
-              </li>
-              <li>Support communications you send us</li>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Name, email address, and password (or OAuth token from Google sign-in)</li>
+              <li>Business name, website URL, and contact details you provide during onboarding</li>
+              <li>Profile picture if connected via Google</li>
             </ul>
 
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
-              3.2 Information from connected platforms (Meta, Google, others)
+              3.2 Billing and payment data
             </h3>
-            <p className="mb-3">
-              When you connect a third-party account to the Platform, we
-              receive only the data your authorization permits. See Section 4
-              for the full Meta Platform Data disclosure.
+            <p className="leading-relaxed mb-3">
+              We use a third-party payment processor (SUMIT) to handle
+              subscription billing. We do not store full card numbers on our
+              servers. We retain:
             </p>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Subscription plan, billing cycle, and payment status</li>
+              <li>Invoice history and transaction references</li>
+              <li>Billing address if provided</li>
+            </ul>
 
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
-              3.3 Information collected automatically
+              3.3 Platform usage data
             </h3>
-            <ul className="list-disc list-inside space-y-1">
-              <li>
-                Device and browser information (user agent, IP address,
-                operating system, screen size)
-              </li>
-              <li>
-                Usage data (pages visited, features used, time spent,
-                referrers)
-              </li>
-              <li>Cookies and similar technologies (see Section 10)</li>
-              <li>Logs, error reports, and performance telemetry</li>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Pages and features accessed inside the dashboard</li>
+              <li>Actions taken (automations created, campaigns sent, content published)</li>
+              <li>Error logs and performance diagnostics</li>
+              <li>IP address, browser type, and device information</li>
+            </ul>
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              3.4 Support and communications
+            </h3>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Messages you send to our support team</li>
+              <li>Feedback, bug reports, and feature requests</li>
+              <li>Conversations with our AI agent (Max) during onboarding and support</li>
             </ul>
           </section>
 
+          {/* 4 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
               4. Meta Platform Data (Facebook and Instagram)
             </h2>
-            <p className="mb-4">
+            <p className="mb-4 leading-relaxed">
               The Platform integrates with Facebook and Instagram through the
-              Meta App so that you can manage your social presence,
-              communicate with your customers, and analyze your performance
-              from one place. This section describes exactly what we access,
-              how we use it, and how you can revoke our access.
+              Meta Graph API so that you can manage your social presence,
+              respond to customers, run and monitor ad campaigns, and analyse
+              performance from one place. This section describes exactly what
+              we access, how we use it, and how you can revoke our access.
             </p>
 
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               4.1 What we access from Facebook
             </h3>
-            <ul className="list-disc list-inside mb-6 space-y-1">
-              <li>
-                Your Facebook profile id, name, and email address (to identify
-                the user who connected the account)
-              </li>
-              <li>
-                The list of Facebook Pages you manage and a Page access token
-                for each (only for Pages you select during the connection
-                flow)
-              </li>
-              <li>
-                Public content on connected Pages: posts, comments, reviews
-                and recommendations, and engagement metrics
-              </li>
-              <li>
-                Messenger conversations sent to and from the connected Page
-              </li>
-              <li>
-                Lead Ads form definitions attached to the connected Page and
-                the lead submissions delivered through those forms
-              </li>
-              <li>
-                Ad campaign data, ad insights, and ad account metadata for the
-                ad account you authorize
-              </li>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Your Facebook profile ID, name, and email address (to identify the connecting user)</li>
+              <li>The list of Facebook Pages you manage and a Page access token for each (only for Pages you select)</li>
+              <li>Public content on connected Pages: posts, comments, reviews, ratings, and engagement metrics</li>
+              <li>Messenger conversations sent to and from the connected Page</li>
+              <li>Lead Ads form definitions and lead submissions delivered through those forms</li>
+              <li>Ad campaign data, ad insights, ad creatives, and ad account metadata for the ad account you authorise</li>
+              <li>Page-level insights: organic reach, impressions, and engagement metrics</li>
             </ul>
 
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               4.2 What we access from Instagram
             </h3>
-            <ul className="list-disc list-inside mb-6 space-y-1">
-              <li>
-                Your Instagram Business or Creator account id, username,
-                display name, profile picture, and account type
-              </li>
-              <li>Your recent posts and their public metadata</li>
-              <li>
-                Comments on your posts and direct messages sent to and from
-                your account
-              </li>
-              <li>
-                Account-level insights such as reach, views, and engagement
-                metrics (only with your authorization)
-              </li>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Your Instagram Business or Creator account ID, username, display name, profile picture, and account type</li>
+              <li>Your recent posts and their public metadata (media URLs, captions, timestamps)</li>
+              <li>Comments on your posts and direct messages sent to and from your account</li>
+              <li>Account-level insights: reach, views, impressions, and engagement metrics</li>
             </ul>
 
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               4.3 How we use Meta Platform Data
             </h3>
-            <ul className="list-disc list-inside mb-6 space-y-1">
-              <li>
-                To display your connected Pages and accounts inside your
-                Platform dashboard
-              </li>
-              <li>
-                To deliver real-time events (new comments, new messages, new
-                leads, new reviews) to your Platform inbox and CRM
-              </li>
-              <li>
-                To run automations you configure (for example, auto-reply to
-                comments, auto-DM a commenter, route a lead to a sales
-                pipeline)
-              </li>
-              <li>
-                To publish content (images, reels, carousels) to your
-                Instagram account when you request it from the Platform
-              </li>
-              <li>
-                To show you analytics about your paid and organic performance
-              </li>
-              <li>
-                To pause, resume, or adjust budgets on ad campaigns you
-                authorize
-              </li>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>To display your connected Pages and accounts on your dashboard</li>
+              <li>To show Facebook reviews and recommendations in your dashboard and optionally on your public website</li>
+              <li>To execute comment auto-reply and DM automations you configure</li>
+              <li>To surface inbound messages in your shared inbox so your team can respond</li>
+              <li>To display ad campaign performance, spend, leads, and ROI in your Marketing module</li>
+              <li>To allow you to pause, resume, or adjust ad campaign budgets from the dashboard</li>
+              <li>To pull Lead Ads form submissions into your CRM automatically</li>
+              <li>To publish images, reels, and carousels to your connected Instagram account at your direction</li>
+              <li>To show organic reach and engagement alongside paid ad performance in one combined view</li>
             </ul>
 
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               4.4 What we do NOT do with Meta Platform Data
             </h3>
-            <ul className="list-disc list-inside mb-6 space-y-1">
-              <li>
-                We do not sell, rent, or lease Meta Platform Data to any third
-                party
-              </li>
-              <li>
-                We do not use Meta Platform Data for advertising other than
-                the advertising of your own business that you authorize us to
-                manage
-              </li>
-              <li>
-                We do not share Meta Platform Data across the accounts of
-                different Platform customers
-              </li>
-              <li>
-                We do not use Meta Platform Data to train general-purpose
-                machine learning models
-              </li>
-              <li>
-                We do not retain Meta Platform Data after you disconnect the
-                integration, except as required by law or to maintain audit
-                logs that contain no personal data
-              </li>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>We do not sell, rent, or lease Meta Platform Data to any third party</li>
+              <li>We do not use Meta Platform Data for advertising targeting other than as explicitly authorised by you</li>
+              <li>We do not share Meta Platform Data across the accounts of different customers</li>
+              <li>We do not use Meta Platform Data to train general-purpose AI or machine-learning models</li>
+              <li>We do not retain Meta Platform Data after you disconnect the integration, except where required by law</li>
             </ul>
 
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               4.5 How to revoke our access to Meta Platform Data
             </h3>
-            <p className="mb-3">You can revoke access at any time, in two ways:</p>
-            <ul className="list-disc list-inside mb-3 space-y-1">
+            <p className="mb-3 leading-relaxed">You can revoke access at any time in two ways:</p>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
               <li>
-                Inside the Platform: go to <em>Social</em>, find the connected
-                Facebook or Instagram account, and click <em>Disconnect</em>.
-                This invalidates the access token we hold and stops all
-                processing.
+                <strong>Inside the Platform:</strong> go to Social, find the connected Facebook or Instagram account, and click Disconnect. This invalidates the access token and stops all processing immediately.
               </li>
               <li>
-                Inside Facebook: go to{" "}
-                <em>
-                  Settings &amp; Privacy &rarr; Settings &rarr; Apps and
-                  Websites
-                </em>{" "}
-                and remove The Upgrade Shop from the list of authorized apps.
+                <strong>Inside Facebook:</strong> go to Settings &amp; Privacy &rarr; Settings &rarr; Apps and Websites and remove The Upgrade Shop from the list of authorised apps.
               </li>
             </ul>
-            <p>
-              After revocation, we delete the relevant access tokens
-              immediately and purge stored Meta Platform Data within 30 days,
-              except where retention is required by law.
+            <p className="leading-relaxed">
+              After revocation we delete the relevant access tokens immediately
+              and purge stored Meta Platform Data within 30 days, except where
+              retention is required by law.
             </p>
           </section>
 
+          {/* 5 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              5. How We Use Your Information
+              5. WhatsApp Business Data
             </h2>
-            <p className="mb-3">We process personal data to:</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>Provide, operate, and improve the Platform</li>
-              <li>Process payments and manage subscriptions</li>
-              <li>Communicate with you about your account and the service</li>
-              <li>Provide customer support</li>
-              <li>Detect, prevent, and respond to fraud or abuse</li>
-              <li>Comply with legal obligations</li>
+            <p className="leading-relaxed mb-4">
+              The Platform integrates with the WhatsApp Business API (operated
+              by Meta Platforms, Inc.) to enable business messaging. When you
+              connect a WhatsApp Business number, we access and process:
+            </p>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Your WhatsApp Business Account ID and phone number</li>
+              <li>Message templates you create and submit for Meta approval</li>
+              <li>Inbound and outbound messages between your business number and your customers</li>
+              <li>Delivery and read status of messages</li>
+              <li>Contact phone numbers and names of people who message your business</li>
+            </ul>
+            <p className="leading-relaxed mb-4">
+              We use this data to operate the shared inbox, run broadcast
+              campaigns, power AI agent conversations with your customers, and
+              trigger automation workflows.
+            </p>
+            <p className="leading-relaxed">
+              You are responsible for ensuring that your customers have opted
+              in to receive WhatsApp communications from your business. Message
+              history is retained for the period necessary to provide the
+              service and support your inbox, after which it is deleted
+              according to our retention schedule.
+            </p>
+          </section>
+
+          {/* 6 */}
+          <section>
+            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
+              6. Google Integration Data
+            </h2>
+            <p className="leading-relaxed mb-4">
+              If you connect Google services, we access the following with
+              your authorisation:
+            </p>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
               <li>
-                Send marketing communications about the Platform (you can opt
-                out at any time)
+                <strong>Google Analytics:</strong> aggregated website traffic
+                metrics (sessions, users, bounce rate, top pages) for your
+                connected website. We do not access individual visitor
+                identities.
+              </li>
+              <li>
+                <strong>Google Search Console:</strong> search performance data
+                (impressions, clicks, average position, top queries) for your
+                website&rsquo;s domain.
+              </li>
+            </ul>
+            <p className="leading-relaxed">
+              This data is fetched on demand and displayed in your Analytics
+              module. We do not store raw Google Analytics data in our
+              database; aggregated metrics are cached temporarily for
+              performance. You can disconnect Google integrations at any time
+              from your dashboard settings.
+            </p>
+          </section>
+
+          {/* 7 */}
+          <section>
+            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
+              7. Payment and Billing Data
+            </h2>
+            <p className="leading-relaxed mb-4">
+              Subscription billing is handled by our payment processor,
+              SUMIT. When you subscribe, SUMIT processes your payment details
+              directly under their own privacy policy. We receive and store
+              only:
+            </p>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>A tokenised customer reference from SUMIT (no raw card data on our servers)</li>
+              <li>Transaction IDs, amounts, dates, and statuses</li>
+              <li>Subscription plan, billing cycle, and renewal dates</li>
+              <li>Invoices issued to your business</li>
+            </ul>
+            <p className="leading-relaxed">
+              We retain billing records for the period required by Israeli tax
+              and accounting law (currently 7 years). Subscription payment
+              data for your own customers (if you use the Store module for
+              your business) is processed on your behalf as described in
+              Section 9.
+            </p>
+          </section>
+
+          {/* 8 */}
+          <section>
+            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
+              8. AI Agent and Conversation Data
+            </h2>
+            <p className="leading-relaxed mb-4">
+              Every account includes a personal AI agent that can communicate
+              with you via WhatsApp and the dashboard. Additionally, your
+              customers may interact with your own AI agent (configured by
+              you) through your WhatsApp Business number.
+            </p>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>
+                <strong>Your conversations with our platform&rsquo;s AI agent (Max):</strong> logged
+                and used to improve response quality, provide onboarding
+                support, and maintain context across sessions.
+              </li>
+              <li>
+                <strong>Your customers&rsquo; conversations with your AI agent:</strong> processed
+                on your behalf (see Section 9). Your customers&rsquo; message
+                content is used to generate responses and may be stored in a
+                knowledge graph to maintain conversational context over time.
+              </li>
+            </ul>
+            <p className="leading-relaxed mb-4">
+              AI responses are generated using large language models provided
+              by third-party AI providers (see Sub-processors in Section 11).
+              Conversation data sent to these providers is subject to our data
+              processing agreements with them and is not used to train their
+              public models.
+            </p>
+            <p className="leading-relaxed">
+              You can request deletion of AI conversation history by emailing
+              privacy@upgradeshop.ai.
+            </p>
+          </section>
+
+          {/* 9 */}
+          <section>
+            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
+              9. Data We Process on Your Customers&rsquo; Behalf
+            </h2>
+            <p className="leading-relaxed mb-4">
+              When you use The Upgrade Shop to run your business, you entrust
+              us with your customers&rsquo; personal data. You are the data
+              controller; we are your data processor. The categories of data
+              we process on your behalf include:
+            </p>
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              9.1 CRM — Contacts and Companies
+            </h3>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Names, phone numbers, email addresses, and business details of your contacts</li>
+              <li>Pipeline stage, lead source, and activity history</li>
+              <li>Custom fields you define for your business</li>
+              <li>Tags, notes, and communication logs</li>
+            </ul>
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              9.2 Messaging and Inbox
+            </h3>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>WhatsApp, Facebook Messenger, and Instagram DM conversations with your customers</li>
+              <li>Message content, timestamps, and delivery status</li>
+              <li>Broadcast campaign recipient lists and engagement data</li>
+            </ul>
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              9.3 Email Marketing
+            </h3>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Email addresses and names of your mailing list subscribers</li>
+              <li>Subscription preferences, opt-in/opt-out status, and consent timestamps</li>
+              <li>Campaign open rates, click-through rates, and bounce data</li>
+            </ul>
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              9.4 Website Visitors
+            </h3>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Form submissions made on websites we host for you</li>
+              <li>Analytics events collected on your website (depending on your tracking configuration)</li>
+            </ul>
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              9.5 Online Store
+            </h3>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Order details, product purchases, and transaction history of your customers</li>
+              <li>Subscription plan and billing status of your customers&rsquo; recurring orders</li>
+              <li>Shipping addresses if collected</li>
+            </ul>
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              9.6 Digital Courses Infrastructure
+            </h3>
+            <p className="leading-relaxed mb-3">
+              If you run digital courses through our platform, we process
+              data about your enrolled students on your behalf:
+            </p>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Student names and email addresses</li>
+              <li>Enrollment status, progress through course content, and completion records</li>
+              <li>Video watch progress and assessment results</li>
+            </ul>
+            <p className="leading-relaxed">
+              You are responsible for including appropriate disclosures about
+              this data processing in your own privacy policy presented to
+              your students.
+            </p>
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              9.7 Dispatch and Field Service
+            </h3>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Customer names and contact details associated with service jobs</li>
+              <li>Job details, status history, and technician assignments</li>
+              <li>Scheduling and appointment data</li>
+            </ul>
+          </section>
+
+          {/* 10 */}
+          <section>
+            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
+              10. How We Use Your Information
+            </h2>
+            <p className="leading-relaxed mb-3">We process your personal data to:</p>
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
+              <li>Provide, operate, and improve the Platform and its features</li>
+              <li>Process payments and manage your subscription</li>
+              <li>Send service notifications, billing alerts, and product updates</li>
+              <li>Provide customer support and respond to enquiries</li>
+              <li>Power the AI agent features on your account</li>
+              <li>Detect, investigate, and prevent fraud, abuse, and security incidents</li>
+              <li>Comply with our legal obligations</li>
+              <li>Enforce our Terms of Service</li>
+            </ul>
+
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              10.1 Lawful Basis for Processing (GDPR and Israeli Privacy Law)
+            </h3>
+            <p className="leading-relaxed mb-3">
+              We rely on the following lawful bases under the GDPR where
+              applicable, and the Israeli Privacy Protection Law 5741-1981:
+            </p>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li><strong>Contract performance</strong> — processing necessary to deliver the Platform services you subscribed to</li>
+              <li><strong>Legitimate interests</strong> — platform security, fraud prevention, service improvement</li>
+              <li><strong>Legal obligation</strong> — retaining billing records as required by law</li>
+              <li><strong>Consent</strong> — where you have opted in to marketing communications or connected a third-party integration</li>
+            </ul>
+          </section>
+
+          {/* 11 */}
+          <section>
+            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
+              11. Sub-processors and Data Sharing
+            </h2>
+            <p className="leading-relaxed mb-4">
+              We do not sell your personal data. We share it only with trusted
+              sub-processors required to operate the Platform, and only to
+              the extent necessary:
+            </p>
+            <div className="overflow-x-auto mb-4">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-foreground/20">
+                    <th className="text-left py-2 pr-4 font-semibold text-foreground">Sub-processor</th>
+                    <th className="text-left py-2 pr-4 font-semibold text-foreground">Purpose</th>
+                    <th className="text-left py-2 font-semibold text-foreground">Location</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-foreground/10">
+                  <tr><td className="py-2 pr-4">Hetzner Online GmbH</td><td className="py-2 pr-4">Cloud server infrastructure and database hosting</td><td className="py-2">Germany / EU</td></tr>
+                  <tr><td className="py-2 pr-4">Cloudflare, Inc.</td><td className="py-2 pr-4">CDN, DDoS protection, DNS</td><td className="py-2">USA</td></tr>
+                  <tr><td className="py-2 pr-4">Anthropic, PBC</td><td className="py-2 pr-4">AI language model provider (Claude)</td><td className="py-2">USA</td></tr>
+                  <tr><td className="py-2 pr-4">OpenAI, Inc.</td><td className="py-2 pr-4">AI language model provider (GPT models)</td><td className="py-2">USA</td></tr>
+                  <tr><td className="py-2 pr-4">Meta Platforms, Inc.</td><td className="py-2 pr-4">Facebook and Instagram Graph API integration</td><td className="py-2">USA</td></tr>
+                  <tr><td className="py-2 pr-4">Meta / WhatsApp</td><td className="py-2 pr-4">WhatsApp Business API messaging</td><td className="py-2">USA</td></tr>
+                  <tr><td className="py-2 pr-4">Google LLC</td><td className="py-2 pr-4">Google Analytics and Search Console integrations, Google sign-in</td><td className="py-2">USA</td></tr>
+                  <tr><td className="py-2 pr-4">SUMIT</td><td className="py-2 pr-4">Subscription billing and payment processing</td><td className="py-2">Israel</td></tr>
+                  <tr><td className="py-2 pr-4">Amazon Web Services</td><td className="py-2 pr-4">File and media storage (R2-compatible object storage via Cloudflare)</td><td className="py-2">USA / EU</td></tr>
+                  <tr><td className="py-2 pr-4">Bunny.net</td><td className="py-2 pr-4">Video hosting and streaming for digital courses</td><td className="py-2">EU</td></tr>
+                  <tr><td className="py-2 pr-4">ElevenLabs</td><td className="py-2 pr-4">AI voice dubbing for course videos (when enabled)</td><td className="py-2">USA</td></tr>
+                  <tr><td className="py-2 pr-4">Resend / email provider</td><td className="py-2 pr-4">Transactional email delivery</td><td className="py-2">USA</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="leading-relaxed">
+              We also share data when required by law, court order, or
+              governmental authority, and in connection with a merger,
+              acquisition, or sale of assets (in which case we will notify
+              you).
+            </p>
+          </section>
+
+          {/* 12 */}
+          <section>
+            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
+              12. Data Retention
+            </h2>
+            <ul className="list-disc list-inside space-y-2 ml-2">
+              <li>
+                <strong>Account data</strong> — retained for the duration of
+                your subscription and for 30 days after cancellation (to allow
+                data export), then deleted.
+              </li>
+              <li>
+                <strong>Billing records</strong> — retained for 7 years as
+                required by Israeli law.
+              </li>
+              <li>
+                <strong>Meta Platform Data</strong> — deleted within 30 days
+                of disconnecting the integration, except where legally
+                required.
+              </li>
+              <li>
+                <strong>WhatsApp message history</strong> — retained while
+                your account is active; deleted within 30 days of account
+                closure unless you request an export.
+              </li>
+              <li>
+                <strong>AI conversation logs</strong> — retained to maintain
+                context and improve responses; deletable on request via
+                privacy@upgradeshop.ai.
+              </li>
+              <li>
+                <strong>Customer data processed on your behalf</strong> —
+                retained in accordance with your instructions or until account
+                closure, whichever comes first.
               </li>
             </ul>
           </section>
 
+          {/* 13 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              6. Lawful Basis for Processing (GDPR)
+              13. Security
             </h2>
-            <p className="mb-3">
-              When EU/EEA or UK data subjects are involved, we rely on the
-              following lawful bases under the GDPR:
+            <p className="leading-relaxed mb-4">
+              We implement industry-standard technical and organisational
+              measures to protect personal data, including:
             </p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>
-                <strong>Contract</strong> (Art. 6(1)(b)): to deliver the
-                Platform to you and perform the agreement between us
-              </li>
-              <li>
-                <strong>Legitimate interests</strong> (Art. 6(1)(f)): to
-                secure the Platform, prevent fraud, and improve our services
-              </li>
-              <li>
-                <strong>Consent</strong> (Art. 6(1)(a)): for marketing
-                communications, cookies that are not strictly necessary, and
-                for integrations you choose to authorize
-              </li>
-              <li>
-                <strong>Legal obligation</strong> (Art. 6(1)(c)): to comply
-                with tax, accounting, and other statutory requirements
-              </li>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>Encrypted connections (HTTPS/TLS) for all data in transit</li>
+              <li>Encrypted storage for sensitive credentials and access tokens</li>
+              <li>Access controls limiting data access to authorised personnel</li>
+              <li>Regular automated database backups</li>
+              <li>Monitoring for unusual activity and security incidents</li>
             </ul>
-          </section>
-
-          <section>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              7. Sharing and Sub-Processors
-            </h2>
-            <p className="mb-4">
-              We do not sell personal information. We share data with the
-              following categories of recipients only as needed to operate
-              the Platform:
-            </p>
-            <ul className="list-disc list-inside mb-4 space-y-1">
-              <li>
-                <strong>Hosting:</strong> Hetzner Online GmbH (Germany, EU)
-              </li>
-              <li>
-                <strong>Network and security:</strong> Cloudflare, Inc.
-              </li>
-              <li>
-                <strong>Transactional email:</strong> Amazon Web Services
-                (SES)
-              </li>
-              <li>
-                <strong>Payments:</strong> SUMIT, and additional payment
-                providers we may add (such as Stripe), to process subscription
-                and one-time charges
-              </li>
-              <li>
-                <strong>AI processing:</strong> Anthropic PBC (Claude), OpenAI
-                Inc., and other AI vendors we may add, to power the in-product
-                AI agent and content tools
-              </li>
-              <li>
-                <strong>Maps and routing:</strong> Google LLC
-              </li>
-              <li>
-                <strong>Video and media:</strong> Gumlet Inc., ElevenLabs Inc.
-                (for course dubbing)
-              </li>
-              <li>
-                <strong>Connected platforms:</strong> Meta Platforms, Inc.
-                (Facebook and Instagram) and other social or communication
-                platforms you authorize. These are not sub-processors of our
-                data — they are platforms we integrate with at your direction.
-              </li>
-              <li>
-                <strong>Professional advisors:</strong> our legal, accounting,
-                and audit professionals when required
-              </li>
-              <li>
-                <strong>Authorities:</strong> when required by law, court
-                order, or to protect rights, property, or safety
-              </li>
-            </ul>
-            <p>
-              Each sub-processor is bound by a data processing agreement and
-              is required to maintain appropriate technical and organizational
-              security measures.
+            <p className="leading-relaxed mt-4">
+              No method of transmission over the internet is 100% secure. If
+              we become aware of a data breach affecting your personal data, we
+              will notify you as required by applicable law.
             </p>
           </section>
 
+          {/* 14 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              8. Data Security
+              14. Your Rights
             </h2>
-            <p>
-              We implement industry-standard technical and organizational
-              measures to protect personal data, including TLS encryption in
-              transit, encryption at rest for sensitive fields, role-based
-              access controls, audit logging, regular backups, network
-              isolation between customer environments, secret rotation, and
-              employee security training. No method of transmission or
-              storage is 100% secure; we cannot guarantee absolute security.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              9. Payment Information
-            </h2>
-            <p>
-              Payment information is processed by our payment partners
-              (currently SUMIT, and additional providers we may add). We do
-              not store full card numbers on our servers. Payment tokens
-              required for recurring billing are stored encrypted by the
-              payment processor. Our payment partners are PCI DSS compliant.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              10. Cookies and Tracking
-            </h2>
-            <p className="mb-3">We use cookies and similar technologies to:</p>
-            <ul className="list-disc list-inside mb-3 space-y-1">
-              <li>Keep you signed in (essential)</li>
-              <li>
-                Remember your preferences such as language and locale
-                (essential)
-              </li>
-              <li>
-                Measure usage of the Platform so we can improve it
-                (analytics, with consent where required)
-              </li>
-              <li>
-                Detect fraudulent or abusive activity (security, essential)
-              </li>
-            </ul>
-            <p>
-              You can manage cookies through your browser settings. Disabling
-              essential cookies will prevent the Platform from working
-              correctly.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              11. Your Rights
-            </h2>
-            <p className="mb-3">
+            <p className="leading-relaxed mb-3">
               Depending on your jurisdiction, you have the right to:
             </p>
-            <ul className="list-disc list-inside mb-4 space-y-1">
+            <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
               <li>Access the personal information we hold about you</li>
               <li>Correct or update inaccurate information</li>
               <li>Request deletion of your information</li>
               <li>Object to or restrict certain processing</li>
               <li>Withdraw consent at any time, where consent is the basis</li>
+              <li>Receive your information in a portable, machine-readable format</li>
               <li>
-                Receive your information in a portable, machine-readable
-                format
-              </li>
-              <li>
-                Lodge a complaint with a supervisory authority — in Israel,
-                the Privacy Protection Authority
-                (https://www.gov.il/en/departments/the_privacy_protection_authority);
-                in the EU, your local data protection authority; in the UK,
-                the Information Commissioner's Office (ICO)
+                Lodge a complaint with a supervisory authority — in Israel, the
+                Privacy Protection Authority (gov.il); in the EU, your local
+                data protection authority; in the UK, the ICO
               </li>
             </ul>
-            <p>
-              To exercise any of these rights, email
-              privacy@upgradeshop.ai. We will respond within 30 days (or
-              shorter where required by law).
+            <p className="leading-relaxed">
+              To exercise any of these rights, email{" "}
+              <strong>privacy@upgradeshop.ai</strong>. We will respond within
+              30 days (or sooner where required by law).
             </p>
           </section>
 
+          {/* 15 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              12. International Data Transfers
+              15. International Data Transfers
             </h2>
-            <p>
-              We are based in Israel. Israel has been recognized by the
+            <p className="leading-relaxed mb-4">
+              We are based in Israel. Israel has been recognised by the
               European Commission as providing an adequate level of data
-              protection under GDPR Article 45. Some of our sub-processors
-              are located in the United States and other jurisdictions. Where
-              required, we rely on the European Commission's Standard
-              Contractual Clauses, the UK International Data Transfer
-              Addendum, or other lawful transfer mechanisms.
+              protection under GDPR Article 45.
+            </p>
+            <p className="leading-relaxed">
+              Some of our sub-processors are located in the United States and
+              other jurisdictions. Where required, we rely on the European
+              Commission&rsquo;s Standard Contractual Clauses or equivalent
+              transfer mechanisms. A list of sub-processors and their locations
+              is in Section 11.
             </p>
           </section>
 
+          {/* 16 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              13. Data Retention
+              16. Children&rsquo;s Privacy
             </h2>
-            <p>
-              We retain personal data for as long as your account is active
-              and for a reasonable period afterward to support compliance
-              with our legal obligations, resolve disputes, and enforce our
-              agreements. When you cancel your account, we delete or
-              anonymize personal data within 90 days, except where retention
-              is required by law (for example, tax records). Meta Platform
-              Data is purged within 30 days of integration disconnection.
+            <p className="leading-relaxed">
+              The Platform is intended for business use by adults. We do not
+              knowingly collect personal data from anyone under 18 years of
+              age. If we become aware that we have inadvertently collected such
+              data, we will delete it promptly.
             </p>
           </section>
 
+          {/* 17 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              14. Children's Privacy
+              17. Changes to This Policy
             </h2>
-            <p>
-              The Platform is not directed to children under 16. We do not
-              knowingly collect personal data from anyone under 16. If you
-              believe a child has provided us with personal data, contact us
-              and we will delete it.
+            <p className="leading-relaxed">
+              We may update this policy from time to time. When we make
+              material changes, we will notify you by email or by a prominent
+              notice on the Platform at least 14 days before they take effect.
+              The &ldquo;Last updated&rdquo; date at the top of this page
+              reflects the most recent revision.
             </p>
           </section>
 
+          {/* 18 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              15. Israeli Privacy Protection Law
+              18. Contact Us
             </h2>
-            <p>
-              We comply with the Israeli Protection of Privacy Law,
-              5741-1981, and the Privacy Protection (Data Security)
-              Regulations, 5777-2017. The database operated by the Platform
-              is registered with the Israeli Registrar of Databases where
-              required. Data subjects have the right to inspect their data
-              under Section 13 of the Law and to request correction under
-              Section 14. Requests should be sent to privacy@upgradeshop.ai.
+            <p className="leading-relaxed mb-4">
+              For privacy-related questions, data requests, or complaints:
             </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              16. Changes to This Policy
-            </h2>
-            <p>
-              We may update this Privacy Policy from time to time. The
-              "Last updated" date at the top of this page reflects the most
-              recent revision. Material changes will be communicated by email
-              or by a prominent notice inside the Platform at least 30 days
-              before the change takes effect.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              17. Contact Us
-            </h2>
-            <p className="mb-3">
-              For questions about this Privacy Policy, to exercise your
-              rights, or to report a privacy concern:
-            </p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>Privacy contact: privacy@upgradeshop.ai</li>
+            <ul className="list-none space-y-1 ml-2">
+              <li><strong>The Upgrade Shop</strong></li>
+              <li>ח.פ. 300330123</li>
+              <li>Har Hatzofim 11, Holon, Israel</li>
+              <li>Privacy enquiries: privacy@upgradeshop.ai</li>
               <li>General contact: hello@upgradeshop.ai</li>
-              <li>
-                Postal: <strong>Har Hatzofim 11, Holon, Israel</strong>
-              </li>
             </ul>
           </section>
-        </div>
 
-        <div className="mt-16 pt-8 border-t border-foreground/10">
-          <a
-            href="/"
-            className="text-gold hover:text-gold-dark font-medium"
-          >
-            &larr; Back to Home
-          </a>
         </div>
       </div>
     </div>
