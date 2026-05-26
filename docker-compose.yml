@@ -8,6 +8,9 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
 
+    ports:
+      - "3010:3000"
+
     networks:
       customer-websites:
         ipv4_address: 172.23.1.19
