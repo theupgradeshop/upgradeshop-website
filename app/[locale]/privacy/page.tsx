@@ -57,13 +57,13 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc list-inside mb-4 space-y-1">
               <li>
-                Legal entity: <strong>[LEGAL ENTITY NAME]</strong>
+                Legal entity: <strong>The Upgrade Shop</strong>
               </li>
               <li>
-                Company registration (ח.פ.): <strong>[REGISTRATION NUMBER]</strong>
+                Company registration (ח.פ.): <strong>300330123</strong>
               </li>
               <li>
-                Registered office: <strong>[REGISTERED ADDRESS]</strong>
+                Registered office: <strong>Har Hatzofim 11, Holon, Israel</strong>
               </li>
               <li>Country of incorporation: Israel</li>
               <li>
@@ -559,7 +559,7 @@ export default function PrivacyPage() {
               <li>Privacy contact: privacy@upgradeshop.ai</li>
               <li>General contact: hello@upgradeshop.ai</li>
               <li>
-                Postal: <strong>[REGISTERED ADDRESS]</strong>
+                Postal: <strong>Har Hatzofim 11, Holon, Israel</strong>
               </li>
             </ul>
           </section>
