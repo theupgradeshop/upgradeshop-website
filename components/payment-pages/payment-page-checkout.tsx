@@ -12,6 +12,7 @@ import {
   Loader2,
   ShoppingCart,
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -78,6 +79,11 @@ const translations: Record<string, Record<string, string>> = {
     loadingPayment: "Loading payment form...",
     processingPayment: "Processing payment...",
     paymentError: "Payment failed",
+    paymentFailedFallback: "Payment failed. Please try again.",
+    redirectingToPayment: "Redirecting to secure payment...",
+    uncertainTitle: "Your payment is being confirmed",
+    uncertainBody:
+      "Please don't pay again or refresh this page. We'll confirm your order shortly and email you a receipt. If you don't hear from us within a few hours, please contact us instead of trying again.",
   },
   he: {
     checkout: "תשלום",
@@ -132,8 +138,94 @@ const translations: Record<string, Record<string, string>> = {
     loadingPayment: "טוען טופס תשלום...",
     processingPayment: "מעבד תשלום...",
     paymentError: "שגיאת תשלום",
+    paymentFailedFallback: "התשלום נכשל. נא לנסות שוב.",
+    redirectingToPayment: "מעביר לתשלום מאובטח...",
+    uncertainTitle: "התשלום שלכם בבדיקה",
+    uncertainBody:
+      "נא לא לשלם שוב ולא לרענן את הדף. נאשר את ההזמנה בקרוב ונשלח קבלה במייל. אם לא תקבלו עדכון תוך מספר שעות, אנא צרו קשר איתנו במקום לנסות שוב.",
   },
 };
+
+/**
+ * Mirrors `PaymentInstruction`/`PaymentOutcome` from the dashboard's
+ * src/lib/store/payment-registry.ts (Payments Consolidation, 2026-08-20
+ * spec §2.1/§2.4) — redeclared locally rather than imported, since this is
+ * a separate repo. This buyer surface renders purely by `instruction.kind`
+ * / `outcome.status`, never by gateway name.
+ */
+type PaymentInstruction =
+  | { kind: "none" }
+  | { kind: "redirect"; url: string }
+  | { kind: "client_instrument"; provider: string; publicConfig: Record<string, any> };
+
+type PaymentOutcome =
+  | { status: "paid"; transactionId: string }
+  | { status: "declined"; code: string }
+  | { status: "ambiguous"; code: string };
+
+/**
+ * The engine and the /payment/begin and /payment/execute routes return
+ * error CODES, never prose — this table is this component's own localized
+ * copy for each one. `generic` is the fallback for any code this table
+ * doesn't recognize, so an unmapped/future code never renders raw on the
+ * page.
+ */
+const paymentErrorLabels: Record<string, Record<string, string>> = {
+  en: {
+    generic: "Something went wrong. Please try again.",
+    invalid_request: "Something went wrong. Please try again.",
+    rate_limited: "Too many attempts. Please wait a moment and try again.",
+    invalid_ownership_token: "Your session has expired. Please refresh the page and try again.",
+    order_not_found: "We couldn't find your order. Please refresh the page and try again.",
+    module_disabled: "Payments are currently unavailable for this store.",
+    no_gateway_connected: "Payment is not available for this store right now.",
+    gateway_misconfigured: "Payment is not available for this store right now.",
+    unknown_gateway: "Payment is not available for this store right now.",
+    invalid_redirect_url: "Something went wrong. Please refresh the page and try again.",
+    order_not_chargeable: "This order has already been processed.",
+    amount_mismatch: "Something went wrong with your order total. Please refresh the page and try again.",
+    currency_mismatch: "Something went wrong with your order currency. Please refresh the page and try again.",
+    card_declined: "Your card was declined. Please try a different card.",
+    gateway_not_configured: "Payment is not available for this store right now.",
+    gateway_unreachable: "We couldn't reach the payment provider. Please try again.",
+    sdk_load_failed: "Failed to load the secure payment form. Please refresh the page and try again.",
+    sdk_init_failed: "Failed to initialize the payment form. Please refresh the page and try again.",
+    form_not_ready: "Payment form is not ready. Please refresh the page and try again.",
+    token_missing: "Failed to process card. Please try again.",
+    network_error: "Could not reach the payment server. Please check your connection and try again.",
+    unsupported_provider: "Payment is not available for this store right now.",
+  },
+  he: {
+    generic: "משהו השתבש. נא לנסות שוב.",
+    invalid_request: "משהו השתבש. נא לנסות שוב.",
+    rate_limited: "יותר מדי ניסיונות. נא להמתין רגע ולנסות שוב.",
+    invalid_ownership_token: "פג תוקף החיבור. נא לרענן את הדף ולנסות שוב.",
+    order_not_found: "לא הצלחנו למצוא את ההזמנה. נא לרענן את הדף ולנסות שוב.",
+    module_disabled: "התשלומים אינם זמינים כעת עבור חנות זו.",
+    no_gateway_connected: "התשלום אינו זמין כעת עבור חנות זו.",
+    gateway_misconfigured: "התשלום אינו זמין כעת עבור חנות זו.",
+    unknown_gateway: "התשלום אינו זמין כעת עבור חנות זו.",
+    invalid_redirect_url: "משהו השתבש. נא לרענן את הדף ולנסות שוב.",
+    order_not_chargeable: "ההזמנה הזו כבר טופלה.",
+    amount_mismatch: "משהו השתבש בסכום ההזמנה. נא לרענן את הדף ולנסות שוב.",
+    currency_mismatch: "משהו השתבש במטבע ההזמנה. נא לרענן את הדף ולנסות שוב.",
+    card_declined: "הכרטיס נדחה. נא לנסות כרטיס אחר.",
+    gateway_not_configured: "התשלום אינו זמין כעת עבור חנות זו.",
+    gateway_unreachable: "לא הצלחנו להתחבר לספק התשלומים. נא לנסות שוב.",
+    sdk_load_failed: "טעינת טופס התשלום המאובטח נכשלה. נא לרענן את הדף ולנסות שוב.",
+    sdk_init_failed: "אתחול טופס התשלום נכשל. נא לרענן את הדף ולנסות שוב.",
+    form_not_ready: "טופס התשלום עדיין לא מוכן. נא לרענן את הדף ולנסות שוב.",
+    token_missing: "עיבוד הכרטיס נכשל. נא לנסות שוב.",
+    network_error: "לא הצלחנו להתחבר לשרת התשלומים. נא לבדוק את החיבור ולנסות שוב.",
+    unsupported_provider: "התשלום אינו זמין כעת עבור חנות זו.",
+  },
+};
+
+function paymentErrorLabel(lang: string, code: string | null): string {
+  if (!code) return "";
+  const table = paymentErrorLabels[lang] || paymentErrorLabels.en;
+  return table[code] || table.generic;
+}
 
 interface PaymentPageCheckoutProps {
   paymentPage: any;
@@ -222,16 +314,37 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
   const couponRemainder = Math.max(0, couponDiscount - monthlyEffectiveTotal);
   const oneTimeAfterCoupon = Math.max(0, oneTimeEffectiveTotal - couponRemainder);
 
-  // SUMIT SDK
-  const [sumitConfig, setSumitConfig] = useState<any>(null);
+  // Gateway-blind payment state (Payments Consolidation, 2026-08-20 spec) —
+  // ownershipToken proves this browser was just handed this order by the
+  // checkout response; `instruction` is what /payment/begin told us to do
+  // (never a gateway name); `paymentErrorCode` holds an error CODE from the
+  // engine/routes, rendered through paymentErrorLabel(); `uncertain` is a
+  // distinct terminal state from success/failure — an ambiguous outcome or
+  // a client-side timeout, neither of which is safe to auto-retry or offer
+  // a retry control for (the atomic charge claim on the server is what
+  // actually prevents a double charge; a resubmit here would defeat that).
+  const [ownershipToken, setOwnershipToken] = useState<string | null>(null);
+  const [instruction, setInstruction] = useState<PaymentInstruction | null>(null);
+  const [paymentErrorCode, setPaymentErrorCode] = useState<string | null>(null);
+  const [uncertain, setUncertain] = useState(false);
   const [sdkLoaded, setSdkLoaded] = useState(false);
   const [formBound, setFormBound] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
-  const [showPaymentFields, setShowPaymentFields] = useState(false);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const boundRef = useRef(false);
-  // Holds order ID between submit and SUMIT callback
-  const pendingOrderRef = useRef<any>(null);
+  // Holds the created order (id/total/currency/redirectUrl) between
+  // checkout and the SUMIT token callback / execute call.
+  const orderRef = useRef<any>(null);
+
+  // Renders the SUMIT card form purely by instruction.kind/provider, never
+  // by a hardcoded gateway assumption — the only client_instrument gateway
+  // today is sumit, but this component never special-cases "sumit" outside
+  // of this check + the SDK-loading effects below.
+  const showCardForm = instruction?.kind === "client_instrument" && instruction.provider === "sumit";
+  const sumitPublicConfig = showCardForm
+    ? (instruction as { kind: "client_instrument"; provider: string; publicConfig: Record<string, any> }).publicConfig
+    : undefined;
 
   const effectiveTotal = Math.max(0, paymentPage.total - (appliedCoupon?.discountAmount || 0));
   const hasRestrictions =
@@ -263,60 +376,53 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
     recordView();
   }, [slug]);
 
-  // Load SUMIT SDK once the user reveals the card fields
+  // Load SUMIT SDK — only once /payment/begin has actually told us this
+  // order's gateway is a client_instrument (sumit) one. Unlike the old
+  // direct sumit-config call, there is nothing to preload speculatively
+  // before that: a redirect-gateway tenant (Green Invoice — all three real
+  // tenants today) never reaches this branch at all.
   useEffect(() => {
-    if (!showPaymentFields || !requiresPayment) return;
+    if (!showCardForm) return;
 
     setPaymentLoading(true);
 
-    const loadSumitConfig = async () => {
-      try {
-        const res = await fetch(`${PLATFORM_URL}/api/public/sumit-config`);
-        if (!res.ok) { setError("Payment system not configured"); setPaymentLoading(false); return; }
-        const config = await res.json();
-        setSumitConfig(config);
-      } catch {
-        setError("Failed to load payment configuration");
-        setPaymentLoading(false);
-      }
+    const loadSumitSDK = () => {
+      if (window.OfficeGuy?.Payments) { setSdkLoaded(true); setPaymentLoading(false); return; }
+      const script = document.createElement("script");
+      script.src = "https://app.sumit.co.il/scripts/payments.js";
+      script.async = true;
+      script.onload = () => { setSdkLoaded(true); setPaymentLoading(false); };
+      script.onerror = () => { setPaymentErrorCode("sdk_load_failed"); setPaymentLoading(false); };
+      document.head.appendChild(script);
     };
 
     const loadJQuery = () => {
-      if (window.jQuery) { loadSumitConfig(); return; }
+      if (window.jQuery) { loadSumitSDK(); return; }
       const script = document.createElement("script");
       script.src = "https://code.jquery.com/jquery-3.7.1.min.js";
       script.async = true;
-      script.onload = () => loadSumitConfig();
-      script.onerror = () => { setError("Failed to load payment dependencies"); setPaymentLoading(false); };
+      script.onload = () => loadSumitSDK();
+      script.onerror = () => { setPaymentErrorCode("sdk_load_failed"); setPaymentLoading(false); };
       document.head.appendChild(script);
     };
 
     loadJQuery();
-  }, [showPaymentFields, requiresPayment]);
+  }, [showCardForm]);
 
-  // Load SUMIT SDK scripts once config is ready
+  // Bind SUMIT form once SDK is loaded, using the publicConfig the
+  // gateway-blind /payment/begin call handed us — no separate
+  // domain-scoped config fetch.
   useEffect(() => {
-    if (!sumitConfig) return;
-    if (window.OfficeGuy?.Payments) { setSdkLoaded(true); setPaymentLoading(false); return; }
-    const script = document.createElement("script");
-    script.src = "https://app.sumit.co.il/scripts/payments.js";
-    script.async = true;
-    script.onload = () => { setSdkLoaded(true); setPaymentLoading(false); };
-    script.onerror = () => { setError("Failed to load payment system"); setPaymentLoading(false); };
-    document.head.appendChild(script);
-  }, [sumitConfig]);
-
-  // Bind SUMIT form once SDK is loaded
-  useEffect(() => {
-    if (!sdkLoaded || !formRef.current || boundRef.current || !sumitConfig) return;
+    if (!sdkLoaded || !formRef.current || boundRef.current) return;
+    if (!showCardForm || !sumitPublicConfig) return;
     if (!window.OfficeGuy?.Payments) return;
 
     boundRef.current = true;
     try {
       window.OfficeGuy.Payments.InitEditors("#sumit-payment-form");
       window.OfficeGuy.Payments.BindFormSubmit({
-        CompanyID: sumitConfig.companyId,
-        APIPublicKey: sumitConfig.apiPublicKey,
+        CompanyID: sumitPublicConfig.companyId,
+        APIPublicKey: sumitPublicConfig.apiPublicKey,
         FormSelector: "#sumit-payment-form",
         Environment: "api",
         ErrorsClass: ".og-errors",
@@ -326,80 +432,99 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
       setFormBound(true);
     } catch (err) {
       console.error("SUMIT init error:", err);
-      setError("Failed to initialize payment form");
+      setPaymentErrorCode("sdk_init_failed");
     }
-  }, [sdkLoaded, sumitConfig]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sdkLoaded, showCardForm]);
 
-  // SUMIT token callback — fires after jQuery form submit
+  // SUMIT token callback — fires after jQuery form submit, then completes
+  // the charge through the gateway-blind /payment/execute endpoint. No
+  // direct call to the legacy sumit/charge or sumit/post-payment endpoints.
   const handleTokenResponse = async (response: any) => {
     if (response.Status !== 0) {
-      setError(response.UserErrorMessage || response.TechnicalErrorDetails || t.paymentError);
-      setLoading(false);
+      // SUMIT's own client-side tokenization validation message — already
+      // localized via ResponseLanguage above (not one of our engine's
+      // codes, so it doesn't go through paymentErrorLabel()).
+      const errorMsg = response.UserErrorMessage || response.TechnicalErrorDetails || t.paymentFailedFallback;
+      setError(errorMsg);
+      setPaymentProcessing(false);
       return;
     }
 
     const token = response.Data?.SingleUseToken;
     if (!token) {
-      setError("Failed to process card. Please try again.");
-      setLoading(false);
+      setPaymentErrorCode("token_missing");
+      setPaymentProcessing(false);
       return;
     }
 
-    const order = pendingOrderRef.current;
-    if (!order) {
-      setError("Order not found. Please try again.");
-      setLoading(false);
+    const order = orderRef.current;
+    if (!ownershipToken || !order?.id) {
+      setPaymentErrorCode("generic");
+      setPaymentProcessing(false);
       return;
     }
 
     try {
-      const chargeRes = await fetch(`${PLATFORM_URL}/api/public/sumit/charge`, {
+      // The gateway-blind completion path — executeOrderPayment builds its
+      // own line items from the order's own stored order_items
+      // server-side, takes the atomic charge claim, and returns a
+      // PaymentOutcome. No gateway name, no items/customer payload — just
+      // the instrument token and the order's own echoed amount/currency
+      // for the pre-charge integrity guard.
+      const res = await fetch(`${PLATFORM_URL}/api/public/orders/${order.id}/payment/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          token,
-          orderId: order.id,
-          orderNumber: order.orderNumber,
+          ownershipToken,
+          instrumentToken: token,
           amount: Number(order.total),
           currency: order.currency,
-          customer: {
-            name: company?.trim() || `${firstName} ${lastName}`.trim(),
-            email,
-            phone,
-          },
-          items: paymentPage.items.map((item: any) => ({
-            name: item.product.name,
-            price: item.effectivePrice,
-            quantity: item.quantity,
-          })),
         }),
       });
+      const body = await res.json().catch(() => ({}));
 
-      const chargeResult = await chargeRes.json();
-      if (!chargeRes.ok || !chargeResult.success) {
-        throw new Error(chargeResult.error || t.paymentError);
+      if (!res.ok) {
+        const code = typeof body.code === "string" ? body.code : "internal_error";
+        // internal_error is the one non-2xx shape executeOrderPayment
+        // cannot rule out having happened after a real charge attempt —
+        // every genuine gateway-side uncertainty already comes back as a
+        // 200 {status:"ambiguous"} below. Treated as uncertain, never a
+        // "try again" invitation — same reasoning as the client timeout in
+        // handlePayClick.
+        if (code === "internal_error") {
+          setUncertain(true);
+        } else {
+          setPaymentErrorCode(code);
+        }
+        setPaymentProcessing(false);
+        return;
       }
 
-      await fetch(`${PLATFORM_URL}/api/public/sumit/post-payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: order.id,
-          paymentId: chargeResult.paymentId,
-          authNumber: chargeResult.authNumber,
-          documentId: chargeResult.documentId,
-          documentNumber: chargeResult.documentNumber,
-          documentDownloadURL: chargeResult.documentDownloadURL,
-        }),
-      });
-
-      setSuccess(true);
-      if (order.redirectUrl) {
-        setTimeout(() => { window.location.href = order.redirectUrl; }, 2000);
+      const outcome = body as PaymentOutcome;
+      if (outcome.status === "paid") {
+        setSuccess(true);
+        if (order.redirectUrl) {
+          setTimeout(() => { window.location.href = order.redirectUrl; }, 2000);
+        }
+      } else if (outcome.status === "declined") {
+        // Final; the claim was released server-side — a retry with a
+        // different card is safe. The card form stays mounted.
+        setPaymentErrorCode(outcome.code);
+        setPaymentProcessing(false);
+      } else {
+        // ambiguous — the claim is retained server-side; never auto-retry.
+        setUncertain(true);
+        setPaymentProcessing(false);
       }
-    } catch (err: any) {
-      setError(err.message || t.paymentError);
-      setLoading(false);
+    } catch (err) {
+      // A network failure while awaiting the charge outcome is exactly as
+      // uncertain as the client timeout below — the request may have
+      // reached the server and charged the card even though this browser
+      // never saw the response. Never presented as retryable.
+      console.error("[payment/execute] request failed:", err);
+      setUncertain(true);
+      setPaymentProcessing(false);
     }
   };
 
@@ -429,24 +554,26 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
     }
   };
 
-  // Main pay button handler (not a form submit — avoids nested form issues)
-  const handlePayClick = async () => {
+  // Creates the order and asks the gateway-blind payment engine what to do
+  // next. This has to happen before we know whether this tenant's gateway
+  // needs a card form (client_instrument) or sends the buyer to a hosted
+  // page (redirect) — so, unlike the old flow, order creation can no
+  // longer wait until a SUMIT-specific "Pay" click. Used both by the
+  // "Continue to Payment" button (requiresPayment) and directly by the
+  // "Place Order" button for free orders.
+  const handleContinue = async () => {
     setError(null);
+    setPaymentErrorCode(null);
 
     if (!firstName || !lastName || !email || !phone) {
       setError(lang === "he" ? "יש למלא את כל השדות החובה" : "Please fill in all required fields");
       return;
     }
     if (!termsAccepted) { setError(t.acceptTerms); return; }
-    if (requiresPayment && (!formBound || paymentLoading)) {
-      setError(lang === "he" ? "טופס התשלום עדיין נטען, נסו שוב" : "Payment form is still loading, please try again");
-      return;
-    }
 
     setLoading(true);
 
     try {
-      // 1. Create order
       const domain = new URL(SITE_URL).hostname;
       const res = await fetch(`${PLATFORM_URL}/api/public/payment-pages/${slug}/checkout`, {
         method: "POST",
@@ -481,7 +608,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
       const result = await res.json();
 
       if (!result.requiresPayment) {
-        // Free order — done immediately
+        // Free order (or a coupon that zeroed it out) — done immediately.
         setSuccess(true);
         if (result.redirectUrl) {
           setTimeout(() => { window.location.href = result.redirectUrl; }, 2000);
@@ -490,31 +617,118 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
         return;
       }
 
-      // 2. Store order for SUMIT callback, then trigger card tokenization
-      pendingOrderRef.current = { ...result.order, redirectUrl: result.redirectUrl };
-
-      if (!window.jQuery || !formRef.current) {
-        throw new Error("Payment form not ready. Please refresh the page.");
+      const token = typeof result.ownershipToken === "string" ? result.ownershipToken : null;
+      if (!token || !result.order?.id) {
+        // trySignOrderOwnershipToken() never blocks the checkout response
+        // on a signing failure — without a token we cannot start payment
+        // at all, so surface this immediately rather than let a later
+        // /payment/begin call fail with a more confusing "session
+        // expired" message.
+        setPaymentErrorCode("generic");
+        setLoading(false);
+        return;
       }
-      // SUMIT intercepts this submit, tokenizes the card, then calls handleTokenResponse
-      window.jQuery(formRef.current).trigger("submit");
 
-      // Safety timeout — handleTokenResponse or an error must clear loading
-      setTimeout(() => {
-        setLoading((cur) => {
-          if (cur) setError("Payment timed out. Please try again.");
-          return false;
-        });
-      }, 30000);
+      setOwnershipToken(token);
+      orderRef.current = { ...result.order, redirectUrl: result.redirectUrl };
+
+      const beginRes = await fetch(`${PLATFORM_URL}/api/public/orders/${result.order.id}/payment/begin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownershipToken: token }),
+      });
+      const beginBody = await beginRes.json().catch(() => ({}));
+
+      if (!beginRes.ok) {
+        setPaymentErrorCode(typeof beginBody.code === "string" ? beginBody.code : "generic");
+        setLoading(false);
+        return;
+      }
+
+      const nextInstruction = beginBody as PaymentInstruction;
+
+      if (nextInstruction.kind === "none") {
+        setSuccess(true);
+        if (result.redirectUrl) {
+          setTimeout(() => { window.location.href = result.redirectUrl; }, 2000);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // A client_instrument for a provider this buyer surface doesn't
+      // know how to mount (only "sumit" is implemented today) must not
+      // silently render a blank state — showCardForm below only matches
+      // provider "sumit", so anything else needs its own explicit error.
+      if (nextInstruction.kind === "client_instrument" && nextInstruction.provider !== "sumit") {
+        setPaymentErrorCode("unsupported_provider");
+        setLoading(false);
+        return;
+      }
+
+      setInstruction(nextInstruction);
+      setLoading(false);
+
+      // A "redirect" instruction (Green Invoice's hosted page) sends the
+      // buyer off this page entirely — rendered purely by
+      // instruction.kind, never a gateway name.
+      if (nextInstruction.kind === "redirect") {
+        window.location.href = nextInstruction.url;
+      }
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
       setLoading(false);
     }
   };
 
+  // SUMIT-specific "Pay" click — only ever shown once /payment/begin
+  // returned a client_instrument(sumit) instruction. Triggers the bound
+  // SUMIT form submit, which tokenizes the card and calls
+  // handleTokenResponse above.
+  const handlePayClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setError(null);
+    setPaymentErrorCode(null);
+    setPaymentProcessing(true);
+
+    if (!window.jQuery || !formRef.current) {
+      setPaymentErrorCode("form_not_ready");
+      setPaymentProcessing(false);
+      return;
+    }
+
+    window.jQuery(formRef.current).trigger("submit");
+
+    // Safety timeout — if the SUMIT SDK callback never fires, the charge
+    // outcome is genuinely UNKNOWN, not failed. Routes to the same
+    // do-not-retry "uncertain" state as a live ambiguous outcome — never
+    // "please try again", which would invite the double-charge the atomic
+    // claim exists to prevent.
+    setTimeout(() => {
+      setPaymentProcessing((current) => {
+        if (current) setUncertain(true);
+        return false;
+      });
+    }, 30000);
+  };
+
   const websiteUrl = typeof window !== "undefined"
     ? `${window.location.protocol}//${window.location.host}`
     : SITE_URL;
+
+  // Uncertain State — an ambiguous outcome or a client timeout: the charge
+  // may or may not have gone through. Deliberately no retry affordance and
+  // no automatic retry — a resubmit here could double-charge, which is
+  // exactly what the server-side atomic claim exists to prevent.
+  if (uncertain) {
+    return (
+      <div className="max-w-md mx-auto text-center space-y-4 flex flex-col items-center justify-center" style={{ minHeight: "60vh" }} dir={dir}>
+        <AlertTriangle className="h-20 w-20 text-amber-600 mx-auto" />
+        <h2 className="text-2xl font-semibold">{t.uncertainTitle}</h2>
+        <p className="text-muted-foreground">{t.uncertainBody}</p>
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -696,10 +910,10 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {error && (
+              {(error || paymentErrorCode) && (
                 <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
                   <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <p>{error}</p>
+                  <p>{error || paymentErrorLabel(lang, paymentErrorCode)}</p>
                 </div>
               )}
 
@@ -763,25 +977,42 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                 </div>
               )}
 
-              {/* SUMIT card fields — revealed after details are filled */}
-              {requiresPayment && !showPaymentFields && (
+              {/* Continue to Payment — creates the order and asks the
+                  gateway-blind payment engine what to do next. Shown only
+                  before we have an instruction; once /payment/begin
+                  responds this gives way to either the redirect notice or
+                  the SUMIT card form below. */}
+              {requiresPayment && !instruction && (
                 <Button
                   type="button"
                   className="w-full bg-gold hover:bg-gold-dark text-foreground font-semibold text-base h-12"
-                  onClick={() => {
-                    if (!firstName || !lastName || !email || !phone) {
-                      setError(lang === "he" ? "יש למלא את כל השדות החובה" : "Please fill in all required fields");
-                      return;
-                    }
-                    setError(null);
-                    setShowPaymentFields(true);
-                  }}
+                  onClick={handleContinue}
+                  disabled={loading}
                 >
-                  {lang === "he" ? "המשך לתשלום" : "Continue to Payment"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 me-2 animate-spin" />
+                      {t.processing}
+                    </>
+                  ) : (
+                    lang === "he" ? "המשך לתשלום" : "Continue to Payment"
+                  )}
                 </Button>
               )}
 
-              {requiresPayment && showPaymentFields && (
+              {/* Redirect instruction (Green Invoice's hosted page) — sends
+                  the buyer off this page entirely. Rendered purely by
+                  instruction.kind, never a gateway name. */}
+              {instruction?.kind === "redirect" && (
+                <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t.redirectingToPayment}
+                </div>
+              )}
+
+              {/* SUMIT card fields — only once /payment/begin returned a
+                  client_instrument(sumit) instruction. */}
+              {showCardForm && (
                 <>
                   <Separator />
                   <p className="text-sm font-medium flex items-center gap-2">
@@ -819,7 +1050,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                       </div>
 
                       {/* Expiry + CVV */}
-                      <div className={`grid gap-3 ${(sumitConfig?.showCVV ?? true) ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                      <div className={`grid gap-3 ${(sumitPublicConfig?.showCVV ?? true) ? 'grid-cols-3' : 'grid-cols-2'}`}>
                         <div className="space-y-1">
                           <Label>{t.expiryMonth}</Label>
                           <select
@@ -848,7 +1079,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                             })}
                           </select>
                         </div>
-                        {(sumitConfig?.showCVV ?? true) && (
+                        {(sumitPublicConfig?.showCVV ?? true) && (
                           <div className="space-y-1">
                             <Label>{t.cvv}</Label>
                             <input
@@ -857,7 +1088,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                               placeholder="123"
                               maxLength={4}
                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              required={sumitConfig?.requireCVV ?? false}
+                              required={sumitPublicConfig?.requireCVV ?? false}
                               autoComplete="cc-csc"
                               dir="ltr"
                             />
@@ -866,7 +1097,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                       </div>
 
                       {/* ID Number — controlled by showCitizenID setting */}
-                      {(sumitConfig?.showCitizenID ?? false) && (
+                      {(sumitPublicConfig?.showCitizenID ?? false) && (
                         <div className="space-y-1">
                           <Label>{t.idNumber}</Label>
                           <input
@@ -874,7 +1105,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                             data-og="citizenid"
                             maxLength={9}
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            required={sumitConfig?.requireCitizenID ?? false}
+                            required={sumitPublicConfig?.requireCitizenID ?? false}
                             autoComplete="off"
                             dir="ltr"
                           />
@@ -913,27 +1144,48 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                 </div>
               </div>
 
-              {/* Submit — only shown for free orders or after card fields are revealed */}
-              {(!requiresPayment || showPaymentFields) && <Button
-                type="button"
-                onClick={handlePayClick}
-                className="w-full bg-gold hover:bg-gold-dark text-foreground font-semibold text-base h-12"
-                disabled={loading || (requiresPayment && showPaymentFields && (!formBound || paymentLoading))}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                    {requiresPayment ? t.processingPayment : t.processing}
-                  </>
-                ) : requiresPayment ? (
-                  <>
-                    <Lock className="h-4 w-4 me-2" />
-                    {t.pay} {formatPrice(effectiveTotal, currency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}
-                  </>
-                ) : (
-                  t.placeOrder
-                )}
-              </Button>}
+              {/* Place Order — free orders only; requiresPayment orders use
+                  the "Continue to Payment" button above, which itself
+                  calls handleContinue. */}
+              {!requiresPayment && (
+                <Button
+                  type="button"
+                  onClick={handleContinue}
+                  className="w-full bg-gold hover:bg-gold-dark text-foreground font-semibold text-base h-12"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 me-2 animate-spin" />
+                      {t.processing}
+                    </>
+                  ) : (
+                    t.placeOrder
+                  )}
+                </Button>
+              )}
+
+              {/* Pay — only once the SUMIT card form is mounted and bound. */}
+              {showCardForm && (
+                <Button
+                  type="button"
+                  onClick={handlePayClick}
+                  className="w-full bg-gold hover:bg-gold-dark text-foreground font-semibold text-base h-12"
+                  disabled={paymentProcessing || paymentLoading || !formBound}
+                >
+                  {paymentProcessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 me-2 animate-spin" />
+                      {t.processingPayment}
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-4 w-4 me-2" />
+                      {t.pay} {formatPrice(effectiveTotal, currency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}
+                    </>
+                  )}
+                </Button>
+              )}
 
               <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
                 <Lock className="h-3 w-3" />
