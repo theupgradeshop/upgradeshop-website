@@ -269,7 +269,7 @@ try {
 } catch (error) {
   console.error('Database connection failed:', error)
   console.log('Make sure SSH tunnel is running:')
-  console.log('ssh -f -N -L 5433:localhost:5432 root@37.27.216.44')
+  console.log('ssh -f -N -L 5433:localhost:5432 root@<db-host>')
 }
 ```
 
@@ -279,7 +279,7 @@ try {
 
 ### "Connection refused" or "ECONNREFUSED"
 - SSH tunnel is not running
-- Run: `ssh -f -N -L 5433:localhost:5432 root@37.27.216.44`
+- Run: `ssh -f -N -L 5433:localhost:5432 root@<db-host>`
 
 ### "Customer not found"
 - Check the customer ID (UUID) is correct
@@ -304,7 +304,7 @@ const pool = new Pool({
   port: 5433,
   database: 'max',
   user: 'upgradeu_ops',
-  password: 'NlpTAmCRJbBGAxd+OWTsh9EH5RSuZHn0A8Y+9lAt9OU=',
+  password: process.env.DB_PASSWORD,
 })
 
 // Example: Get customer by ID

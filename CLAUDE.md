@@ -23,7 +23,7 @@ When the user gives you a **customer UUID**, follow these phases:
 Database access requires an SSH tunnel. Ask the user to run:
 
 ```bash
-ssh -f -N -L 5433:localhost:5432 root@37.27.216.44
+ssh -f -N -L 5433:localhost:5432 root@<db-host>
 ```
 
 **Check if already running:**
@@ -260,7 +260,7 @@ Take screenshots:
 
 **SSH Tunnel:**
 ```bash
-ssh -f -N -L 5433:localhost:5432 root@37.27.216.44
+ssh -f -N -L 5433:localhost:5432 root@<db-host>
 ```
 
 **Load Data:**

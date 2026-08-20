@@ -18,7 +18,7 @@ Build beautiful, unique marketing websites for clients using Claude Code + datab
 ### 1. Start SSH Tunnel (Required for Database Access)
 
 ```bash
-ssh -f -N -L 5433:localhost:5432 root@37.27.216.44
+ssh -f -N -L 5433:localhost:5432 root@<db-host>
 ```
 
 See [docs/ssh-tunnel-setup.md](docs/ssh-tunnel-setup.md) for troubleshooting.
@@ -90,7 +90,7 @@ Invoke a skill: `/skill unique-design-principles`
 ### SSH Tunnel (Required)
 
 ```bash
-ssh -f -N -L 5433:localhost:5432 root@37.27.216.44
+ssh -f -N -L 5433:localhost:5432 root@<db-host>
 ```
 
 ### Using the Node.js Loader
@@ -120,7 +120,7 @@ See [docs/database-access.md](docs/database-access.md) for complete reference.
 - **Port:** 5433
 - **Database:** max
 - **User:** upgradeu_ops
-- **Password:** NlpTAmCRJbBGAxd+OWTsh9EH5RSuZHn0A8Y+9lAt9OU=
+- **Password:** set via `DB_PASSWORD` env var
 
 ### Key Tables
 
@@ -229,7 +229,7 @@ See [CLAUDE.md](CLAUDE.md) for complete workflow and quality gates.
 ```
 Is SSH tunnel running?
 ```
-Start it: `ssh -f -N -L 5433:localhost:5432 root@37.27.216.44`
+Start it: `ssh -f -N -L 5433:localhost:5432 root@<db-host>`
 
 Check: [docs/ssh-tunnel-setup.md](docs/ssh-tunnel-setup.md)
 

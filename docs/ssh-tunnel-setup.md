@@ -9,14 +9,14 @@ The Max PostgreSQL database is hosted on a remote server. To access it from your
 Run this command before accessing the database:
 
 ```bash
-ssh -f -N -L 5433:localhost:5432 root@37.27.216.44
+ssh -f -N -L 5433:localhost:5432 root@<db-host>
 ```
 
 **What this does:**
 - **`-f`** - Runs in background
 - **`-N`** - Don't execute remote commands (just tunnel)
 - **`-L 5433:localhost:5432`** - Forward local port 5433 to remote port 5432
-- **`root@37.27.216.44`** - Remote server
+- **`root@<db-host>`** - Remote server
 
 ---
 
@@ -89,7 +89,7 @@ If the tunnel dies or you need to restart it:
 # (See "Stopping the Tunnel" above)
 
 # 2. Start a new tunnel
-ssh -f -N -L 5433:localhost:5432 root@37.27.216.44
+ssh -f -N -L 5433:localhost:5432 root@<db-host>
 ```
 
 ---
@@ -126,7 +126,7 @@ kill <process-id>
 
 **Solution:** Start the tunnel:
 ```bash
-ssh -f -N -L 5433:localhost:5432 root@37.27.216.44
+ssh -f -N -L 5433:localhost:5432 root@<db-host>
 ```
 
 ---
@@ -148,13 +148,13 @@ ssh -f -N -L 5433:localhost:5432 root@37.27.216.44
 
 **Solution:** Restart the tunnel:
 ```bash
-ssh -f -N -L 5433:localhost:5432 root@37.27.216.44
+ssh -f -N -L 5433:localhost:5432 root@<db-host>
 ```
 
 **To keep tunnel alive longer, use these options:**
 ```bash
 ssh -f -N -o ServerAliveInterval=60 -o ServerAliveCountMax=3 \
-  -L 5433:localhost:5432 root@37.27.216.44
+  -L 5433:localhost:5432 root@<db-host>
 ```
 
 ---
@@ -172,7 +172,7 @@ If you frequently restart your machine or the tunnel keeps dying, set up a persi
 
 # Run persistent tunnel
 autossh -M 0 -f -N -o "ServerAliveInterval 60" -o "ServerAliveCountMax 3" \
-  -L 5433:localhost:5432 root@37.27.216.44
+  -L 5433:localhost:5432 root@<db-host>
 ```
 
 ### Windows (using Task Scheduler)
@@ -181,7 +181,7 @@ autossh -M 0 -f -N -o "ServerAliveInterval 60" -o "ServerAliveCountMax 3" \
 ```batch
 @echo off
 ssh -f -N -o ServerAliveInterval=60 -o ServerAliveCountMax=3 \
-  -L 5433:localhost:5432 root@37.27.216.44
+  -L 5433:localhost:5432 root@<db-host>
 ```
 
 2. Open Task Scheduler
@@ -199,7 +199,7 @@ Host: localhost
 Port: 5433  (NOT 5432!)
 Database: max
 User: upgradeu_ops
-Password: NlpTAmCRJbBGAxd+OWTsh9EH5RSuZHn0A8Y+9lAt9OU=
+Password: <set via DB_PASSWORD env var>
 ```
 
 **Important:** Always use port **5433** (your local tunnel port), not 5432 (the remote server port).
@@ -222,7 +222,7 @@ const pool = new pg.Pool({
   port: 5433,
   database: 'max',
   user: 'upgradeu_ops',
-  password: 'NlpTAmCRJbBGAxd+OWTsh9EH5RSuZHn0A8Y+9lAt9OU='
+  password: process.env.DB_PASSWORD
 });
 pool.query('SELECT NOW()').then(res => {
   console.log('Connected! Server time:', res.rows[0].now);
