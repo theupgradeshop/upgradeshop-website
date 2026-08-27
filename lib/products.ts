@@ -81,7 +81,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     includes: [
       "Everything in Starter",
       "Full store module — catalog, inventory, variants, shipping",
-      "Tax automation & order management",
+      "Order management",
       "Abandoned cart recovery",
       "AI generates product pages from your catalog",
       "Higher base AI credit allocation",
