@@ -25,7 +25,13 @@ interface CheckoutRequestBody {
   }>;
   currency?: string; // Display currency (e.g., "ILS", "USD")
   display_total?: number; // Total in the display currency
+  language?: string; // Buyer's browsing locale — validated against SUPPORTED_LOCALES below
 }
+
+// Mirrors i18n/routing.ts's `locales` — kept as a literal list here rather than
+// importing routing.ts, since that config is next-intl-shaped and this route
+// only needs the raw set of valid values.
+const SUPPORTED_LOCALES = ["en", "he"];
 
 export async function POST(request: NextRequest) {
   const client = await pool.connect();
@@ -52,6 +58,9 @@ export async function POST(request: NextRequest) {
 
     await client.query("BEGIN");
 
+    const validatedLanguage =
+      body.language && SUPPORTED_LOCALES.includes(body.language) ? body.language : null;
+
     // Find or create contact for this buyer
     let contactId: string;
     const existingContact = await client.query(
@@ -64,12 +73,19 @@ export async function POST(request: NextRequest) {
     if (existingContact.rows.length > 0) {
       contactId = existingContact.rows[0].id;
       console.log("[Checkout API] Found existing contact:", contactId);
+      // Fill-only — never overwrite a language the contact already has.
+      if (validatedLanguage) {
+        await client.query(
+          `UPDATE crm.contacts SET language = $1 WHERE id = $2 AND language IS NULL`,
+          [validatedLanguage, contactId]
+        );
+      }
     } else {
       // Create new contact
       const newContact = await client.query(
         `INSERT INTO crm.contacts
-         (customer_id, email, first_name, last_name, phone, company, source, status, contact_type)
-         VALUES ($1, $2, $3, $4, $5, $6, 'checkout', 'active', 'customer')
+         (customer_id, email, first_name, last_name, phone, company, source, status, contact_type, language)
+         VALUES ($1, $2, $3, $4, $5, $6, 'checkout', 'active', 'customer', $7)
          RETURNING id`,
         [
           UPGRADESHOP_CUSTOMER_ID,
@@ -78,6 +94,7 @@ export async function POST(request: NextRequest) {
           body.buyer.last_name,
           body.buyer.phone || null,
           body.buyer.company || null,
+          validatedLanguage,
         ]
       );
       contactId = newContact.rows[0].id;
@@ -181,6 +198,7 @@ export async function POST(request: NextRequest) {
           country: body.buyer.country,
           company: body.buyer.company,
           awaitingPayment: true,
+          ...(validatedLanguage ? { language: validatedLanguage } : {}),
         }),
       ]
     );

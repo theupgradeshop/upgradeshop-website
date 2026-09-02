@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -82,6 +83,7 @@ const steps = [
 
 export function CheckoutForm() {
   const router = useRouter();
+  const locale = useLocale();
   const { items, total, clearCart } = useCart();
   const { getPriceDisplay, currency } = useCurrency();
   const [currentStep, setCurrentStep] = useState(0);
@@ -230,6 +232,7 @@ export function CheckoutForm() {
           }),
           currency,
           display_total: displayTotal,
+          language: locale,
         }),
       });
 
