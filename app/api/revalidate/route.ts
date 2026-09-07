@@ -15,8 +15,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { path, secret } = body;
 
-    // Validate the revalidation secret
-    if (secret !== process.env.REVALIDATE_SECRET) {
+    // Validate the revalidation secret. The header (`x-revalidate-secret`) is
+    // canonical — that's what the dashboard sends. The body's `secret` field
+    // is a transitional fallback for older dashboard call sites and should be
+    // removed once nothing depends on it.
+    const expectedSecret = process.env.REVALIDATE_SECRET;
+    const headerSecret = request.headers.get("x-revalidate-secret");
+    const secretIsValid =
+      !!expectedSecret && (headerSecret === expectedSecret || secret === expectedSecret);
+
+    if (!secretIsValid) {
       return NextResponse.json(
         { error: "Invalid revalidation secret" },
         { status: 401 }
