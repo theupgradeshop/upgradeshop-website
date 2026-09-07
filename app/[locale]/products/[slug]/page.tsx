@@ -3,16 +3,34 @@ import { notFound } from "next/navigation";
 import { fetchProductsFromDB } from "@/lib/db-products";
 import { enrichWithStaticData } from "@/lib/fetch-products";
 import { allProducts } from "@/lib/products";
-import { getAllProductSlugs, getProductContent } from "@/lib/product-content";
+import { getProductContent } from "@/lib/product-content";
 import ProductPageClient from "./product-page-client";
 import WebsiteProductPage from "./website-product-page";
 import AiAgentProductPage from "./ai-agent-product-page";
 
 export const revalidate = 60;
 
-export async function generateStaticParams() {
-  return getAllProductSlugs().map((slug) => ({ slug }));
-}
+// No generateStaticParams here, deliberately.
+//
+// It used to export one for [slug], which made Next attempt STATIC generation of
+// this route. It could never succeed: [locale] has no generateStaticParams, so no
+// concrete page was ever prerendered (the prerender-manifest listed this route
+// with zero pages). What it did instead was make every on-demand render run in a
+// static context — where app/[locale]/layout.tsx's getMessages() call, a
+// next-intl server API, needs request scope and throws.
+//
+// Result: EVERY slug returned 500 with digest DYNAMIC_SERVER_USAGE, including
+// slugs that should have 404'd, on staging AND production. Sibling routes
+// (/[locale], /[locale]/pricing) export no generateStaticParams, render
+// dynamically, and have always worked.
+//
+// Removing it costs nothing — the static generation it requested never happened —
+// and restores parity with those siblings.
+//
+// The fuller fix, if this route should genuinely be static one day, is the
+// documented next-intl setup: generateStaticParams for [locale] plus
+// setRequestLocale(locale) in the layout and in every page beneath it. That
+// touches every page on the site and is a separate piece of work.
 
 export async function generateMetadata({
   params,
