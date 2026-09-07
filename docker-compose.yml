@@ -6,6 +6,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # PRODUCTION values - this file is TRACKED and the production checkout
+      # (/var/www/upgradeshop.ai on the customer-websites prod box) builds from
+      # it. Read from production's own .env.production, not inferred. Staging
+      # overrides the two platform URLs in the gitignored override file.
+      args:
+        NEXT_PUBLIC_SITE_URL: https://upgradeshop.ai
+        NEXT_PUBLIC_SITE_DOMAIN: upgradeshop.ai
+        NEXT_PUBLIC_UPGRADESHOP_API_URL: https://app.upgradeshop.ai
+        NEXT_PUBLIC_PLATFORM_URL: https://app.upgradeshop.ai
     restart: unless-stopped
 
     ports:

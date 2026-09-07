@@ -40,3 +40,6 @@ NUL
 *.tsbuildinfo
 next-env.d.ts
 .env.production
+
+# Per-box build args (staging platform URLs); never commit - see docker-compose.yml
+docker-compose.override.yml

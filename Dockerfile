@@ -24,6 +24,35 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build application
+# Build-time configuration.
+#
+# The build inlines exactly these four NEXT_PUBLIC_* values. Everything else this
+# site reads - DB_HOST/PORT/NAME/USER/PASSWORD, DATABASE_URL, UPLOAD_API_KEY,
+# REVALIDATE_SECRET, AWS_*, GOOGLE_OAUTH_* - is read at RUNTIME and arrives via
+# `env_file:` at container start.
+#
+# The build does NOT query the database, which is why no credential is needed
+# here. Verified: the only generateStaticParams (app/[locale]/products/[slug])
+# returns getAllProductSlugs(), a static list from lib/product-content; the
+# [locale] segment has no generateStaticParams, so no locale route is
+# prerendered at all and every page body renders on demand.
+#
+# NEVER add a secret as a build arg: an arg promoted to ENV is stored in the
+# image config, which is the defect this change removes. In particular the
+# operations-DB password must not appear here - removing the baking does not
+# remove this site's direct DB dependency (BOARD 23), it only stops shipping
+# the credential inside the image.
+#
+# Every arg compose passes MUST have an ARG here or it is dropped SILENTLY.
+ARG NEXT_PUBLIC_SITE_URL
+ARG NEXT_PUBLIC_SITE_DOMAIN
+ARG NEXT_PUBLIC_UPGRADESHOP_API_URL
+ARG NEXT_PUBLIC_PLATFORM_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_DOMAIN=$NEXT_PUBLIC_SITE_DOMAIN
+ENV NEXT_PUBLIC_UPGRADESHOP_API_URL=$NEXT_PUBLIC_UPGRADESHOP_API_URL
+ENV NEXT_PUBLIC_PLATFORM_URL=$NEXT_PUBLIC_PLATFORM_URL
+
 RUN npm run build
 
 # Production image, copy all the files and run next

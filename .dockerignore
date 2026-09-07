@@ -1,4 +1,17 @@
-.env.local
-.env.development
+# Environment files - NEVER include in the Docker image.
+#
+# `COPY . .` baked /app/.env.production into an image layer carrying EIGHT
+# secret-shaped keys, including DB_PASSWORD and DATABASE_URL for the shared
+# operations database - the highest exposure measured on this box. Readable by
+# anyone who can pull the image and permanent in every historical layer.
+#
+# The build needs no env file: its four NEXT_PUBLIC_* values arrive as build args
+# and it does not query the database (no locale route is prerendered). Runtime
+# config, DB credentials included, arrives via `env_file:` at container start.
+#
+# This removes the credential from the IMAGE. It does not remove this site's
+# direct dependency on the operations DB (BOARD 23), which is a separate matter.
+.env*
+!.env.example
 node_modules
 .next
