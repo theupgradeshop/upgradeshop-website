@@ -38,7 +38,7 @@ const DB_CONFIG = {
   port: 5433, // SSH tunnel port
   database: 'max',
   user: 'upgradeu_ops',
-  password: 'NlpTAmCRJbBGAxd+OWTsh9EH5RSuZHn0A8Y+9lAt9OU=',
+  password: process.env.DB_PASSWORD || '',
 }
 
 // =============================================================================
