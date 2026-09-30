@@ -12,6 +12,8 @@
   },
   "waitlist": {
     "title": "Join the waitlist.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Name",
     "emailLabel": "Email",
     "emailPlaceholder": "you@business.com",
     "phoneLabel": "WhatsApp Number",
@@ -20,6 +22,7 @@
     "submit": "Save my spot",
     "submitting": "Joining...",
     "successTitle": "You're on the list.",
+    "successTitleNamed": "You're on the list, {name}.",
     "successMessage": "We'll be in touch on WhatsApp and email before we open. It's handled.",
     "errorGeneric": "Something went wrong. Please try again.",
     "errorDuplicate": "You're already on the waitlist!"

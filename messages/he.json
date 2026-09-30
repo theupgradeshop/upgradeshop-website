@@ -1,31 +1,34 @@
 {
   "meta": {
-    "title": "The Upgrade Shop",
-    "description": ""
+    "title": "The Upgrade Shop | העסק שלכם, משודרג.",
+    "description": "אתם עושים את מה שאתם אוהבים. אנחנו משדרגים את השאר. כל הצד הדיגיטלי של העסק שלכם, מהאתר ועד המכירות, נבנה, מתופעל ומשתפר כל הזמן, בידי אנשים אמיתיים ועוזר AI אישי משלכם."
   },
   "nav": {
-    "joinWaitlist": "Join the waitlist"
+    "joinWaitlist": "הצטרפו לרשימת ההמתנה"
   },
   "hero": {
-    "headline": "The Upgrade Shop",
-    "subheadline": ""
+    "headline": "אתם עושים את מה שאתם אוהבים. אנחנו משדרגים את השאר.",
+    "subheadline": "כל הצד הדיגיטלי של העסק שלכם, מהאתר ועד המכירות: אנשים אמיתיים ועוזר AI אישי משלכם בונים אותו, מתפעלים אותו וממשיכים לשפר אותו. צריכים משהו שעוד אין לנו? נבנה אותו."
   },
   "waitlist": {
-    "title": "Join the waitlist",
-    "emailLabel": "Email",
-    "emailPlaceholder": "you@business.com",
-    "phoneLabel": "WhatsApp Number",
-    "phonePlaceholder": "Phone number",
-    "countryCode": "Code",
-    "submit": "Join the waitlist",
-    "submitting": "Joining...",
-    "successTitle": "You're on the list!",
-    "successMessage": "We'll be in touch.",
-    "errorGeneric": "Something went wrong. Please try again.",
-    "errorDuplicate": "You're already on the waitlist!"
+    "title": "הצטרפו לרשימת ההמתנה.",
+    "nameLabel": "שם",
+    "namePlaceholder": "שם",
+    "emailLabel": "אימייל",
+    "emailPlaceholder": "אימייל",
+    "phoneLabel": "מספר וואטסאפ",
+    "phonePlaceholder": "מספר וואטסאפ",
+    "countryCode": "קידומת",
+    "submit": "שמרו לי מקום",
+    "submitting": "שומרים מקום...",
+    "successTitle": "נרשמת לרשימה.",
+    "successTitleNamed": "{name}, נרשמת לרשימה.",
+    "successMessage": "ניצור איתך קשר בוואטסאפ ובמייל לפני שנפתח. הכול מסודר.",
+    "errorGeneric": "משהו השתבש. נסו שוב.",
+    "errorDuplicate": "כבר נרשמתם לרשימת ההמתנה."
   },
   "footer": {
-    "tagline": "",
+    "tagline": "העסק שלכם, משודרג.",
     "copyright": "© {year} The Upgrade Shop. All rights reserved."
   }
 }

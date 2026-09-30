@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { splitName } from "@/lib/first-name";
 
 const PLATFORM_URL =
   process.env.NEXT_PUBLIC_PLATFORM_URL || "https://app.staging.upgradeshop.ai";
@@ -32,7 +33,10 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { email, phone, language } = body;
+    const { email, phone, language, name } = body;
+    const { firstName, lastName } = splitName(
+      typeof name === "string" ? name.slice(0, 120) : ""
+    );
 
     if (!email || !phone) {
       return NextResponse.json(
@@ -57,6 +61,8 @@ export async function POST(request: Request) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email,
+        ...(firstName ? { firstName } : {}),
+        ...(lastName ? { lastName } : {}),
         phone,
         wa_id: phone, // pre-built international number, bypass normalizeToWaId
         source: "waitlist",

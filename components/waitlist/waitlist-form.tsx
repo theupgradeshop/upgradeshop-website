@@ -9,9 +9,11 @@ import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib";
+import { firstName as getFirstName } from "@/lib/first-name";
 import { countries, getFlagEmoji } from "./country-data";
 
 const waitlistSchema = z.object({
+  name: z.string().optional(),
   email: z.email("Please enter a valid email"),
   countryCode: z.string().min(1, "Select a country"),
   phone: z.string().min(5, "Please enter your phone number"),
@@ -29,6 +31,7 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
   const locale = useLocale();
   const [isSuccess, setIsSuccess] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [submittedFirstName, setSubmittedFirstName] = useState("");
 
   const defaultCountryCode = locale === "he" ? countries.find(c => c.iso === "IL")?.dialCode ?? "" : "";
 
@@ -60,6 +63,7 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          name: (data.name ?? "").trim(),
           email: data.email,
           phone: waId,
           language: locale,
@@ -72,6 +76,7 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
         return;
       }
 
+      setSubmittedFirstName(getFirstName(data.name));
       setIsSuccess(true);
     } catch {
       setServerError(t("errorGeneric"));
@@ -92,7 +97,9 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
             isDark ? "text-primary-foreground" : "text-foreground"
           )}
         >
-          {t("successTitle")}
+          {submittedFirstName
+            ? t("successTitleNamed", { name: submittedFirstName })
+            : t("successTitle")}
         </h3>
         <p
           className={cn(
@@ -112,10 +119,29 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
       className={cn("w-full max-w-md mx-auto", className)}
     >
       <div className="flex flex-col gap-3">
+        {/* Name (optional) */}
+        <div>
+          <Input
+            type="text"
+            autoComplete="name"
+            placeholder={t("namePlaceholder")}
+            aria-label={t("nameLabel")}
+            className={cn(
+              "h-12 rounded-xl text-base",
+              isDark
+                ? "bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40"
+                : "bg-background border-border"
+            )}
+            {...register("name")}
+          />
+        </div>
+
         {/* Email */}
         <div>
           <Input
             type="email"
+            dir="ltr"
+            aria-label={t("emailLabel")}
             placeholder={t("emailPlaceholder")}
             className={cn(
               "h-12 rounded-xl text-base",
@@ -158,6 +184,8 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
           <div className="flex-1">
             <Input
               type="tel"
+              dir="ltr"
+              aria-label={t("phoneLabel")}
               placeholder={t("phonePlaceholder")}
               className={cn(
                 "h-12 rounded-xl text-base",
@@ -184,13 +212,13 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="me-2 h-4 w-4 animate-spin" />
               {t("submitting")}
             </>
           ) : (
             <>
               {t("submit")}
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="ms-2 h-5 w-5" />
             </>
           )}
         </Button>
