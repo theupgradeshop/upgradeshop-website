@@ -158,8 +158,7 @@ export default function TermsPage() {
             <p className="leading-relaxed mb-4">
               The Platform is offered on a subscription basis. Plans differ in
               the modules included, the level of managed-service involvement,
-              and the Action Points allowance. Current plans are described on
-              our pricing page and may include:
+              and the Action Points allowance. Plans may include:
             </p>
             <ul className="list-disc list-inside space-y-1 mb-4 ml-2">
               <li>
@@ -236,9 +235,8 @@ export default function TermsPage() {
               at least 30 days&rsquo; notice before a price change takes effect
               for existing subscriptions. Your continued use of the Platform
               after the effective date constitutes acceptance of the new price.
-              Founder Pricing and other locked-rate commitments made at
-              enrollment are honored for the duration specified at the time of
-              the commitment.
+              Locked-rate commitments made at enrollment are honored for the
+              duration specified at the time of the commitment.
             </p>
           </section>
 

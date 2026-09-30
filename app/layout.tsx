@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Newsreader, Anton } from "next/font/google";
 import "./globals.css";
 import { fetchWebsiteConfig } from "@/lib/analytics-api";
+import { SITE_URL } from "@/lib/site-url";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -20,18 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const websiteConfig = await fetchWebsiteConfig();
 
   return {
-    title: "The Upgrade Shop | Your Digital Foundation, Handled",
-    description:
-      "Professional digital infrastructure for small businesses. We build it for you, manage it for you, and keep improving it. Focus on what you do best — we handle the rest.",
-    keywords: [
-      "digital infrastructure",
-      "small business",
-      "website builder",
-      "CRM",
-      "email marketing",
-      "WhatsApp business",
-      "managed services",
-    ],
+    metadataBase: new URL(SITE_URL),
+    title: "The Upgrade Shop",
     verification: websiteConfig?.googleSiteVerification
       ? { google: websiteConfig.googleSiteVerification }
       : undefined,
@@ -41,10 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "/images/brand/logo/logo_webp/v2_icon_on_black_-_no_bg_-_favicon-tight.webp",
     },
     openGraph: {
-      title: "The Upgrade Shop | Your Digital Foundation, Handled",
-      description:
-        "Professional digital infrastructure for small businesses. Focus on what you do best — we handle the rest.",
-      url: "https://upgradeshop.ai",
+      title: "The Upgrade Shop",
       siteName: "The Upgrade Shop",
       type: "website",
     },
