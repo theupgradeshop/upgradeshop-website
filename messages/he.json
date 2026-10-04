@@ -25,7 +25,8 @@
     "successTitleNamed": "{name}, נרשמת לרשימה.",
     "successMessage": "ניצור איתך קשר בוואטסאפ ובמייל לפני שנפתח. הכול מסודר.",
     "errorGeneric": "משהו השתבש. נסו שוב.",
-    "errorDuplicate": "כבר נרשמת לרשימת ההמתנה."
+    "errorDuplicate": "כבר נרשמת לרשימת ההמתנה.",
+    "errorRateLimited": "יותר מדי ניסיונות. נסו שוב בעוד כמה דקות."
   },
   "footer": {
     "tagline": "העסק שלכם, משודרג.",

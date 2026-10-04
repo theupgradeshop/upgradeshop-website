@@ -25,7 +25,8 @@
     "successTitleNamed": "You're on the list, {name}.",
     "successMessage": "We'll be in touch on WhatsApp and email before we open. It's handled.",
     "errorGeneric": "Something went wrong. Please try again.",
-    "errorDuplicate": "You're already on the waitlist!"
+    "errorDuplicate": "You're already on the waitlist!",
+    "errorRateLimited": "Too many attempts. Please try again in a few minutes."
   },
   "footer": {
     "tagline": "Your business, upgraded.",

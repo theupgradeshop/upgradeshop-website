@@ -71,8 +71,15 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
       });
 
       if (!res.ok) {
+        // Never display server text (it is English): map status/code to translated lines.
         const err = await res.json().catch(() => ({}));
-        setServerError(err.error || t("errorGeneric"));
+        if (err?.code === "already_on_waitlist") {
+          setServerError(t("errorDuplicate"));
+        } else if (res.status === 429) {
+          setServerError(t("errorRateLimited"));
+        } else {
+          setServerError(t("errorGeneric"));
+        }
         return;
       }
 
