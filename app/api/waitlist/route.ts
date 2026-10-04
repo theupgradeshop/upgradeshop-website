@@ -82,13 +82,9 @@ export async function POST(request: Request) {
 
     const data = await res.json();
 
-    // Existing contact that did not just get the waitlist tag was already on the
-    // waitlist. An older dashboard sends no addedTags: keep the success response.
-    if (
-      data.created === false &&
-      Array.isArray(data.addedTags) &&
-      !data.addedTags.includes("waitlist")
-    ) {
+    // The dashboard says whether this contact already had the waitlist tag.
+    // An older dashboard sends no flag: keep the success response.
+    if (data.alreadyOnWaitlist === true) {
       return NextResponse.json(
         { error: "Already on the waitlist", code: "already_on_waitlist" },
         { status: 409 }

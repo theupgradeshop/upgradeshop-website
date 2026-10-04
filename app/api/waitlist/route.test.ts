@@ -34,27 +34,27 @@ afterEach(() => {
 
 describe("POST /api/waitlist", () => {
   it("returns success for a newly created contact", async () => {
-    mockDashboard({ contactId: "c1", created: true, upgraded: false, addedTags: ["waitlist"] });
+    mockDashboard({ contactId: "c1", created: true, upgraded: false, alreadyOnWaitlist: false });
     const res = await POST(makeRequest());
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ success: true, contactId: "c1", created: true });
   });
 
   it("returns success for an existing contact that just received the waitlist tag", async () => {
-    mockDashboard({ contactId: "c2", created: false, upgraded: false, addedTags: ["waitlist"] });
+    mockDashboard({ contactId: "c2", created: false, upgraded: false, alreadyOnWaitlist: false });
     const res = await POST(makeRequest());
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ success: true, created: false });
   });
 
   it("returns 409 already_on_waitlist for an existing contact that already had the tag", async () => {
-    mockDashboard({ contactId: "c3", created: false, upgraded: false, addedTags: [] });
+    mockDashboard({ contactId: "c3", created: false, upgraded: false, alreadyOnWaitlist: true });
     const res = await POST(makeRequest());
     expect(res.status).toBe(409);
     expect(await res.json()).toMatchObject({ code: "already_on_waitlist" });
   });
 
-  it("keeps success when an older dashboard sends no addedTags", async () => {
+  it("keeps success when an older dashboard sends no alreadyOnWaitlist", async () => {
     mockDashboard({ contactId: "c4", created: false, upgraded: false });
     const res = await POST(makeRequest());
     expect(res.status).toBe(200);
@@ -62,7 +62,7 @@ describe("POST /api/waitlist", () => {
   });
 
   it("returns 429 after 5 requests from one IP", async () => {
-    mockDashboard({ contactId: "c5", created: true, addedTags: ["waitlist"] });
+    mockDashboard({ contactId: "c5", created: true, alreadyOnWaitlist: false });
     const make = () =>
       new Request("https://staging.upgradeshop.ai/api/waitlist", {
         method: "POST",
