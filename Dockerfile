@@ -26,7 +26,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Build application
 # Build-time configuration.
 #
-# The build inlines exactly these four NEXT_PUBLIC_* values. Everything else this
+# The build inlines exactly these five NEXT_PUBLIC_* values (the fifth is staging-only). Everything else this
 # site reads - DB_HOST/PORT/NAME/USER/PASSWORD, DATABASE_URL, UPLOAD_API_KEY,
 # REVALIDATE_SECRET, AWS_*, GOOGLE_OAUTH_* - is read at RUNTIME and arrives via
 # `env_file:` at container start.
@@ -48,10 +48,13 @@ ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_SITE_DOMAIN
 ARG NEXT_PUBLIC_UPGRADESHOP_API_URL
 ARG NEXT_PUBLIC_PLATFORM_URL
+# Staging-only noindex flag: passed ONLY by the gitignored docker-compose.override.yml.
+ARG NEXT_PUBLIC_STAGING_REPLICA
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_SITE_DOMAIN=$NEXT_PUBLIC_SITE_DOMAIN
 ENV NEXT_PUBLIC_UPGRADESHOP_API_URL=$NEXT_PUBLIC_UPGRADESHOP_API_URL
 ENV NEXT_PUBLIC_PLATFORM_URL=$NEXT_PUBLIC_PLATFORM_URL
+ENV NEXT_PUBLIC_STAGING_REPLICA=$NEXT_PUBLIC_STAGING_REPLICA
 
 RUN npm run build
 

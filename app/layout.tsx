@@ -3,6 +3,7 @@ import { Newsreader, Anton } from "next/font/google";
 import "./globals.css";
 import { fetchWebsiteConfig } from "@/lib/analytics-api";
 import { SITE_URL } from "@/lib/site-url";
+import { getLayoutRobots } from "@/lib/staging-robots";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -23,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(SITE_URL),
     title: "The Upgrade Shop",
+    robots: getLayoutRobots(),
     verification: websiteConfig?.googleSiteVerification
       ? { google: websiteConfig.googleSiteVerification }
       : undefined,

@@ -1,8 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
+import { isStagingDeployment } from "./lib/staging-robots";
 
 const intlMiddleware = createMiddleware(routing);
+const STAGING = isStagingDeployment();
 
 // /pricing and the priced /products/* pages are retired while the site is a holding page
 // (2026-09-30); the new site brings /pricing back. Permanent 301 (next.config redirects
@@ -23,7 +25,7 @@ export default function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 301);
   }
   const response = intlMiddleware(request);
-  if (NOINDEX.test(request.nextUrl.pathname)) {
+  if (STAGING || NOINDEX.test(request.nextUrl.pathname)) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
   return response;
