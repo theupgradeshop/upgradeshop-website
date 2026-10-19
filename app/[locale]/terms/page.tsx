@@ -32,8 +32,8 @@ export default function TermsPage() {
         <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
           Terms of Use
         </h1>
-        <p className="text-foreground/60 mb-2">Effective date: October 18, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: October 18, 2026</p>
+        <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: October 19, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -217,10 +217,10 @@ export default function TermsPage() {
               All prices are in US dollars and exclude taxes. You pay any value added tax (VAT), sales tax, or similar tax that applies to your purchase. Current prices are on our <a href="https://upgradeshop.ai/pricing" className="underline">pricing page</a>.
             </p>
             <p className="leading-relaxed mb-4">
-              Subscriptions are billed in advance for each billing period until you cancel, and each payment covers the period it pays for. The setup fee is a one-time charge. You authorize us to charge your payment method on a recurring basis until you cancel. There is no long-term contract.
+              You can choose monthly or annual billing. Subscriptions are billed in advance for each billing period (a month or a year) until you cancel, and each payment covers the period it pays for. The setup fee is a one-time charge. You authorize us to charge your payment method on a recurring basis until you cancel. There is no commitment beyond the billing period you choose.
             </p>
             <p className="leading-relaxed mb-4">
-              Payments are processed by our payment provider. Our payment provider may act as the reseller of our service (the merchant of record). If it does, its own buyer terms also apply to your payment, and it may collect and account for tax on the sale.
+              Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders: it sells the service to you on our behalf, takes your payment, and collects and accounts for any tax on the sale. Paddle&rsquo;s buyer terms also apply to your payment. Accounts that started before we moved to Paddle may keep being billed by us through our previous payment provider until they move.
             </p>
             <p className="leading-relaxed">
               If a payment fails, we will tell you and try again. If a payment is still unpaid 14 days after it was due, we may pause the service (the team&rsquo;s work, your AI assistant, and sending) until it is paid. While the service is paused, your data stays safe and the exit package in Section 26 stays available to you.
@@ -236,7 +236,7 @@ export default function TermsPage() {
               7.1 Cancelling
             </h3>
             <p className="leading-relaxed mb-4">
-              You can cancel at any time, by asking your account manager or support, or from your account settings where that option is available. It is month to month, with no lock-in.
+              You can cancel at any time, by asking your account manager or support, or from your account settings where that option is available. There is no lock-in: you pay for one billing period at a time.
             </p>
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               7.2 Refunds
@@ -246,7 +246,7 @@ export default function TermsPage() {
                 <strong>Setup fee.</strong> The setup fee is never refundable. Work starts as soon as it is paid.
               </li>
               <li>
-                <strong>First payment.</strong> You can ask for a refund of your first subscription payment within 14 days of the first charge. A refund closes the account.
+                <strong>First payment.</strong> You can ask for a refund of your first subscription payment (a month or a year, depending on your billing) within 14 days of the first charge, through your account manager, our support, or Paddle at paddle.net. A refund closes the account.
               </li>
               <li>
                 <strong>After 14 days.</strong> Cancelling takes effect at the end of the billing period you have already paid for, and you keep the service until then. We do not give partial refunds for the rest of a period, unless the law requires it.
@@ -272,7 +272,7 @@ export default function TermsPage() {
               8. Founder Price and the Waitlist
             </h2>
             <p className="leading-relaxed mb-4">
-              Everyone who joined the waitlist before launch gets the Founder Price: 20% off the monthly price and 20% off the setup fee. It lasts for as long as you stay subscribed. A price change never touches it, and nothing ends it except cancelling. If you cancel and come back later, you pay the current full price.
+              Everyone who joined the waitlist before launch gets the Founder Price: 20% off the subscription price, monthly or annual, and 20% off the setup fee. It lasts for as long as you stay subscribed. A price change never touches it, and nothing ends it except cancelling. If you cancel and come back later, you pay the current full price.
             </p>
             <p className="leading-relaxed">
               When you join the waitlist, you give us your name, email address, and WhatsApp number. We use them to tell you about the launch and your Founder Price, as described in our <a href="/privacy-policy" className="underline">Privacy Policy</a>. You can ask us to stop at any time. Joining the waitlist does not oblige you to buy anything, and it does not guarantee a place or a date.
@@ -338,6 +338,9 @@ export default function TermsPage() {
               </li>
               <li>
                 The assistant operates within the boundaries of the Platform and is not a substitute for professional legal, financial, medical, or other regulated advice.
+              </li>
+              <li>
+                You can ask us to stop using a particular AI provider on your account, as described in our Privacy Policy (Section 8). Some tasks then run on other providers and may use more Action Points.
               </li>
               <li>
                 We may update, retrain, or modify the assistant&rsquo;s behavior at any time to improve accuracy, safety, or compliance.
