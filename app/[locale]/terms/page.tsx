@@ -243,7 +243,7 @@ export default function TermsPage() {
             </h3>
             <ul className="list-disc list-inside space-y-2 mb-4 ml-2">
               <li>
-                <strong>Setup fee.</strong> The setup fee is never refundable. Work starts as soon as it is paid.
+                <strong>Setup fee.</strong> You can ask for a refund of the setup fee within 14 days of paying it, as long as design work on your account has not started yet. Once design work has started, the setup fee is not refunded, because that work is being done for you.
               </li>
               <li>
                 <strong>First payment.</strong> You can ask for a refund of your first subscription payment (a month or a year, depending on your billing) within 14 days of the first charge, through your account manager, our support, or Paddle at paddle.net. A refund closes the account.
