@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: October 19, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: October 23, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -361,6 +361,10 @@ export default function PrivacyPage() {
               <li>Campaign open rates, click-through rates, and bounce data</li>
             </ul>
 
+            <p className="leading-relaxed mb-4">
+              <strong>Mail sent to your business&rsquo;s domain.</strong> If you turn on email forwarding, mail that people send to addresses on your domain is received by Amazon Web Services and forwarded to you. We keep the full message for 30 days and the sender&rsquo;s address for 30 days, so we can forward it and look into delivery problems, and then we delete them. We process this mail on your behalf, like the rest of the data in this section.
+            </p>
+
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               10.4 Website Visitors
             </h3>
@@ -465,7 +469,7 @@ export default function PrivacyPage() {
                   <tr><td className="py-2 pr-4">OpenAI</td><td className="py-2 pr-4">AI models (fallback, classification, memory embeddings)</td><td className="py-2">United States</td></tr>
                   <tr><td className="py-2 pr-4">DeepSeek</td><td className="py-2 pr-4">AI models for background tasks (classification, extraction, contact summaries, translation). You can ask us to stop using it on your account (Section 8)</td><td className="py-2">China</td></tr>
                   <tr><td className="py-2 pr-4">Google (Gemini)</td><td className="py-2 pr-4">AI models for document extraction, logo analysis, images, short labels</td><td className="py-2">United States</td></tr>
-                  <tr><td className="py-2 pr-4">Amazon Web Services (SES)</td><td className="py-2 pr-4">Email sending</td><td className="py-2">EU region</td></tr>
+                  <tr><td className="py-2 pr-4">Amazon Web Services (SES)</td><td className="py-2 pr-4">Email sending, and receiving and forwarding mail sent to your domain (SES, S3)</td><td className="py-2">EU region</td></tr>
                   <tr><td className="py-2 pr-4">Cloudflare</td><td className="py-2 pr-4">File and media storage (R2), DNS</td><td className="py-2">United States, global network</td></tr>
                   <tr><td className="py-2 pr-4">Bunny.net</td><td className="py-2 pr-4">Course video hosting and delivery</td><td className="py-2">Slovenia (EU), global network</td></tr>
                   <tr><td className="py-2 pr-4">Gumlet</td><td className="py-2 pr-4">Course video hosting (existing courses)</td><td className="py-2">India</td></tr>

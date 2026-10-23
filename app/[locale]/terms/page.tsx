@@ -33,7 +33,7 @@ export default function TermsPage() {
           Terms of Use
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: October 19, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: October 23, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -495,8 +495,14 @@ export default function TermsPage() {
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               17.3 What Stays Ours
             </h3>
-            <p className="leading-relaxed">
+            <p className="leading-relaxed mb-4">
               The Platform, including its software, interface, AI models, automation logic, templates, and all related documentation, and the code that connects a website to the Platform, belong to The Upgrade Shop and are protected by copyright, trade secret, and other applicable intellectual property laws. Features we build into the Platform, even when one customer asked for them, stay ours and may be offered to others. Nothing in these Terms grants you any ownership of or license in our intellectual property beyond the right to use the Service as described here.
+            </p>
+            <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              17.4 Ideas and Requests
+            </h3>
+            <p className="leading-relaxed">
+              When you share an idea, feedback or a request for a feature or a module, we may build it into the Platform for all our customers. We owe no payment or exclusivity for it, and building it does not make the feature yours. We decide what we build and when. Your Content stays yours, as described in Section 17.1.
             </p>
           </section>
 
