@@ -16,4 +16,13 @@ describe("formatQuoteAmount", () => {
   it("falls back to the number and code for an unknown currency", () => {
     expect(formatQuoteAmount(5, "??", "en")).toBe("5 ??");
   });
+  it("shows the bare number when the quote has no currency", () => {
+    expect(formatQuoteAmount(100, null, "en")).toBe("100");
+    expect(formatQuoteAmount(99.5, undefined, "en")).toBe("99.50");
+  });
+  it("uses the same fraction digits for every amount when told to", () => {
+    expect(formatQuoteAmount(100, "USD", "en", 2)).toBe("$100.00");
+    expect(formatQuoteAmount(99.5, "USD", "en", 2)).toBe("$99.50");
+    expect(formatQuoteAmount(100, "USD", "en", 0)).toBe("$100");
+  });
 });

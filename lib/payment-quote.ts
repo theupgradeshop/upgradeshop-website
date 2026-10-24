@@ -83,7 +83,7 @@ export interface PaymentQuote {
   coupon: QuoteCoupon | null;
   selections: { bundleSelections: BundleSelections };
   catalogue?: CatalogueBundle[];
-  /** Not in the contract yet (reported to the payments lane); read when the dashboard serves it. */
+  /** ISO 4217 code every amount is priced in: the page's own, else the account's, else null (never a guess). */
   currency?: string | null;
 }
 
@@ -369,4 +369,19 @@ export function summaryRows(quote: PaymentQuote): SummaryRow[] {
     rows.push({ key: `recurring-${r.billingCycle}`, type: "recurring", label: "recurring", amount: r.amount, billingCycle: r.billingCycle });
   }
   return rows;
+}
+
+/**
+ * The fraction digits every amount of one quote is shown with: 0 only when every amount the buyer can see (lines,
+ * totals, recurring, tiers and add-ons of the catalogue) is a whole number, else 2, so "$100" never sits beside "$99.50".
+ */
+export function quoteFractionDigitsOf(quote: PaymentQuote, catalogue: CatalogueBundle[] = quote.catalogue ?? []): 0 | 2 {
+  const amounts: number[] = [
+    quote.subtotal, quote.itemDiscount, quote.globalDiscount, quote.couponDiscount, quote.totalDiscount,
+    quote.extraTotal, quote.shippingAmount, quote.total,
+    ...quote.lines.flatMap((l) => [l.unitPrice, l.originalUnitPrice, l.lineTotal]),
+    ...quote.recurring.map((r) => r.amount),
+    ...catalogue.flatMap((b) => [...b.tiers.map((t) => t.price), ...b.addons.map((a) => a.price)]),
+  ];
+  return amounts.every((n) => Number.isInteger(n)) ? 0 : 2;
 }

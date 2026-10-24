@@ -9,6 +9,7 @@ import {
   buildCheckoutBody,
   interpretCheckoutFailure,
   summaryRows,
+  quoteFractionDigitsOf,
   selectionsMatch,
   selectionsKey,
   type PaymentQuote,
@@ -297,5 +298,24 @@ describe("interpretCheckoutFailure (409 quote_changed flow, quote_required, coup
   it("anything else is an error with the server's text or code", () => {
     expect(interpretCheckoutFailure(400, { error: "Nope", code: "x" })).toEqual({ kind: "error", code: "x", message: "Nope" });
     expect(interpretCheckoutFailure(500, null)).toEqual({ kind: "error", code: null, message: null });
+  });
+});
+
+describe("quoteFractionDigitsOf (one quote, one number of decimals)", () => {
+  it("is 0 only when every amount the buyer sees is whole", () => {
+    expect(quoteFractionDigitsOf(quote())).toBe(0);
+  });
+  it("is 2 as soon as any amount, even a catalogue tier, has cents", () => {
+    expect(quoteFractionDigitsOf(quote({ shippingAmount: 9.5 }))).toBe(2);
+    const q = quote();
+    expect(quoteFractionDigitsOf(q, [{ itemIndex: 0, productId: "p", lockedVariantId: null, defaultSelection: {}, addons: [{ id: "a", name: "A", price: 99.5, billingCycle: null }], tiers: [] }])).toBe(2);
+  });
+});
+
+describe("currencyOf on a quote page never guesses", () => {
+  it("returns the caller's fallback only when neither quote nor page names a currency", () => {
+    expect(currencyOf({ currency: null }, quote({ currency: null }), "")).toBe("");
+    expect(currencyOf({ currency: "EUR" }, quote({ currency: null }), "")).toBe("EUR");
+    expect(currencyOf({ currency: "EUR" }, quote({ currency: "USD" }), "")).toBe("USD");
   });
 });

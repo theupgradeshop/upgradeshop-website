@@ -157,18 +157,23 @@ export function formatPriceSimple(amount: number | string, currencyCode: string 
 /**
  * An amount from a payment-page quote, as money in the buyer's language. Intl places the currency symbol and the
  * minus sign for the locale (so a discount passed as a negative number reads correctly in Hebrew); a code Intl does
- * not know falls back to the number followed by the code.
+ * not know falls back to the number followed by the code, and no code at all shows the bare number. Pass
+ * `fractionDigits` (see quoteFractionDigitsOf) to give every amount of one quote the same number of decimals.
  */
-export function formatQuoteAmount(value: number, currencyCode: string, lang: string = "en"): string {
+export function formatQuoteAmount(
+  value: number,
+  currencyCode: string | null | undefined,
+  lang: string = "en",
+  fractionDigits?: 0 | 2
+): string {
   const locale = lang === "he" ? "he-IL" : "en-US";
+  const digits = fractionDigits ?? (Number.isInteger(value) ? 0 : 2);
+  const digitOptions = { minimumFractionDigits: digits, maximumFractionDigits: digits };
+  // A quote with no currency shows the bare number: never a guessed symbol.
+  if (!currencyCode) return new Intl.NumberFormat(locale, digitOptions).format(value);
   try {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: currencyCode.toUpperCase(),
-      minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+    return new Intl.NumberFormat(locale, { style: "currency", currency: currencyCode.toUpperCase(), ...digitOptions }).format(value);
   } catch {
-    return `${value.toLocaleString(locale)} ${currencyCode}`;
+    return `${value.toLocaleString(locale, digitOptions)} ${currencyCode}`;
   }
 }

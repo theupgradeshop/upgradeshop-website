@@ -34,6 +34,7 @@ import {
   type RequoteInput,
   type CatalogueBundle,
   type BundleSelections,
+  quoteFractionDigitsOf,
   type CouponReason,
 } from "@/lib/payment-quote";
 
@@ -316,6 +317,8 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
   const isRTL = lang === "he";
   const dir = isRTL ? "rtl" : "ltr";
   const legacyCurrency = paymentPage.currency || "ILS";
+  // A quote page never guesses a currency: the quote's, else the page's, else none (amounts show without a symbol).
+  const quoteCurrencyOf = (q: PaymentQuote): string | null => currencyOf(paymentPage, q, "") || null;
 
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -435,6 +438,8 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
   // Holds the created order (id/total/currency/redirectUrl) between
   // checkout and the SUMIT token callback / execute call.
   const orderRef = useRef<any>(null);
+  // The order a failed /payment/begin left behind, with what it was placed for (choices, total, buyer details).
+  const placedRef = useRef<{ key: string; total: number; token: string; order: any } | null>(null);
 
   // Renders the SUMIT card form purely by instruction.kind/provider, never
   // by a hardcoded gateway assumption — the only client_instrument gateway
@@ -510,6 +515,13 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
   const quotableEmail = isQuotableEmail(email) ? email.trim() : "";
   currentInputRef.current = { selections, couponCode: quoteCode, email: quotableEmail };
   const requoteKey = JSON.stringify([selectionsKey(selections), quoteCode, quotableEmail]);
+  // The "price updated" notice is about the choices the buyer had; changing any of them dismisses it.
+  // The key the door's own quote_changed answer put the choices at is not a buyer change and keeps the notice.
+  const noticeKeyRef = useRef<string>("");
+  useEffect(() => {
+    if (noticeKeyRef.current === requoteKey) return;
+    setPriceNotice(false);
+  }, [requoteKey]);
   useEffect(() => {
     if (!quoteActive || quoteLocked) return;
     if (!lastRequoteKeyRef.current) {
@@ -710,8 +722,9 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
     };
     return known[cycle] || t.perPeriod;
   };
-  const shownCurrency = quote ? currencyOf(paymentPage, quote, legacyCurrency) : legacyCurrency;
-  const money = (amount: number, cur: string = shownCurrency) => formatQuoteAmount(amount, cur, lang);
+  const shownCurrency: string | null = quote ? quoteCurrencyOf(quote) : legacyCurrency;
+  const quoteFractionDigits = quote ? quoteFractionDigitsOf(quote, catalogue) : undefined;
+  const money = (amount: number, cur: string | null = shownCurrency) => formatQuoteAmount(amount, cur, lang, quoteFractionDigits);
   // Pay is held while a price is being asked for, until the email is quoted for a coupon that needs it, and while
   // the chosen tier or add-ons differ from the ones the shown quote was priced with.
   const hold = quote
@@ -724,6 +737,60 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
         current: { couponCode: quoteCode, email: quotableEmail },
       })
     : null;
+
+  // Asks the gateway-blind engine what to do for a placed order. A failure here leaves a pending order behind: the
+  // quote is unlocked so the buyer can still change tier, add-ons or code, and an unchanged retry begins the SAME
+  // order again (the ownership token stays valid for repeated begins) instead of creating a second one.
+  const runBegin = async (order: any, token: string) => {
+    setOwnershipToken(token);
+    orderRef.current = order;
+
+    const beginRes = await fetch(`${PLATFORM_URL}/api/public/orders/${order.id}/payment/begin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ownershipToken: token }),
+    });
+    const beginBody = await beginRes.json().catch(() => ({}));
+
+    if (!beginRes.ok) {
+      setOwnershipToken(null);
+      setPaymentErrorCode(typeof beginBody.code === "string" ? beginBody.code : "generic");
+      setLoading(false);
+      return;
+    }
+
+    const nextInstruction = beginBody as PaymentInstruction;
+
+    if (nextInstruction.kind === "none") {
+      setSuccess(true);
+      if (order.redirectUrl) {
+        setTimeout(() => { window.location.href = order.redirectUrl; }, 2000);
+      }
+      setLoading(false);
+      return;
+    }
+
+    // A client_instrument for a provider this buyer surface doesn't
+    // know how to mount (only "sumit" is implemented today) must not
+    // silently render a blank state — showCardForm below only matches
+    // provider "sumit", so anything else needs its own explicit error.
+    if (nextInstruction.kind === "client_instrument" && nextInstruction.provider !== "sumit") {
+      setOwnershipToken(null);
+      setPaymentErrorCode("unsupported_provider");
+      setLoading(false);
+      return;
+    }
+
+    setInstruction(nextInstruction);
+    setLoading(false);
+
+    // A "redirect" instruction (Green Invoice's hosted page) sends the
+    // buyer off this page entirely — rendered purely by
+    // instruction.kind, never a gateway name.
+    if (nextInstruction.kind === "redirect") {
+      window.location.href = nextInstruction.url;
+    }
+  };
 
   // Creates the order and asks the gateway-blind payment engine what to do
   // next. This has to happen before we know whether this tenant's gateway
@@ -761,6 +828,13 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
           },
         }),
       };
+      const placedKey = JSON.stringify([requoteKey, customerData]);
+      const placed = placedRef.current;
+      if (quote !== null && placed && placed.key === placedKey && placed.total === quote.total) {
+        await runBegin(placed.order, placed.token);
+        return;
+      }
+      placedRef.current = null;
       const checkoutBody =
         quote !== null
           ? buildCheckoutBody({ domain, customerData, viewId, language: lang, quote, quotedInput: quotedInputRef.current })
@@ -784,6 +858,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
           setQuote(failure.quote);
           setSelections(failure.quote.selections.bundleSelections);
           setRequoteFailed(false);
+          noticeKeyRef.current = JSON.stringify([selectionsKey(failure.quote.selections.bundleSelections), quoteCode, quotableEmail]);
           setPriceNotice(true);
           setLoading(false);
           return;
@@ -833,52 +908,10 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
         return;
       }
 
-      setOwnershipToken(token);
-      orderRef.current = { ...result.order, redirectUrl: result.redirectUrl };
-
-      const beginRes = await fetch(`${PLATFORM_URL}/api/public/orders/${result.order.id}/payment/begin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ownershipToken: token }),
-      });
-      const beginBody = await beginRes.json().catch(() => ({}));
-
-      if (!beginRes.ok) {
-        setPaymentErrorCode(typeof beginBody.code === "string" ? beginBody.code : "generic");
-        setLoading(false);
-        return;
+      if (quote !== null) {
+        placedRef.current = { key: placedKey, total: quote.total, token, order: { ...result.order, redirectUrl: result.redirectUrl } };
       }
-
-      const nextInstruction = beginBody as PaymentInstruction;
-
-      if (nextInstruction.kind === "none") {
-        setSuccess(true);
-        if (result.redirectUrl) {
-          setTimeout(() => { window.location.href = result.redirectUrl; }, 2000);
-        }
-        setLoading(false);
-        return;
-      }
-
-      // A client_instrument for a provider this buyer surface doesn't
-      // know how to mount (only "sumit" is implemented today) must not
-      // silently render a blank state — showCardForm below only matches
-      // provider "sumit", so anything else needs its own explicit error.
-      if (nextInstruction.kind === "client_instrument" && nextInstruction.provider !== "sumit") {
-        setPaymentErrorCode("unsupported_provider");
-        setLoading(false);
-        return;
-      }
-
-      setInstruction(nextInstruction);
-      setLoading(false);
-
-      // A "redirect" instruction (Green Invoice's hosted page) sends the
-      // buyer off this page entirely — rendered purely by
-      // instruction.kind, never a gateway name.
-      if (nextInstruction.kind === "redirect") {
-        window.location.href = nextInstruction.url;
-      }
+      await runBegin({ ...result.order, redirectUrl: result.redirectUrl }, token);
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
       setLoading(false);
@@ -1080,7 +1113,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
                       type="button"
                       variant="outline"
                       size="sm"
-                      disabled={quoteLocked || !couponInput.trim()}
+                      disabled={quoteLocked}
                       onClick={() => setQuoteCode(couponInput.trim())}
                       className="shrink-0"
                     >
