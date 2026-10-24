@@ -414,7 +414,6 @@ const BEGIN_NOTHING_STARTED_NEW_ORDER = new Set([
   "amount_mismatch",
   "currency_mismatch",
   "free_completion_needs_card",
-  "order_not_capturable",
   "trial_needs_card_gateway",
   "trial_needs_business_contact",
   "trial_ended",
@@ -423,8 +422,8 @@ const BEGIN_NOTHING_STARTED_NEW_ORDER = new Set([
 
 /**
  * What the page does with its quote lock and placed order after /payment/begin failed. A session may exist or the order
- * may already be paid for payment_confirming, payment_paid_not_applied, payment_begin_ambiguous, order_not_chargeable and
- * payment_session_used; for those, a network error (no code) and any code not listed the lock and the order stay, so the
+ * may already be paid for payment_confirming, payment_paid_not_applied, payment_begin_ambiguous, order_not_chargeable,
+ * payment_session_used and order_not_capturable (a completed capture may not have been applied); for those, a network error (no code) and any code not listed the lock and the order stay, so the
  * buyer can only retry the same order or reload, never place a second one.
  */
 export function beginFailureHandling(code: string | null | undefined): BeginFailureHandling {

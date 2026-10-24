@@ -325,10 +325,10 @@ describe("beginFailureHandling (what /payment/begin failures do to the lock and 
   const sameOrder = ["rate_limited", "gateway_unreachable", "internal_error", "no_gateway_connected", "gateway_misconfigured", "unknown_gateway", "unsupported_provider"];
   const newOrder = [
     "invalid_request", "invalid_ownership_token", "order_not_found", "module_disabled", "invalid_redirect_url",
-    "amount_mismatch", "currency_mismatch", "free_completion_needs_card", "order_not_capturable",
+    "amount_mismatch", "currency_mismatch", "free_completion_needs_card",
     "trial_needs_card_gateway", "trial_needs_business_contact", "trial_ended", "plan_trial_invalid_shape",
   ];
-  const mayBePaid = ["payment_confirming", "payment_paid_not_applied", "payment_begin_ambiguous", "order_not_chargeable", "payment_session_used"];
+  const mayBePaid = ["payment_confirming", "payment_paid_not_applied", "payment_begin_ambiguous", "order_not_chargeable", "payment_session_used", "order_not_capturable"];
   for (const code of sameOrder) {
     it(`${code}: nothing started, unlock and retry the same order`, () => {
       expect(beginFailureHandling(code)).toEqual({ unlock: true, keepOrder: true });
