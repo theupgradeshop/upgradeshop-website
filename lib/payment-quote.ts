@@ -397,7 +397,6 @@ export interface BeginFailureHandling {
 const BEGIN_NOTHING_STARTED_RETRY_SAME_ORDER = new Set([
   "rate_limited",
   "gateway_unreachable",
-  "internal_error",
   "no_gateway_connected",
   "gateway_misconfigured",
   "unknown_gateway",
@@ -423,11 +422,35 @@ const BEGIN_NOTHING_STARTED_NEW_ORDER = new Set([
 /**
  * What the page does with its quote lock and placed order after /payment/begin failed. A session may exist or the order
  * may already be paid for payment_confirming, payment_paid_not_applied, payment_begin_ambiguous, order_not_chargeable,
- * payment_session_used and order_not_capturable (a completed capture may not have been applied); for those, a network error (no code) and any code not listed the lock and the order stay, so the
+ * payment_session_used, order_not_capturable (a completed capture may not have been applied) and internal_error (a
+ * gateway can throw after its form may exist); for those, a network error (no code) and any code not listed the lock and the order stay, so the
  * buyer can only retry the same order or reload, never place a second one.
  */
-export function beginFailureHandling(code: string | null | undefined): BeginFailureHandling {
+export function beginFailureHandling(
+  code: string | null | undefined,
+  opts: { holdingOrder?: boolean } = {}
+): BeginFailureHandling {
+  // A token refusal on an order an earlier answer left possibly begun or paid is not proof that nothing exists.
+  if (opts.holdingOrder && code === "invalid_ownership_token") return { unlock: false, keepOrder: true };
   if (code && BEGIN_NOTHING_STARTED_RETRY_SAME_ORDER.has(code)) return { unlock: true, keepOrder: true };
   if (code && BEGIN_NOTHING_STARTED_NEW_ORDER.has(code)) return { unlock: true, keepOrder: false };
   return { unlock: false, keepOrder: true };
+}
+
+export type OrderAction = "reuse_held" | "reuse_placed" | "new_order";
+
+/**
+ * Which order a checkout click works on. An order held by a keep-lock begin failure is always begun again, whatever the
+ * buyer has edited since (it may be paid, and a second order beside it must never be placed). Otherwise an order a
+ * failed begin left behind is reused only when the choices, buyer details and total are those it was placed for.
+ */
+export function chooseOrderAction(state: {
+  held: boolean;
+  placed: { key: string; total: number } | null;
+  key: string;
+  total: number | null;
+}): OrderAction {
+  if (state.held) return "reuse_held";
+  if (state.placed && state.total !== null && state.placed.key === state.key && state.placed.total === state.total) return "reuse_placed";
+  return "new_order";
 }

@@ -36,6 +36,7 @@ import {
   type BundleSelections,
   quoteFractionDigitsOf,
   beginFailureHandling,
+  chooseOrderAction,
   type CouponReason,
 } from "@/lib/payment-quote";
 
@@ -132,6 +133,7 @@ const translations: Record<string, Record<string, string>> = {
     selectionsHeld: "Please wait for the price to update before paying.",
     enterEmailToPay: "Enter your email so we can confirm your final price.",
     pricingErrorFallback: "This page could not be priced. Please refresh the page and try again.",
+    orderHeldHint: "Your details are locked while we confirm this order. You can try again, or reload the page or contact us.",
   },
   he: {
     checkout: "תשלום",
@@ -221,6 +223,7 @@ const translations: Record<string, Record<string, string>> = {
     selectionsHeld: "נא להמתין לעדכון המחיר לפני התשלום.",
     enterEmailToPay: "הזינו אימייל כדי שנאשר את המחיר הסופי.",
     pricingErrorFallback: "לא ניתן לחשב את המחיר של הדף. נא לרענן את הדף ולנסות שוב.",
+    orderHeldHint: "הפרטים נעולים בזמן שאנו מאשרים את ההזמנה. אפשר לנסות שוב, לרענן את הדף או ליצור איתנו קשר.",
   },
 };
 
@@ -447,6 +450,10 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
   const orderRef = useRef<any>(null);
   // The order a failed /payment/begin left behind, with what it was placed for (choices, total, buyer details).
   const placedRef = useRef<{ key: string; total: number; token: string; order: any } | null>(null);
+  // The order a begin failure that may have started or taken payment is holding: every later click begins THIS order
+  // again, whatever the buyer edits (state mirror: the buyer's details are disabled while it is held).
+  const heldRef = useRef<{ token: string; order: any } | null>(null);
+  const [orderHeld, setOrderHeld] = useState(false);
 
   // Renders the SUMIT card form purely by instruction.kind/provider, never
   // by a hardcoded gateway assumption — the only client_instrument gateway
@@ -755,9 +762,11 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
     // A begin that may have started a session or been paid keeps the lock and the order (beginFailureHandling): the
     // buyer can only retry the same order or reload. A thrown fetch is such a case.
     const failBegin = (code: string | null) => {
-      const handling = beginFailureHandling(code);
+      const handling = beginFailureHandling(code, { holdingOrder: heldRef.current !== null });
       if (handling.unlock) setOwnershipToken(null);
       if (!handling.keepOrder) placedRef.current = null;
+      heldRef.current = handling.unlock ? null : { token, order };
+      setOrderHeld(!handling.unlock);
       setPaymentErrorCode(code ?? "network_error");
       setLoading(false);
     };
@@ -782,6 +791,8 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
     }
 
     const nextInstruction = beginBody as PaymentInstruction;
+    heldRef.current = null;
+    setOrderHeld(false);
 
     if (nextInstruction.kind === "none") {
       setSuccess(true);
@@ -832,6 +843,11 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
     setLoading(true);
 
     try {
+      const held = heldRef.current;
+      if (held) {
+        await runBegin(held.order, held.token);
+        return;
+      }
       const domain = new URL(SITE_URL).hostname;
       const customerData = {
         firstName,
@@ -850,7 +866,8 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
       };
       const placedKey = JSON.stringify([requoteKey, customerData]);
       const placed = placedRef.current;
-      if (quote !== null && placed && placed.key === placedKey && placed.total === quote.total) {
+      const action = chooseOrderAction({ held: false, placed, key: placedKey, total: quote ? quote.total : null });
+      if (action === "reuse_placed" && placed) {
         await runBegin(placed.order, placed.token);
         return;
       }
@@ -1385,32 +1402,34 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
                 </div>
               )}
 
+              {orderHeld && <p className="text-xs text-muted-foreground">{t.orderHeldHint}</p>}
+
               {/* Customer details */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">{t.firstName} *</Label>
-                  <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                  <Input id="firstName" disabled={orderHeld} value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">{t.lastName} *</Label>
-                  <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                  <Input id="lastName" disabled={orderHeld} value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="email">{t.email} *</Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <Input id="email" disabled={orderHeld} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">{t.phone} *</Label>
-                  <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                  <Input id="phone" disabled={orderHeld} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="company">{t.company}</Label>
-                <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder={t.companyPlaceholder} />
+                <Input id="company" disabled={orderHeld} value={company} onChange={(e) => setCompany(e.target.value)} placeholder={t.companyPlaceholder} />
               </div>
 
               <button
@@ -1426,21 +1445,21 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
                 <div className="space-y-3 pt-1 border-t border-dashed">
                   <div className="space-y-2">
                     <Label htmlFor="addressLine1">{t.address}</Label>
-                    <Input id="addressLine1" value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder={t.streetPlaceholder} />
+                    <Input id="addressLine1" disabled={orderHeld} value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder={t.streetPlaceholder} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="city">{t.city}</Label>
-                      <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} />
+                      <Input id="city" disabled={orderHeld} value={city} onChange={(e) => setCity(e.target.value)} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="postalCode">{t.postalCode}</Label>
-                      <Input id="postalCode" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />
+                      <Input id="postalCode" disabled={orderHeld} value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="country">{t.country}</Label>
-                    <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} />
+                    <Input id="country" disabled={orderHeld} value={country} onChange={(e) => setCountry(e.target.value)} />
                   </div>
                 </div>
               )}

@@ -11,6 +11,7 @@ import {
   summaryRows,
   quoteFractionDigitsOf,
   beginFailureHandling,
+  chooseOrderAction,
   selectionsMatch,
   selectionsKey,
   type PaymentQuote,
@@ -322,13 +323,13 @@ describe("currencyOf on a quote page never guesses", () => {
 });
 
 describe("beginFailureHandling (what /payment/begin failures do to the lock and the placed order)", () => {
-  const sameOrder = ["rate_limited", "gateway_unreachable", "internal_error", "no_gateway_connected", "gateway_misconfigured", "unknown_gateway", "unsupported_provider"];
+  const sameOrder = ["rate_limited", "gateway_unreachable", "no_gateway_connected", "gateway_misconfigured", "unknown_gateway", "unsupported_provider"];
   const newOrder = [
     "invalid_request", "invalid_ownership_token", "order_not_found", "module_disabled", "invalid_redirect_url",
     "amount_mismatch", "currency_mismatch", "free_completion_needs_card",
     "trial_needs_card_gateway", "trial_needs_business_contact", "trial_ended", "plan_trial_invalid_shape",
   ];
-  const mayBePaid = ["payment_confirming", "payment_paid_not_applied", "payment_begin_ambiguous", "order_not_chargeable", "payment_session_used", "order_not_capturable"];
+  const mayBePaid = ["payment_confirming", "payment_paid_not_applied", "payment_begin_ambiguous", "order_not_chargeable", "payment_session_used", "order_not_capturable", "internal_error"];
   for (const code of sameOrder) {
     it(`${code}: nothing started, unlock and retry the same order`, () => {
       expect(beginFailureHandling(code)).toEqual({ unlock: true, keepOrder: true });
@@ -348,5 +349,32 @@ describe("beginFailureHandling (what /payment/begin failures do to the lock and 
     expect(beginFailureHandling(null)).toEqual({ unlock: false, keepOrder: true });
     expect(beginFailureHandling(undefined)).toEqual({ unlock: false, keepOrder: true });
     expect(beginFailureHandling("something_new")).toEqual({ unlock: false, keepOrder: true });
+  });
+});
+
+describe("beginFailureHandling with a held order", () => {
+  it("invalid_ownership_token keeps the lock and the order while an order is held, drops it otherwise", () => {
+    expect(beginFailureHandling("invalid_ownership_token", { holdingOrder: true })).toEqual({ unlock: false, keepOrder: true });
+    expect(beginFailureHandling("invalid_ownership_token")).toEqual({ unlock: true, keepOrder: false });
+  });
+  it("other codes classify the same held or not", () => {
+    expect(beginFailureHandling("gateway_unreachable", { holdingOrder: true })).toEqual({ unlock: true, keepOrder: true });
+  });
+});
+
+describe("chooseOrderAction", () => {
+  const placed = { key: "k", total: 100 };
+  it("a held order is always begun again, even after buyer edits and on a quote-less page", () => {
+    expect(chooseOrderAction({ held: true, placed: null, key: "other", total: null })).toBe("reuse_held");
+    expect(chooseOrderAction({ held: true, placed, key: "other", total: 5 })).toBe("reuse_held");
+  });
+  it("a placed order is reused only for the same key and total", () => {
+    expect(chooseOrderAction({ held: false, placed, key: "k", total: 100 })).toBe("reuse_placed");
+    expect(chooseOrderAction({ held: false, placed, key: "k2", total: 100 })).toBe("new_order");
+    expect(chooseOrderAction({ held: false, placed, key: "k", total: 90 })).toBe("new_order");
+  });
+  it("no order, or no quote total, places a new order", () => {
+    expect(chooseOrderAction({ held: false, placed: null, key: "k", total: 100 })).toBe("new_order");
+    expect(chooseOrderAction({ held: false, placed, key: "k", total: null })).toBe("new_order");
   });
 });
