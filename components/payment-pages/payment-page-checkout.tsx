@@ -19,7 +19,23 @@ import {
   CreditCard,
   Lock,
 } from "lucide-react";
-import { formatPriceSimple as formatPrice } from "@/lib/currency";
+import { formatPriceSimple as formatPrice, formatQuoteAmount } from "@/lib/currency";
+import {
+  quoteModeOf,
+  currencyOf,
+  isQuotableEmail,
+  selectionsKey,
+  createRequoter,
+  payHold,
+  buildCheckoutBody,
+  interpretCheckoutFailure,
+  summaryRows,
+  type PaymentQuote,
+  type RequoteInput,
+  type CatalogueBundle,
+  type BundleSelections,
+  type CouponReason,
+} from "@/lib/payment-quote";
 
 
 const PLATFORM_URL = process.env.NEXT_PUBLIC_UPGRADESHOP_API_URL || "https://app.staging.upgradeshop.ai";
@@ -84,6 +100,36 @@ const translations: Record<string, Record<string, string>> = {
     uncertainTitle: "Your payment is being confirmed",
     uncertainBody:
       "Please don't pay again or refresh this page. We'll confirm your order shortly and email you a receipt. If you don't hear from us within a few hours, please contact us instead of trying again.",
+    unavailableTitle: "This payment page is unavailable",
+    unavailableBody: "This page cannot be priced right now. Please contact us.",
+    chooseOption: "Choose an option",
+    addOns: "Add-ons",
+    couponCode: "Coupon code",
+    couponApplied: "Coupon applied",
+    couponPendingEmail: "Enter your email to apply your coupon",
+    couponDropped: "The page's coupon could not be applied",
+    couponRefused: "This code was not applied",
+    reason_not_valid: "This code is not valid.",
+    reason_not_for_this_purchase: "This code does not apply to this purchase.",
+    reason_not_for_this_email: "This code cannot be used with this email.",
+    reason_limit_reached: "This code has reached its usage limit.",
+    reason_minimum_not_met: "This purchase is below the minimum for this code.",
+    reason_maximum_exceeded: "This purchase is above the maximum for this code.",
+    itemDiscount: "Item discount",
+    globalDiscount: "Discount",
+    couponDiscount: "Coupon discount",
+    shipping: "Shipping",
+    recurringLabel: "Then",
+    perWeek: "/wk",
+    perDay: "/day",
+    perPeriod: "/billing period",
+    updatingPrice: "Updating price...",
+    requoteFailed: "We could not refresh the price. The price shown is the last one we have.",
+    retry: "Try again",
+    priceUpdated: "The price has changed. Please review the new total and confirm again.",
+    selectionsHeld: "Please wait for the price to update before paying.",
+    enterEmailToPay: "Enter your email so we can confirm your final price.",
+    pricingErrorFallback: "This page could not be priced. Please refresh the page and try again.",
   },
   he: {
     checkout: "תשלום",
@@ -143,6 +189,36 @@ const translations: Record<string, Record<string, string>> = {
     uncertainTitle: "התשלום שלכם בבדיקה",
     uncertainBody:
       "נא לא לשלם שוב ולא לרענן את הדף. נאשר את ההזמנה בקרוב ונשלח קבלה במייל. אם לא תקבלו עדכון תוך מספר שעות, אנא צרו קשר איתנו במקום לנסות שוב.",
+    unavailableTitle: "דף התשלום אינו זמין",
+    unavailableBody: "לא ניתן לחשב את המחיר של הדף כרגע. אנא צרו קשר.",
+    chooseOption: "בחרו אפשרות",
+    addOns: "תוספות",
+    couponCode: "קוד קופון",
+    couponApplied: "הקופון הופעל",
+    couponPendingEmail: "הזינו אימייל כדי להפעיל את הקופון",
+    couponDropped: "קופון הדף לא הופעל",
+    couponRefused: "הקוד לא הופעל",
+    reason_not_valid: "הקוד אינו תקף.",
+    reason_not_for_this_purchase: "הקוד אינו חל על רכישה זו.",
+    reason_not_for_this_email: "לא ניתן להשתמש בקוד עם אימייל זה.",
+    reason_limit_reached: "הקוד הגיע למגבלת השימוש.",
+    reason_minimum_not_met: "הרכישה נמוכה מהמינימום הנדרש לקוד.",
+    reason_maximum_exceeded: "הרכישה גבוהה מהמקסימום המותר לקוד.",
+    itemDiscount: "הנחת פריט",
+    globalDiscount: "הנחה",
+    couponDiscount: "הנחת קופון",
+    shipping: "משלוח",
+    recurringLabel: "לאחר מכן",
+    perWeek: "/שבוע",
+    perDay: "/יום",
+    perPeriod: "/תקופת חיוב",
+    updatingPrice: "מעדכן מחיר...",
+    requoteFailed: "לא הצלחנו לרענן את המחיר. המחיר המוצג הוא האחרון שיש לנו.",
+    retry: "נסו שוב",
+    priceUpdated: "המחיר השתנה. נא לבדוק את הסכום החדש ולאשר שוב.",
+    selectionsHeld: "נא להמתין לעדכון המחיר לפני התשלום.",
+    enterEmailToPay: "הזינו אימייל כדי שנאשר את המחיר הסופי.",
+    pricingErrorFallback: "לא ניתן לחשב את המחיר של הדף. נא לרענן את הדף ולנסות שוב.",
   },
 };
 
@@ -230,15 +306,16 @@ function paymentErrorLabel(lang: string, code: string | null): string {
 interface PaymentPageCheckoutProps {
   paymentPage: any;
   slug: string;
+  /** The route's locale; the page's own language wins when the page names one. */
+  locale?: string;
 }
 
-export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutProps) {
-  const lang = paymentPage.language || "en";
+export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCheckoutProps) {
+  const lang = paymentPage.language || locale || "en";
   const t = translations[lang] || translations.en;
   const isRTL = lang === "he";
   const dir = isRTL ? "rtl" : "ltr";
-  const currency = paymentPage.currency || "ILS";
-  const requiresPayment = paymentPage.total > 0;
+  const legacyCurrency = paymentPage.currency || "ILS";
 
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -260,12 +337,34 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
 
-  // Coupon
+  // Quote mode (payment-pages.md endpoints 9/9a): every price shown is a number the dashboard's quote carries.
+  // `legacy` (the response carried no quote key) keeps the page's own totals; a coupon is then only the page's
+  // pre-assigned one, because the dashboard's validate-coupon route no longer exists.
+  const mode = quoteModeOf(paymentPage);
+  const initialQuote = mode.kind === "quote" ? mode.quote : null;
+  const quoteActive = initialQuote !== null;
+  const [quote, setQuote] = useState<PaymentQuote | null>(initialQuote);
+  // The tiers and add-ons the first view offered; the requote answer never carries them.
+  const [catalogue] = useState<CatalogueBundle[]>(initialQuote?.catalogue ?? []);
+  const [selections, setSelections] = useState<BundleSelections>(initialQuote?.selections.bundleSelections ?? {});
   const [couponInput, setCouponInput] = useState("");
-  const [couponLoading, setCouponLoading] = useState(false);
-  const [couponError, setCouponError] = useState<string | null>(null);
+  const [quoteCode, setQuoteCode] = useState("");
+  const [quotePending, setQuotePending] = useState(false);
+  const [requoteFailed, setRequoteFailed] = useState(false);
+  const [requoteUnavailable, setRequoteUnavailable] = useState(false);
+  const [priceNotice, setPriceNotice] = useState(false);
+  const quotedInputRef = useRef<RequoteInput>({
+    selections: initialQuote?.selections.bundleSelections ?? {},
+    couponCode: "",
+    email: "",
+  });
+  const requoterRef = useRef<ReturnType<typeof createRequoter> | null>(null);
+  const lastRequoteKeyRef = useRef<string>("");
+  // The choices the buyer has right now, for a requote asked from a handler or the retry control.
+  const currentInputRef = useRef<RequoteInput>({ selections: {}, couponCode: "", email: "" });
+  const requiresPayment = quote ? quote.total > 0 : paymentPage.total > 0;
 
-  // Auto-apply pre-assigned coupon from payment page config
+  // Auto-apply pre-assigned coupon from payment page config (legacy pages only)
   const getPreAppliedCoupon = () => {
     const coupon = paymentPage.coupon;
     if (!coupon?.code || !coupon?.discountType) return null;
@@ -281,7 +380,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
   const [appliedCoupon, setAppliedCoupon] = useState<{
     code: string;
     discountAmount: number;
-  } | null>(getPreAppliedCoupon);
+  } | null>(quoteActive ? null : getPreAppliedCoupon);
 
   const getBillingLabel = (billingCycle: string | null | undefined) => {
     if (!billingCycle) return "";
@@ -375,6 +474,53 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
     };
     recordView();
   }, [slug]);
+
+  useEffect(() => {
+    if (!quoteActive) return;
+    const requoter = createRequoter({
+      fetchFn: (input, init) => fetch(input, init),
+      url: `${PLATFORM_URL}/api/public/payment-pages/${slug}/quote`,
+      domain: new URL(SITE_URL).hostname,
+      language: lang,
+      onPending: () => setQuotePending(true),
+      onOutcome: (outcome, input) => {
+        setQuotePending(false);
+        if (outcome.kind === "quote") {
+          quotedInputRef.current = input;
+          setQuote(outcome.quote);
+          setRequoteFailed(false);
+          setSelections(outcome.quote.selections.bundleSelections);
+        } else if (outcome.kind === "unavailable") {
+          setRequoteUnavailable(true);
+        } else {
+          // 429 or any failure: keep the last quote on screen with a retry control.
+          setRequoteFailed(true);
+        }
+      },
+    });
+    requoterRef.current = requoter;
+    // The page was served from the dashboard at some earlier moment: price it once now.
+    requoter.retryNow(currentInputRef.current);
+    return () => requoter.cancel();
+  }, [slug, quoteActive, lang]);
+
+  // Requote when the tier, add-ons, coupon code or a valid email change (debounced). Locked once an order exists
+  // or the checkout is submitted.
+  const quoteLocked = loading || ownershipToken !== null || instruction !== null;
+  const quotableEmail = isQuotableEmail(email) ? email.trim() : "";
+  currentInputRef.current = { selections, couponCode: quoteCode, email: quotableEmail };
+  const requoteKey = JSON.stringify([selectionsKey(selections), quoteCode, quotableEmail]);
+  useEffect(() => {
+    if (!quoteActive || quoteLocked) return;
+    if (!lastRequoteKeyRef.current) {
+      lastRequoteKeyRef.current = requoteKey;
+      return;
+    }
+    if (lastRequoteKeyRef.current === requoteKey) return;
+    lastRequoteKeyRef.current = requoteKey;
+    requoterRef.current?.schedule({ selections, couponCode: quoteCode, email: quotableEmail });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requoteKey, quoteActive, quoteLocked]);
 
   // Load SUMIT SDK — only once /payment/begin has actually told us this
   // order's gateway is a client_instrument (sumit) one. Unlike the old
@@ -528,31 +674,56 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
     }
   };
 
-  // Apply coupon
-  const handleApplyCoupon = async () => {
-    if (!couponInput.trim()) return;
-    setCouponLoading(true);
-    setCouponError(null);
-    try {
-      const domain = new URL(SITE_URL).hostname;
-      const res = await fetch(`${PLATFORM_URL}/api/public/payment-pages/${slug}/validate-coupon`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain, code: couponInput.trim(), subtotal: paymentPage.subtotal }),
-      });
-      const data = await res.json();
-      if (data.valid) {
-        setAppliedCoupon({ code: data.code, discountAmount: data.discountAmount });
-        setCouponInput("");
-      } else {
-        setCouponError(data.message || t.invalidCoupon);
-      }
-    } catch {
-      setCouponError(t.invalidCoupon);
-    } finally {
-      setCouponLoading(false);
-    }
+  const chooseTier = (bundle: CatalogueBundle, variantId: string) => {
+    setSelections((prev) => ({
+      ...prev,
+      [bundle.productId]: {
+        selectedVariantId: variantId,
+        selectedAddonProductIds: prev[bundle.productId]?.selectedAddonProductIds ?? bundle.defaultSelection.selectedAddonProductIds ?? [],
+      },
+    }));
   };
+
+  const toggleAddon = (bundle: CatalogueBundle, addonId: string, on: boolean) => {
+    setSelections((prev) => {
+      const current = prev[bundle.productId] ?? bundle.defaultSelection;
+      const ids = new Set(current.selectedAddonProductIds ?? []);
+      if (on) ids.add(addonId);
+      else ids.delete(addonId);
+      return {
+        ...prev,
+        [bundle.productId]: { selectedVariantId: current.selectedVariantId ?? null, selectedAddonProductIds: Array.from(ids) },
+      };
+    });
+  };
+
+  const couponReasonLabel = (reason: CouponReason | undefined): string => (reason ? t[`reason_${reason}`] || t.couponRefused : "");
+  const cycleSuffix = (cycle: string | null | undefined): string => {
+    if (!cycle) return "";
+    const known: Record<string, string> = {
+      monthly: t.perMonth,
+      quarterly: t.perQuarter,
+      yearly: t.perYear,
+      annual: t.perYear,
+      weekly: t.perWeek,
+      daily: t.perDay,
+    };
+    return known[cycle] || t.perPeriod;
+  };
+  const shownCurrency = quote ? currencyOf(paymentPage, quote, legacyCurrency) : legacyCurrency;
+  const money = (amount: number, cur: string = shownCurrency) => formatQuoteAmount(amount, cur, lang);
+  // Pay is held while a price is being asked for, until the email is quoted for a coupon that needs it, and while
+  // the chosen tier or add-ons differ from the ones the shown quote was priced with.
+  const hold = quote
+    ? payHold({
+        quote,
+        pending: quotePending,
+        failed: requoteFailed,
+        selections,
+        quotedInput: quotedInputRef.current,
+        current: { couponCode: quoteCode, email: quotableEmail },
+      })
+    : null;
 
   // Creates the order and asks the gateway-blind payment engine what to do
   // next. This has to happen before we know whether this tenant's gateway
@@ -575,35 +746,68 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
 
     try {
       const domain = new URL(SITE_URL).hostname;
+      const customerData = {
+        firstName,
+        lastName,
+        email,
+        phone,
+        ...(company && { company }),
+        ...(addressLine1 && {
+          address: {
+            street: addressLine1,
+            city: city || undefined,
+            postalCode: postalCode || undefined,
+            country: country || undefined,
+          },
+        }),
+      };
+      const checkoutBody =
+        quote !== null
+          ? buildCheckoutBody({ domain, customerData, viewId, language: lang, quote, quotedInput: quotedInputRef.current })
+          : { domain, customerData, viewId, couponCode: appliedCoupon?.code || null };
       const res = await fetch(`${PLATFORM_URL}/api/public/payment-pages/${slug}/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          domain,
-          customerData: {
-            firstName,
-            lastName,
-            email,
-            phone,
-            ...(company && { company }),
-            ...(addressLine1 && {
-              address: {
-                street: addressLine1,
-                city: city || undefined,
-                postalCode: postalCode || undefined,
-                country: country || undefined,
-              },
-            }),
-          },
-          viewId,
-          couponCode: appliedCoupon?.code || null,
-        }),
+        body: JSON.stringify(checkoutBody),
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Checkout failed");
+        if (quote === null) {
+          const err = await res.json();
+          throw new Error(err.error || "Checkout failed");
+        }
+        const errBody = await res.json().catch(() => ({}));
+        const failure = interpretCheckoutFailure(res.status, errBody);
+        if (failure.kind === "quote_changed") {
+          // The door priced differently: show its quote and ask the buyer to confirm again.
+          quotedInputRef.current = { ...quotedInputRef.current, selections: failure.quote.selections.bundleSelections };
+          setQuote(failure.quote);
+          setSelections(failure.quote.selections.bundleSelections);
+          setRequoteFailed(false);
+          setPriceNotice(true);
+          setLoading(false);
+          return;
+        }
+        if (failure.kind === "quote_required") {
+          requoterRef.current?.retryNow(currentInputRef.current);
+          setError(t.pricingErrorFallback);
+          setLoading(false);
+          return;
+        }
+        if (failure.kind === "coupon_refused") {
+          quotedInputRef.current = { ...quotedInputRef.current, couponCode: "" };
+          setQuoteCode("");
+          setCouponInput("");
+          setError(failure.reason ? couponReasonLabel(failure.reason) : t.couponRefused);
+          setLoading(false);
+          return;
+        }
+        throw new Error(
+          failure.message ||
+            (failure.code && failure.code !== "internal_error" ? t.pricingErrorFallback : "Checkout failed")
+        );
       }
+      setPriceNotice(false);
 
       const result = await res.json();
 
@@ -746,6 +950,18 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
     );
   }
 
+  if (mode.kind === "unavailable" || requoteUnavailable) {
+    return (
+      <Card dir={dir}>
+        <CardContent className="py-12 text-center space-y-3">
+          <AlertCircle className="h-10 w-10 mx-auto text-muted-foreground" />
+          <h2 className="text-xl font-semibold">{t.unavailableTitle}</h2>
+          <p className="text-muted-foreground">{t.unavailableBody}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8" dir={dir}>
       {/* Left — Products & Summary */}
@@ -761,6 +977,222 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
             )}
           </CardHeader>
           <CardContent className="space-y-4">
+            {quote ? (
+              <div className="space-y-4" dir={dir}>
+                {paymentPage.items.map((item: any, itemIndex: number) => {
+                  const imageUrl = item.product.images?.[0]?.url || item.product.images?.[0];
+                  if (!imageUrl && !item.product.description) return null;
+                  return (
+                    <div key={`${item.product.id}-${itemIndex}`} className="flex gap-4">
+                      {imageUrl && (
+                        <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-sand">
+                          <Image src={imageUrl} alt={item.product.name} fill className="object-cover" />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <h3 className="font-medium">{item.product.name}</h3>
+                        {item.product.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">{item.product.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {catalogue.map((bundle) => {
+                  const current = selections[bundle.productId] ?? bundle.defaultSelection;
+                  const chosenTier = current.selectedVariantId ?? bundle.defaultSelection.selectedVariantId ?? null;
+                  const chosenAddons = new Set(current.selectedAddonProductIds ?? []);
+                  const tiers = bundle.lockedVariantId
+                    ? []
+                    : bundle.tiers.filter((tier) => tier.available).sort((a, b) => a.position - b.position);
+                  if (tiers.length === 0 && bundle.addons.length === 0) return null;
+                  return (
+                    <fieldset key={bundle.productId} disabled={quoteLocked} className="space-y-3 rounded-lg border p-3">
+                      {tiers.length > 0 && (
+                        <div className="space-y-2">
+                          <legend className="text-sm font-medium">{t.chooseOption}</legend>
+                          {tiers.map((tier) => (
+                            <label key={tier.id} className="flex items-center justify-between gap-2 text-sm cursor-pointer">
+                              <span className="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  name={`tier-${bundle.productId}`}
+                                  checked={chosenTier === tier.id}
+                                  onChange={() => chooseTier(bundle, tier.id)}
+                                />
+                                {tier.title}
+                              </span>
+                              <span>
+                                {money(tier.price)}
+                                {cycleSuffix(tier.billingCycle)}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                      {bundle.addons.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">{t.addOns}</p>
+                          {bundle.addons.map((addon) => (
+                            <label key={addon.id} className="flex items-center justify-between gap-2 text-sm cursor-pointer">
+                              <span className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={chosenAddons.has(addon.id)}
+                                  onChange={(e) => toggleAddon(bundle, addon.id, e.target.checked)}
+                                />
+                                {addon.name}
+                              </span>
+                              <span>
+                                {money(addon.price)}
+                                {cycleSuffix(addon.billingCycle)}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </fieldset>
+                  );
+                })}
+
+                <Separator />
+
+                {/* Coupon — typed here, priced by the quote (POST /quote with couponCode). */}
+                <div className="space-y-2">
+                  <Label htmlFor="couponCode">{t.couponCode}</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="couponCode"
+                      value={couponInput}
+                      disabled={quoteLocked}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          setQuoteCode(couponInput.trim());
+                        }
+                      }}
+                      className="text-sm"
+                      dir="ltr"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={quoteLocked || !couponInput.trim()}
+                      onClick={() => setQuoteCode(couponInput.trim())}
+                      className="shrink-0"
+                    >
+                      {t.applyCoupon}
+                    </Button>
+                  </div>
+                  {quote.coupon?.status === "applied" && (
+                    <p className="text-sm text-green-700">
+                      {t.couponApplied}
+                      {quote.coupon.code ? `: ${quote.coupon.code}` : ""}
+                      {quoteCode && !quoteLocked && (
+                        <button
+                          type="button"
+                          onClick={() => { setQuoteCode(""); setCouponInput(""); }}
+                          className="text-green-600 hover:text-green-800 text-xs underline ms-2"
+                        >
+                          {t.remove}
+                        </button>
+                      )}
+                    </p>
+                  )}
+                  {quote.coupon?.status === "pending_email" && (
+                    <p className="text-sm text-muted-foreground">{t.couponPendingEmail}</p>
+                  )}
+                  {quote.coupon?.status === "dropped" && (
+                    <p className="text-sm text-amber-600">
+                      {t.couponDropped}
+                      {quote.coupon.reason ? `: ${couponReasonLabel(quote.coupon.reason)}` : ""}
+                    </p>
+                  )}
+                  {quote.coupon?.status === "refused" && (
+                    <p className="text-sm text-red-600">
+                      {t.couponRefused}
+                      {quote.coupon.reason ? `: ${couponReasonLabel(quote.coupon.reason)}` : ""}
+                    </p>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Summary — every figure is the quote's own, so the rows add up to its total. */}
+                <div className="space-y-2" dir={dir}>
+                  {summaryRows(quote).map((row) => {
+                    if (row.type === "line") {
+                      return (
+                        <div key={row.key} className="flex justify-between gap-2 text-sm">
+                          <span>
+                            {row.label}
+                            {row.quantity && row.quantity > 1 ? ` × ${row.quantity}` : ""}
+                            {cycleSuffix(row.billingCycle)}
+                          </span>
+                          <span>{money(row.amount)}</span>
+                        </div>
+                      );
+                    }
+                    if (row.type === "discount") {
+                      return (
+                        <div key={row.key} className="flex justify-between text-sm text-green-600">
+                          <span>{t[row.label]}:</span>
+                          <span>{money(-row.amount)}</span>
+                        </div>
+                      );
+                    }
+                    if (row.type === "shipping") {
+                      return (
+                        <div key={row.key} className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">{t.shipping}:</span>
+                          <span>{money(row.amount)}</span>
+                        </div>
+                      );
+                    }
+                    if (row.type === "total") {
+                      return (
+                        <div key={row.key} className="space-y-2">
+                          <Separator />
+                          <div className="flex justify-between text-lg font-bold">
+                            <span>{t.total}:</span>
+                            <span>{money(row.amount)}</span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={row.key} className="flex justify-between text-sm text-muted-foreground">
+                        <span>
+                          {t.recurringLabel}
+                          {cycleSuffix(row.billingCycle)}
+                        </span>
+                        <span>{money(row.amount)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {quotePending && <p className="text-xs text-muted-foreground">{t.updatingPrice}</p>}
+                {requoteFailed && !quotePending && (
+                  <div className="flex items-center justify-between gap-2 text-xs text-amber-700">
+                    <span>{t.requoteFailed}</span>
+                    <Button type="button" variant="outline" size="sm" onClick={() => requoterRef.current?.retryNow(currentInputRef.current)}>
+                      {t.retry}
+                    </Button>
+                  </div>
+                )}
+                {priceNotice && (
+                  <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <p>{t.priceUpdated}</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
             {/* Products */}
             <div className="space-y-4">
               {paymentPage.items.map((item: any) => {
@@ -782,15 +1214,15 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                         {item.effectivePrice < item.originalPrice ? (
                           <>
                             <span className="text-sm line-through text-muted-foreground">
-                              {formatPrice(item.originalPrice, currency)}
+                              {formatPrice(item.originalPrice, legacyCurrency)}
                             </span>
                             <span className="text-sm font-medium text-green-600">
-                              {formatPrice(item.effectivePrice, currency)}{getBillingLabel(item.product?.billing_cycle)}
+                              {formatPrice(item.effectivePrice, legacyCurrency)}{getBillingLabel(item.product?.billing_cycle)}
                             </span>
                           </>
                         ) : (
                           <span className="text-sm font-medium">
-                            {formatPrice(item.effectivePrice, currency)}{getBillingLabel(item.product?.billing_cycle)}
+                            {formatPrice(item.effectivePrice, legacyCurrency)}{getBillingLabel(item.product?.billing_cycle)}
                           </span>
                         )}
                       </div>
@@ -802,13 +1234,15 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
 
             <Separator />
 
-            {/* Coupon */}
-            <div className="space-y-2">
-              {appliedCoupon ? (
+            {/* Coupon — the page's pre-assigned one only. The dashboard's validate-coupon route is gone, so a
+                legacy page (no quote) offers no code box; a code is typed on a quote page, where it is priced by
+                the quote. */}
+            {appliedCoupon && (
+              <div className="space-y-2">
                 <div className="flex items-center justify-between rounded-md bg-green-50 border border-green-200 px-3 py-2 text-sm">
                   <span className="text-green-700">
                     {t.coupon}: <code className="font-mono font-semibold">{appliedCoupon.code}</code>
-                    {" "}— -{formatPrice(appliedCoupon.discountAmount, currency)}
+                    {" "}— -{formatPrice(appliedCoupon.discountAmount, legacyCurrency)}
                   </span>
                   <button
                     type="button"
@@ -818,30 +1252,8 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                     {t.remove}
                   </button>
                 </div>
-              ) : (
-                <div className="flex gap-2">
-                  <Input
-                    value={couponInput}
-                    onChange={(e) => { setCouponInput(e.target.value); setCouponError(null); }}
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleApplyCoupon())}
-                    placeholder={t.couponPlaceholder}
-                    className="text-sm"
-                    dir="ltr"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleApplyCoupon}
-                    disabled={couponLoading || !couponInput.trim()}
-                    className="shrink-0"
-                  >
-                    {couponLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : t.applyCoupon}
-                  </Button>
-                </div>
-              )}
-              {couponError && <p className="text-xs text-red-600">{couponError}</p>}
-            </div>
+              </div>
+            )}
 
             {/* Price summary */}
             <div className="space-y-2">
@@ -851,12 +1263,12 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                   <Separator />
                   <div className="flex justify-between items-baseline">
                     <span className="text-lg font-bold">{isRTL ? "סה״כ להיום" : "Total today"}:</span>
-                    <span className="text-2xl font-bold">{formatPrice(effectiveTotal, currency)}</span>
+                    <span className="text-2xl font-bold">{formatPrice(effectiveTotal, legacyCurrency)}</span>
                   </div>
                   <div className={`flex gap-3 text-sm text-muted-foreground ${isRTL ? "justify-end" : ""}`}>
-                    <span>{formatPrice(oneTimeAfterCoupon, currency)} {isRTL ? "חד פעמי" : "one-time"}</span>
+                    <span>{formatPrice(oneTimeAfterCoupon, legacyCurrency)} {isRTL ? "חד פעמי" : "one-time"}</span>
                     <span>·</span>
-                    <span>{formatPrice(monthlyAfterCoupon, currency)}{getBillingLabel("monthly")} {isRTL ? "מנוי" : "subscription"}</span>
+                    <span>{formatPrice(monthlyAfterCoupon, legacyCurrency)}{getBillingLabel("monthly")} {isRTL ? "מנוי" : "subscription"}</span>
                   </div>
                 </>
               ) : (
@@ -864,28 +1276,31 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                 <>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t.subtotal}:</span>
-                    <span>{formatPrice(paymentPage.subtotal, currency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}</span>
+                    <span>{formatPrice(paymentPage.subtotal, legacyCurrency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}</span>
                   </div>
                   {paymentPage.discount > 0 && (
                     <div className="flex justify-between text-sm text-green-600">
                       <span>{t.discount}:</span>
-                      <span>-{formatPrice(paymentPage.discount, currency)}</span>
+                      <span>-{formatPrice(paymentPage.discount, legacyCurrency)}</span>
                     </div>
                   )}
                   {appliedCoupon && (
                     <div className="flex justify-between text-sm text-green-600">
                       <span>{t.coupon} ({appliedCoupon.code}):</span>
-                      <span>-{formatPrice(appliedCoupon.discountAmount, currency)}</span>
+                      <span>-{formatPrice(appliedCoupon.discountAmount, legacyCurrency)}</span>
                     </div>
                   )}
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>{t.total}:</span>
-                    <span>{formatPrice(effectiveTotal, currency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}</span>
+                    <span>{formatPrice(effectiveTotal, legacyCurrency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}</span>
                   </div>
                 </>
               )}
             </div>
+
+              </>
+            )}
 
             {hasRestrictions && (
               <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
@@ -982,12 +1397,19 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                   before we have an instruction; once /payment/begin
                   responds this gives way to either the redirect notice or
                   the SUMIT card form below. */}
+              {hold === "pending_email" && (
+                <p className="text-xs text-muted-foreground">{t.enterEmailToPay}</p>
+              )}
+              {hold === "selections_changed" && (
+                <p className="text-xs text-muted-foreground">{t.selectionsHeld}</p>
+              )}
+
               {requiresPayment && !instruction && (
                 <Button
                   type="button"
                   className="w-full bg-gold hover:bg-gold-dark text-foreground font-semibold text-base h-12"
                   onClick={handleContinue}
-                  disabled={loading}
+                  disabled={loading || hold !== null}
                 >
                   {loading ? (
                     <>
@@ -1152,7 +1574,7 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                   type="button"
                   onClick={handleContinue}
                   className="w-full bg-gold hover:bg-gold-dark text-foreground font-semibold text-base h-12"
-                  disabled={loading}
+                  disabled={loading || hold !== null}
                 >
                   {loading ? (
                     <>
@@ -1181,7 +1603,10 @@ export function PaymentPageCheckout({ paymentPage, slug }: PaymentPageCheckoutPr
                   ) : (
                     <>
                       <Lock className="h-4 w-4 me-2" />
-                      {t.pay} {formatPrice(effectiveTotal, currency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}
+                      {t.pay}{" "}
+                      {quote
+                        ? money(Number(orderRef.current?.total ?? quote.total), orderRef.current?.currency ?? shownCurrency)
+                        : <>{formatPrice(effectiveTotal, legacyCurrency)}{allItemsAreSubscriptions ? getBillingLabel(paymentPage.items.find((i: any) => i.product?.billing_cycle)?.product?.billing_cycle) : ""}</>}
                     </>
                   )}
                 </Button>

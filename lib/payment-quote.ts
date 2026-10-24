@@ -1,0 +1,372 @@
+/**
+ * The payment-page quote, as the dashboard serves it (payment-pages.md endpoints 9 and 9a).
+ *
+ * Every price a buyer sees on /pay/[slug] is a number the quote carries; this file never computes one. It holds
+ * the framework-free parts of the quote flow (request building, the debounced requote with its stale-answer guard,
+ * the Pay hold, the checkout body and the checkout refusals) so they can be tested without a browser.
+ */
+
+export type QuoteLineKind = "product" | "manual" | "bundle" | "setup_fee" | "addon";
+
+export interface QuoteLine {
+  kind: QuoteLineKind;
+  itemIndex: number;
+  productId: string | null;
+  variantId: string | null;
+  name: string;
+  variantTitle: string | null;
+  quantity: number;
+  unitPrice: number;
+  originalUnitPrice: number;
+  lineTotal: number;
+  billingCycle: string | null;
+}
+
+export type CouponReason =
+  | "not_valid"
+  | "not_for_this_purchase"
+  | "not_for_this_email"
+  | "limit_reached"
+  | "minimum_not_met"
+  | "maximum_exceeded";
+
+export interface QuoteCoupon {
+  status: "applied" | "dropped" | "refused" | "pending_email";
+  code?: string;
+  reason?: CouponReason;
+}
+
+export interface BundleSelection {
+  selectedVariantId?: string | null;
+  selectedAddonProductIds?: string[];
+}
+
+export type BundleSelections = Record<string, BundleSelection>;
+
+export interface CatalogueTier {
+  id: string;
+  title: string | null;
+  price: number;
+  setupFee: number;
+  billingCycle: string | null;
+  available: boolean;
+  position: number;
+}
+
+export interface CatalogueAddon {
+  id: string;
+  name: string;
+  price: number;
+  billingCycle: string | null;
+}
+
+export interface CatalogueBundle {
+  itemIndex: number;
+  productId: string;
+  lockedVariantId: string | null;
+  tiers: CatalogueTier[];
+  addons: CatalogueAddon[];
+  defaultSelection: BundleSelection;
+}
+
+export interface PaymentQuote {
+  lines: QuoteLine[];
+  subtotal: number;
+  itemDiscount: number;
+  globalDiscount: number;
+  couponDiscount: number;
+  totalDiscount: number;
+  extraTotal: number;
+  shippingAmount: number;
+  total: number;
+  recurring: { billingCycle: string; amount: number }[];
+  coupon: QuoteCoupon | null;
+  selections: { bundleSelections: BundleSelections };
+  catalogue?: CatalogueBundle[];
+  /** Not in the contract yet (reported to the payments lane); read when the dashboard serves it. */
+  currency?: string | null;
+}
+
+export interface RequoteInput {
+  selections: BundleSelections;
+  couponCode: string;
+  email: string;
+}
+
+/**
+ * `legacy`: the dashboard did not answer the quote capability (older dashboard), the page behaves as before.
+ * `unavailable`: the page is served but its quote refused; never fall back to the legacy total.
+ */
+export type QuoteMode =
+  | { kind: "legacy" }
+  | { kind: "unavailable"; refusal: string | null }
+  | { kind: "quote"; quote: PaymentQuote };
+
+export function quoteModeOf(paymentPage: any): QuoteMode {
+  if (!paymentPage || !("quote" in paymentPage) || paymentPage.quote === undefined) return { kind: "legacy" };
+  if (!paymentPage.quote) {
+    return { kind: "unavailable", refusal: typeof paymentPage.quoteRefusal === "string" ? paymentPage.quoteRefusal : null };
+  }
+  return { kind: "quote", quote: paymentPage.quote as PaymentQuote };
+}
+
+/** The ISO currency to price with: what the quote or page carries, else the caller's legacy fallback. */
+export function currencyOf(paymentPage: any, quote: PaymentQuote | null, legacyFallback: string): string {
+  const fromQuote = quote?.currency;
+  if (typeof fromQuote === "string" && fromQuote) return fromQuote;
+  const fromPage = paymentPage?.currency;
+  if (typeof fromPage === "string" && fromPage) return fromPage;
+  return legacyFallback;
+}
+
+/** The same shape test the quote endpoint applies (ASCII, one @, a dotted domain, no spaces); an invalid one is never sent. */
+export function isQuotableEmail(email: string): boolean {
+  const e = email.trim();
+  return /^[\x21-\x7e]+@[\x21-\x7e]+\.[\x21-\x7e]+$/.test(e) && e.split("@").length === 2;
+}
+
+export function buildQuoteBody(domain: string, input: RequoteInput, language?: string): Record<string, unknown> {
+  const body: Record<string, unknown> = { domain, bundleSelections: input.selections };
+  if (language) body.language = language;
+  const code = input.couponCode.trim();
+  if (code) body.couponCode = code;
+  if (isQuotableEmail(input.email)) body.email = input.email.trim();
+  return body;
+}
+
+function normalise(sel: BundleSelection | undefined): string {
+  const variant = sel?.selectedVariantId ?? null;
+  const addons = [...(sel?.selectedAddonProductIds ?? [])].sort();
+  return JSON.stringify([variant, addons]);
+}
+
+/** A stable string for a selection map, equal for equal choices whatever the key or add-on order. */
+export function selectionsKey(selections: BundleSelections): string {
+  return JSON.stringify(
+    Object.keys(selections)
+      .sort()
+      .map((k) => [k, normalise(selections[k])])
+  );
+}
+
+/** True when every bundle in the catalogue (and any other key) holds the same choices in both maps. */
+export function selectionsMatch(a: BundleSelections, b: BundleSelections): boolean {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  for (const k of keys) {
+    if (normalise(a[k]) !== normalise(b[k])) return false;
+  }
+  return true;
+}
+
+export type RequoteOutcome =
+  | { kind: "quote"; quote: PaymentQuote }
+  | { kind: "unavailable"; reason: string | null }
+  | { kind: "failed"; status: number | null; code: string | null };
+
+export interface RequoterDeps {
+  fetchFn: typeof fetch;
+  url: string;
+  domain: string;
+  /** The page's language, sent with every quote request. */
+  language?: string;
+  debounceMs?: number;
+  setTimeoutFn?: (fn: () => void, ms: number) => unknown;
+  clearTimeoutFn?: (handle: unknown) => void;
+  /** A quote request began (or is waiting to): the Pay button holds. */
+  onPending: () => void;
+  /** Only the latest request's outcome is ever delivered. */
+  onOutcome: (outcome: RequoteOutcome, input: RequoteInput) => void;
+}
+
+/**
+ * Debounced requote. A sequence number and an AbortController make sure only the latest answer is delivered.
+ * 429 and every other failure are reported as `failed` so the caller keeps its last quote on screen.
+ */
+export function createRequoter(deps: RequoterDeps) {
+  const debounceMs = deps.debounceMs ?? 400;
+  const setT = deps.setTimeoutFn ?? ((fn: () => void, ms: number) => setTimeout(fn, ms));
+  const clearT = deps.clearTimeoutFn ?? ((h: unknown) => clearTimeout(h as ReturnType<typeof setTimeout>));
+  let seq = 0;
+  let timer: unknown = null;
+  let controller: AbortController | null = null;
+  let last: RequoteInput | null = null;
+
+  async function fire(input: RequoteInput, mine: number) {
+    controller?.abort();
+    const ctl = new AbortController();
+    controller = ctl;
+    let outcome: RequoteOutcome;
+    try {
+      const res = await deps.fetchFn(deps.url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildQuoteBody(deps.domain, input, deps.language)),
+        signal: ctl.signal,
+      });
+      const body: any = await res.json().catch(() => ({}));
+      if (res.ok && body?.quote) outcome = { kind: "quote", quote: body.quote as PaymentQuote };
+      else if (res.status === 403 || res.status === 404) {
+        outcome = { kind: "unavailable", reason: typeof body?.reason === "string" ? body.reason : null };
+      } else outcome = { kind: "failed", status: res.status, code: typeof body?.code === "string" ? body.code : null };
+    } catch {
+      if (ctl.signal.aborted) return;
+      outcome = { kind: "failed", status: null, code: null };
+    }
+    if (mine !== seq) return;
+    deps.onOutcome(outcome, input);
+  }
+
+  return {
+    schedule(input: RequoteInput) {
+      last = input;
+      seq += 1;
+      const mine = seq;
+      if (timer !== null) clearT(timer);
+      controller?.abort();
+      deps.onPending();
+      timer = setT(() => {
+        timer = null;
+        void fire(input, mine);
+      }, debounceMs);
+    },
+    /** Ask again at once: with the given input, else the last one asked. Nothing to ask with is a no-op. */
+    retryNow(input?: RequoteInput) {
+      const next = input ?? last;
+      if (!next) return;
+      last = next;
+      seq += 1;
+      const mine = seq;
+      if (timer !== null) clearT(timer);
+      timer = null;
+      deps.onPending();
+      void fire(next, mine);
+    },
+    cancel() {
+      seq += 1;
+      if (timer !== null) clearT(timer);
+      timer = null;
+      controller?.abort();
+    },
+  };
+}
+
+export type PayHold = "pending" | "pending_email" | "selections_changed" | null;
+
+/**
+ * Why Pay is held, or null. What the buyer has chosen now is compared with what the shown quote was priced with, always:
+ * a changed tier or add-on holds Pay (two selections can share a total, which expectedTotal cannot see). A changed coupon
+ * code or email holds it only until the requote has been asked (a failed requote keeps the last quote and releases it,
+ * because the door prices again and answers 409 on any total difference).
+ */
+export function payHold(state: {
+  quote: PaymentQuote;
+  pending: boolean;
+  failed: boolean;
+  selections: BundleSelections;
+  /** The input the shown quote was priced with. */
+  quotedInput: RequoteInput;
+  /** The coupon code and email the buyer has now (email already reduced to a quotable one or ""). */
+  current: { couponCode: string; email: string };
+}): PayHold {
+  if (state.pending) return "pending";
+  if (!selectionsMatch(state.quote.selections.bundleSelections, state.selections)) return "selections_changed";
+  if (state.failed) return null;
+  const inputsDiffer =
+    state.current.couponCode.trim() !== state.quotedInput.couponCode.trim() ||
+    state.current.email.trim() !== state.quotedInput.email.trim();
+  if (inputsDiffer) return "pending";
+  if (state.quote.coupon?.status === "pending_email") return "pending_email";
+  return null;
+}
+
+export interface CheckoutBodyInput {
+  domain: string;
+  customerData: Record<string, unknown>;
+  /** The page's language, sent with the checkout. */
+  language?: string;
+  viewId: string | null;
+  quote: PaymentQuote;
+  /** The input the shown quote was priced with. */
+  quotedInput: RequoteInput;
+}
+
+/** The door's body in quote mode: the shown total (display only, the door re-prices) and the choices it was priced with. */
+export function buildCheckoutBody(input: CheckoutBodyInput): Record<string, unknown> {
+  const body: Record<string, unknown> = {
+    domain: input.domain,
+    customerData: input.customerData,
+    viewId: input.viewId,
+    expectedTotal: input.quote.total,
+    bundleSelections: input.quote.selections.bundleSelections,
+  };
+  if (input.language) body.language = input.language;
+  const code = input.quotedInput.couponCode.trim();
+  if (code && input.quote.coupon?.status === "applied") body.couponCode = code;
+  return body;
+}
+
+export type CheckoutFailure =
+  | { kind: "quote_changed"; quote: PaymentQuote }
+  | { kind: "quote_required" }
+  | { kind: "coupon_refused"; reason: CouponReason | null }
+  | { kind: "error"; code: string | null; message: string | null };
+
+export function interpretCheckoutFailure(status: number, body: any): CheckoutFailure {
+  const code = typeof body?.code === "string" ? body.code : null;
+  if (status === 409 && code === "quote_changed" && body?.quote) {
+    return { kind: "quote_changed", quote: body.quote as PaymentQuote };
+  }
+  if (code === "quote_required") return { kind: "quote_required" };
+  if (code === "coupon_refused") {
+    return { kind: "coupon_refused", reason: typeof body?.reason === "string" ? (body.reason as CouponReason) : null };
+  }
+  return { kind: "error", code, message: typeof body?.error === "string" ? body.error : null };
+}
+
+export interface SummaryRow {
+  key: string;
+  type: "line" | "discount" | "shipping" | "total" | "recurring";
+  /** A line's name; for a discount row the discount kind. */
+  label: string;
+  /** Present on a line: quantity and per-unit price shown. */
+  quantity?: number;
+  unitPrice?: number;
+  amount: number;
+  billingCycle?: string | null;
+}
+
+function money(n: number): number {
+  return Math.round((n + Number.EPSILON) * 100) / 100;
+}
+
+/**
+ * The rows the summary draws, every figure from the quote, so they add up to its total:
+ * page lines (before their own item discount, the quote's `subtotal`) + setup-fee and add-on lines (`extraTotal`)
+ * - item, page-wide and coupon discounts (together `totalDiscount`, already scaled by any cap) + shipping = `total`.
+ * A bundle line is already its net price in the quote's subtotal, so it is shown at that price.
+ */
+export function summaryRows(quote: PaymentQuote): SummaryRow[] {
+  const rows: SummaryRow[] = [];
+  quote.lines.forEach((l, i) => {
+    const beforeItemDiscount = l.kind === "product" || l.kind === "manual";
+    const unitPrice = beforeItemDiscount ? l.originalUnitPrice : l.unitPrice;
+    rows.push({
+      key: `line-${i}`,
+      type: "line",
+      label: l.variantTitle && l.kind !== "setup_fee" ? `${l.name} (${l.variantTitle})` : l.name,
+      quantity: l.quantity,
+      unitPrice,
+      amount: beforeItemDiscount ? money(l.originalUnitPrice * l.quantity) : l.lineTotal,
+      billingCycle: l.billingCycle,
+    });
+  });
+  if (quote.itemDiscount > 0) rows.push({ key: "discount-item", type: "discount", label: "itemDiscount", amount: quote.itemDiscount });
+  if (quote.globalDiscount > 0) rows.push({ key: "discount-global", type: "discount", label: "globalDiscount", amount: quote.globalDiscount });
+  if (quote.couponDiscount > 0) rows.push({ key: "discount-coupon", type: "discount", label: "couponDiscount", amount: quote.couponDiscount });
+  if (quote.shippingAmount > 0) rows.push({ key: "shipping", type: "shipping", label: "shipping", amount: quote.shippingAmount });
+  rows.push({ key: "total", type: "total", label: "total", amount: quote.total });
+  for (const r of quote.recurring) {
+    rows.push({ key: `recurring-${r.billingCycle}`, type: "recurring", label: "recurring", amount: r.amount, billingCycle: r.billingCycle });
+  }
+  return rows;
+}

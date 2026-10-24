@@ -153,3 +153,22 @@ export function formatPriceSimple(amount: number | string, currencyCode: string 
   // Other currencies: symbol before number
   return `${symbol}${formatted}`;
 }
+
+/**
+ * An amount from a payment-page quote, as money in the buyer's language. Intl places the currency symbol and the
+ * minus sign for the locale (so a discount passed as a negative number reads correctly in Hebrew); a code Intl does
+ * not know falls back to the number followed by the code.
+ */
+export function formatQuoteAmount(value: number, currencyCode: string, lang: string = "en"): string {
+  const locale = lang === "he" ? "he-IL" : "en-US";
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: currencyCode.toUpperCase(),
+      minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString(locale)} ${currencyCode}`;
+  }
+}

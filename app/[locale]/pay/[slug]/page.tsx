@@ -7,17 +7,16 @@ const PLATFORM_URL = process.env.NEXT_PUBLIC_UPGRADESHOP_API_URL || "https://app
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://anahata.staging.upgradeshop.ai";
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }
 
 async function fetchPaymentPage(slug: string) {
   try {
     const domain = new URL(SITE_URL).hostname;
     const response = await fetch(
-      `${PLATFORM_URL}/api/public/payment-pages/${slug}?domain=${domain}`,
-      {
-        next: { revalidate: 60 }, // ISR with 60 second revalidation
-      }
+      `${PLATFORM_URL}/api/public/payment-pages/${slug}?domain=${domain}&capabilities=quote`,
+      // The quote is a price: never serve a cached one on the first view.
+      { cache: "no-store" }
     );
 
     if (!response.ok) {
@@ -49,7 +48,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function PaymentPagePage({ params }: PageProps) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const paymentPage = await fetchPaymentPage(slug);
 
   if (!paymentPage) {
@@ -63,7 +62,7 @@ export default async function PaymentPagePage({ params }: PageProps) {
         hideFooter={paymentPage.hideFooter ?? true}
       />
       <div className="max-w-[1280px] mx-auto px-4 pt-16 pb-8">
-        <PaymentPageCheckout paymentPage={paymentPage} slug={slug} />
+        <PaymentPageCheckout paymentPage={paymentPage} slug={slug} locale={locale} />
       </div>
     </div>
   );
