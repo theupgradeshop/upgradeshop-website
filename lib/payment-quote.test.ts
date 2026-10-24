@@ -388,6 +388,9 @@ describe("parseBeginInstruction", () => {
     expect(parseBeginInstruction("x")).toBe(null);
     expect(parseBeginInstruction({ kind: "embedded_session" })).toBe(null);
     expect(parseBeginInstruction({ kind: "redirect" })).toBe(null);
+    expect(parseBeginInstruction({ kind: "redirect", url: "javascript:alert(1)" })).toBe(null);
+    expect(parseBeginInstruction({ kind: "redirect", url: "data:text/html,x" })).toBe(null);
+    expect(parseBeginInstruction({ kind: "redirect", url: "/relative" })).toBe(null);
     expect(parseBeginInstruction({ kind: "client_instrument" })).toBe(null);
   });
 });

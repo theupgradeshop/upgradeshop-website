@@ -506,6 +506,8 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
       onPending: () => setQuotePending(true),
       onOutcome: (outcome, input) => {
         setQuotePending(false);
+        // An order is being placed or held: the quote it was placed for must not change under it.
+        if (quoteLockedRef.current) return;
         if (outcome.kind === "quote") {
           quotedInputRef.current = input;
           setQuote(outcome.quote);
@@ -528,6 +530,14 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
   // Requote when the tier, add-ons, coupon code or a valid email change (debounced). Locked once an order exists
   // or the checkout is submitted.
   const quoteLocked = loading || ownershipToken !== null || instruction !== null;
+  const quoteLockedRef = useRef(false);
+  quoteLockedRef.current = quoteLocked;
+  // Locking drops any debounced or in-flight requote, and the pending flag with it (a held order's retry needs Pay free).
+  useEffect(() => {
+    if (!quoteLocked) return;
+    requoterRef.current?.cancel();
+    setQuotePending(false);
+  }, [quoteLocked]);
   const quotableEmail = isQuotableEmail(email) ? email.trim() : "";
   currentInputRef.current = { selections, couponCode: quoteCode, email: quotableEmail };
   const requoteKey = JSON.stringify([selectionsKey(selections), quoteCode, quotableEmail]);
@@ -798,10 +808,10 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
       failBegin(null);
       return;
     }
-    heldRef.current = null;
-    setOrderHeld(false);
 
     if (nextInstruction.kind === "none") {
+      heldRef.current = null;
+      setOrderHeld(false);
       setSuccess(true);
       if (order.redirectUrl) {
         setTimeout(() => { window.location.href = order.redirectUrl; }, 2000);
@@ -819,6 +829,8 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
       return;
     }
 
+    heldRef.current = null;
+    setOrderHeld(false);
     setInstruction(nextInstruction);
     setLoading(false);
 

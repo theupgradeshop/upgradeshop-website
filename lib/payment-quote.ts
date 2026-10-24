@@ -461,15 +461,25 @@ export type BeginInstruction =
   | { kind: "redirect"; url: string }
   | { kind: "client_instrument"; provider: string; publicConfig: Record<string, any> };
 
+function isHttpUrl(value: unknown): value is string {
+  if (typeof value !== "string" || !value) return false;
+  try {
+    const protocol = new URL(value).protocol;
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * The instruction of a 200 /payment/begin body, or null when the body is not one this page can follow (unparseable, null,
- * an unknown kind, a redirect without a url). A null answer is handled as a failure that may have started a session.
+ * an unknown kind, a redirect whose url is not http or https). A null answer is handled as a failure that may have started a session.
  */
 export function parseBeginInstruction(body: unknown): BeginInstruction | null {
   if (!body || typeof body !== "object") return null;
   const b = body as Record<string, any>;
   if (b.kind === "none") return { kind: "none" };
-  if (b.kind === "redirect") return typeof b.url === "string" && b.url ? { kind: "redirect", url: b.url } : null;
+  if (b.kind === "redirect") return isHttpUrl(b.url) ? { kind: "redirect", url: b.url } : null;
   if (b.kind === "client_instrument") {
     if (typeof b.provider !== "string" || !b.provider) return null;
     return { kind: "client_instrument", provider: b.provider, publicConfig: b.publicConfig && typeof b.publicConfig === "object" ? b.publicConfig : {} };
