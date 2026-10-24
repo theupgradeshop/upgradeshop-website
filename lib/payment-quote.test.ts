@@ -12,6 +12,7 @@ import {
   quoteFractionDigitsOf,
   beginFailureHandling,
   chooseOrderAction,
+  parseBeginInstruction,
   selectionsMatch,
   selectionsKey,
   type PaymentQuote,
@@ -353,12 +354,41 @@ describe("beginFailureHandling (what /payment/begin failures do to the lock and 
 });
 
 describe("beginFailureHandling with a held order", () => {
-  it("invalid_ownership_token keeps the lock and the order while an order is held, drops it otherwise", () => {
-    expect(beginFailureHandling("invalid_ownership_token", { holdingOrder: true })).toEqual({ unlock: false, keepOrder: true });
+  const every = [
+    "rate_limited", "gateway_unreachable", "internal_error", "no_gateway_connected", "gateway_misconfigured", "unknown_gateway",
+    "unsupported_provider", "invalid_request", "invalid_ownership_token", "order_not_found", "module_disabled", "invalid_redirect_url",
+    "amount_mismatch", "currency_mismatch", "free_completion_needs_card", "trial_ended", "plan_trial_invalid_shape",
+    "payment_confirming", "payment_paid_not_applied", "payment_begin_ambiguous", "order_not_chargeable", "payment_session_used",
+    "order_not_capturable", "something_new",
+  ];
+  for (const code of every) {
+    it(`${code}: nothing releases a held order`, () => {
+      expect(beginFailureHandling(code, { holdingOrder: true })).toEqual({ unlock: false, keepOrder: true });
+    });
+  }
+  it("a network error while holding keeps it too; without a held order the code decides", () => {
+    expect(beginFailureHandling(null, { holdingOrder: true })).toEqual({ unlock: false, keepOrder: true });
     expect(beginFailureHandling("invalid_ownership_token")).toEqual({ unlock: true, keepOrder: false });
+    expect(beginFailureHandling("gateway_unreachable", { holdingOrder: false })).toEqual({ unlock: true, keepOrder: true });
   });
-  it("other codes classify the same held or not", () => {
-    expect(beginFailureHandling("gateway_unreachable", { holdingOrder: true })).toEqual({ unlock: true, keepOrder: true });
+});
+
+describe("parseBeginInstruction", () => {
+  it("accepts the three instruction kinds", () => {
+    expect(parseBeginInstruction({ kind: "none" })).toEqual({ kind: "none" });
+    expect(parseBeginInstruction({ kind: "redirect", url: "https://x.test/p" })).toEqual({ kind: "redirect", url: "https://x.test/p" });
+    expect(parseBeginInstruction({ kind: "client_instrument", provider: "sumit", publicConfig: { companyId: 1 } })).toEqual({
+      kind: "client_instrument", provider: "sumit", publicConfig: { companyId: 1 },
+    });
+    expect(parseBeginInstruction({ kind: "client_instrument", provider: "sumit" })).toEqual({ kind: "client_instrument", provider: "sumit", publicConfig: {} });
+  });
+  it("refuses a body the page cannot follow", () => {
+    expect(parseBeginInstruction(null)).toBe(null);
+    expect(parseBeginInstruction({})).toBe(null);
+    expect(parseBeginInstruction("x")).toBe(null);
+    expect(parseBeginInstruction({ kind: "embedded_session" })).toBe(null);
+    expect(parseBeginInstruction({ kind: "redirect" })).toBe(null);
+    expect(parseBeginInstruction({ kind: "client_instrument" })).toBe(null);
   });
 });
 

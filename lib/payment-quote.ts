@@ -430,8 +430,9 @@ export function beginFailureHandling(
   code: string | null | undefined,
   opts: { holdingOrder?: boolean } = {}
 ): BeginFailureHandling {
-  // A token refusal on an order an earlier answer left possibly begun or paid is not proof that nothing exists.
-  if (opts.holdingOrder && code === "invalid_ownership_token") return { unlock: false, keepOrder: true };
+  // While an earlier answer left the order possibly begun or paid, no later failure proves otherwise: only a
+  // successful begin (or a reload) releases the hold.
+  if (opts.holdingOrder) return { unlock: false, keepOrder: true };
   if (code && BEGIN_NOTHING_STARTED_RETRY_SAME_ORDER.has(code)) return { unlock: true, keepOrder: true };
   if (code && BEGIN_NOTHING_STARTED_NEW_ORDER.has(code)) return { unlock: true, keepOrder: false };
   return { unlock: false, keepOrder: true };
@@ -453,4 +454,25 @@ export function chooseOrderAction(state: {
   if (state.held) return "reuse_held";
   if (state.placed && state.total !== null && state.placed.key === state.key && state.placed.total === state.total) return "reuse_placed";
   return "new_order";
+}
+
+export type BeginInstruction =
+  | { kind: "none" }
+  | { kind: "redirect"; url: string }
+  | { kind: "client_instrument"; provider: string; publicConfig: Record<string, any> };
+
+/**
+ * The instruction of a 200 /payment/begin body, or null when the body is not one this page can follow (unparseable, null,
+ * an unknown kind, a redirect without a url). A null answer is handled as a failure that may have started a session.
+ */
+export function parseBeginInstruction(body: unknown): BeginInstruction | null {
+  if (!body || typeof body !== "object") return null;
+  const b = body as Record<string, any>;
+  if (b.kind === "none") return { kind: "none" };
+  if (b.kind === "redirect") return typeof b.url === "string" && b.url ? { kind: "redirect", url: b.url } : null;
+  if (b.kind === "client_instrument") {
+    if (typeof b.provider !== "string" || !b.provider) return null;
+    return { kind: "client_instrument", provider: b.provider, publicConfig: b.publicConfig && typeof b.publicConfig === "object" ? b.publicConfig : {} };
+  }
+  return null;
 }

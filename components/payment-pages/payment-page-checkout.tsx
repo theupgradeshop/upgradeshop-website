@@ -37,6 +37,8 @@ import {
   quoteFractionDigitsOf,
   beginFailureHandling,
   chooseOrderAction,
+  parseBeginInstruction,
+  type BeginInstruction,
   type CouponReason,
 } from "@/lib/payment-quote";
 
@@ -790,7 +792,12 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
       return;
     }
 
-    const nextInstruction = beginBody as PaymentInstruction;
+    // A 200 body this page cannot follow may still have started a session: it keeps the lock like any unknown answer.
+    const nextInstruction: BeginInstruction | null = parseBeginInstruction(beginBody);
+    if (!nextInstruction) {
+      failBegin(null);
+      return;
+    }
     heldRef.current = null;
     setOrderHeld(false);
 
@@ -843,11 +850,6 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
     setLoading(true);
 
     try {
-      const held = heldRef.current;
-      if (held) {
-        await runBegin(held.order, held.token);
-        return;
-      }
       const domain = new URL(SITE_URL).hostname;
       const customerData = {
         firstName,
@@ -866,7 +868,12 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
       };
       const placedKey = JSON.stringify([requoteKey, customerData]);
       const placed = placedRef.current;
-      const action = chooseOrderAction({ held: false, placed, key: placedKey, total: quote ? quote.total : null });
+      const held = heldRef.current;
+      const action = chooseOrderAction({ held: held !== null, placed, key: placedKey, total: quote ? quote.total : null });
+      if (action === "reuse_held" && held) {
+        await runBegin(held.order, held.token);
+        return;
+      }
       if (action === "reuse_placed" && placed) {
         await runBegin(placed.order, placed.token);
         return;
@@ -1249,7 +1256,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
                 {requoteFailed && !quotePending && (
                   <div className="flex items-center justify-between gap-2 text-xs text-amber-700">
                     <span>{t.requoteFailed}</span>
-                    <Button type="button" variant="outline" size="sm" onClick={() => requoterRef.current?.retryNow(currentInputRef.current)}>
+                    <Button type="button" variant="outline" size="sm" disabled={quoteLocked} onClick={() => requoterRef.current?.retryNow(currentInputRef.current)}>
                       {t.retry}
                     </Button>
                   </div>
