@@ -35,6 +35,7 @@ import {
   type CatalogueBundle,
   type BundleSelections,
   quoteFractionDigitsOf,
+  beginFailureHandling,
   type CouponReason,
 } from "@/lib/payment-quote";
 
@@ -271,6 +272,9 @@ const paymentErrorLabels: Record<string, Record<string, string>> = {
     token_missing: "Failed to process card. Please try again.",
     network_error: "Could not reach the payment server. Please check your connection and try again.",
     unsupported_provider: "Payment is not available for this store right now.",
+    payment_confirming: "Your payment is being confirmed. Please don't pay again; we'll email you a receipt shortly. If you don't hear from us within a few hours, please contact us.",
+    payment_paid_not_applied: "Your payment was received and is being applied to your order. Please don't pay again; we'll email you shortly.",
+    payment_begin_ambiguous: "We couldn't confirm whether your payment session started. Please try the same order again, or reload the page and check your email before paying again.",
   },
   he: {
     generic: "משהו השתבש. נא לנסות שוב.",
@@ -295,6 +299,9 @@ const paymentErrorLabels: Record<string, Record<string, string>> = {
     token_missing: "עיבוד הכרטיס נכשל. נא לנסות שוב.",
     network_error: "לא הצלחנו להתחבר לשרת התשלומים. נא לבדוק את החיבור ולנסות שוב.",
     unsupported_provider: "התשלום אינו זמין כעת עבור חנות זו.",
+    payment_confirming: "התשלום שלכם בבדיקה. נא לא לשלם שוב; נשלח קבלה במייל בקרוב. אם לא תקבלו עדכון תוך מספר שעות, אנא צרו קשר איתנו.",
+    payment_paid_not_applied: "התשלום התקבל ומוחל על ההזמנה. נא לא לשלם שוב; נעדכן אתכם במייל בקרוב.",
+    payment_begin_ambiguous: "לא הצלחנו לוודא אם הליך התשלום התחיל. נא לנסות שוב את אותה הזמנה, או לרענן את הדף ולבדוק את המייל לפני תשלום חוזר.",
   },
 };
 
@@ -745,17 +752,32 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
     setOwnershipToken(token);
     orderRef.current = order;
 
-    const beginRes = await fetch(`${PLATFORM_URL}/api/public/orders/${order.id}/payment/begin`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ownershipToken: token }),
-    });
-    const beginBody = await beginRes.json().catch(() => ({}));
+    // A begin that may have started a session or been paid keeps the lock and the order (beginFailureHandling): the
+    // buyer can only retry the same order or reload. A thrown fetch is such a case.
+    const failBegin = (code: string | null) => {
+      const handling = beginFailureHandling(code);
+      if (handling.unlock) setOwnershipToken(null);
+      if (!handling.keepOrder) placedRef.current = null;
+      setPaymentErrorCode(code ?? "network_error");
+      setLoading(false);
+    };
+
+    let beginRes: Response;
+    let beginBody: any;
+    try {
+      beginRes = await fetch(`${PLATFORM_URL}/api/public/orders/${order.id}/payment/begin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownershipToken: token }),
+      });
+      beginBody = await beginRes.json().catch(() => ({}));
+    } catch {
+      failBegin(null);
+      return;
+    }
 
     if (!beginRes.ok) {
-      setOwnershipToken(null);
-      setPaymentErrorCode(typeof beginBody.code === "string" ? beginBody.code : "generic");
-      setLoading(false);
+      failBegin(typeof beginBody?.code === "string" ? beginBody.code : null);
       return;
     }
 
@@ -775,9 +797,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
     // silently render a blank state — showCardForm below only matches
     // provider "sumit", so anything else needs its own explicit error.
     if (nextInstruction.kind === "client_instrument" && nextInstruction.provider !== "sumit") {
-      setOwnershipToken(null);
-      setPaymentErrorCode("unsupported_provider");
-      setLoading(false);
+      failBegin("unsupported_provider");
       return;
     }
 

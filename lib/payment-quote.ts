@@ -385,3 +385,50 @@ export function quoteFractionDigitsOf(quote: PaymentQuote, catalogue: CatalogueB
   ];
   return amounts.every((n) => Number.isInteger(n)) ? 0 : 2;
 }
+
+export interface BeginFailureHandling {
+  /** Release the quote lock so the buyer may change tier, add-ons or code. */
+  unlock: boolean;
+  /** Keep the placed order so an unchanged retry begins the same order again (else the next try places a new one). */
+  keepOrder: boolean;
+}
+
+/** /payment/begin codes after which nothing was started or paid, so the quote may be unlocked and the order kept for a retry. */
+const BEGIN_NOTHING_STARTED_RETRY_SAME_ORDER = new Set([
+  "rate_limited",
+  "gateway_unreachable",
+  "internal_error",
+  "no_gateway_connected",
+  "gateway_misconfigured",
+  "unknown_gateway",
+  "unsupported_provider",
+]);
+
+/** Codes after which nothing was started or paid and the order itself cannot be begun: unlock and place a new one next time. */
+const BEGIN_NOTHING_STARTED_NEW_ORDER = new Set([
+  "invalid_request",
+  "invalid_ownership_token",
+  "order_not_found",
+  "module_disabled",
+  "invalid_redirect_url",
+  "amount_mismatch",
+  "currency_mismatch",
+  "free_completion_needs_card",
+  "order_not_capturable",
+  "trial_needs_card_gateway",
+  "trial_needs_business_contact",
+  "trial_ended",
+  "plan_trial_invalid_shape",
+]);
+
+/**
+ * What the page does with its quote lock and placed order after /payment/begin failed. A session may exist or the order
+ * may already be paid for payment_confirming, payment_paid_not_applied, payment_begin_ambiguous, order_not_chargeable and
+ * payment_session_used; for those, a network error (no code) and any code not listed the lock and the order stay, so the
+ * buyer can only retry the same order or reload, never place a second one.
+ */
+export function beginFailureHandling(code: string | null | undefined): BeginFailureHandling {
+  if (code && BEGIN_NOTHING_STARTED_RETRY_SAME_ORDER.has(code)) return { unlock: true, keepOrder: true };
+  if (code && BEGIN_NOTHING_STARTED_NEW_ORDER.has(code)) return { unlock: true, keepOrder: false };
+  return { unlock: false, keepOrder: true };
+}

@@ -10,6 +10,7 @@ import {
   interpretCheckoutFailure,
   summaryRows,
   quoteFractionDigitsOf,
+  beginFailureHandling,
   selectionsMatch,
   selectionsKey,
   type PaymentQuote,
@@ -317,5 +318,35 @@ describe("currencyOf on a quote page never guesses", () => {
     expect(currencyOf({ currency: null }, quote({ currency: null }), "")).toBe("");
     expect(currencyOf({ currency: "EUR" }, quote({ currency: null }), "")).toBe("EUR");
     expect(currencyOf({ currency: "EUR" }, quote({ currency: "USD" }), "")).toBe("USD");
+  });
+});
+
+describe("beginFailureHandling (what /payment/begin failures do to the lock and the placed order)", () => {
+  const sameOrder = ["rate_limited", "gateway_unreachable", "internal_error", "no_gateway_connected", "gateway_misconfigured", "unknown_gateway", "unsupported_provider"];
+  const newOrder = [
+    "invalid_request", "invalid_ownership_token", "order_not_found", "module_disabled", "invalid_redirect_url",
+    "amount_mismatch", "currency_mismatch", "free_completion_needs_card", "order_not_capturable",
+    "trial_needs_card_gateway", "trial_needs_business_contact", "trial_ended", "plan_trial_invalid_shape",
+  ];
+  const mayBePaid = ["payment_confirming", "payment_paid_not_applied", "payment_begin_ambiguous", "order_not_chargeable", "payment_session_used"];
+  for (const code of sameOrder) {
+    it(`${code}: nothing started, unlock and retry the same order`, () => {
+      expect(beginFailureHandling(code)).toEqual({ unlock: true, keepOrder: true });
+    });
+  }
+  for (const code of newOrder) {
+    it(`${code}: nothing started, unlock and place a new order next time`, () => {
+      expect(beginFailureHandling(code)).toEqual({ unlock: true, keepOrder: false });
+    });
+  }
+  for (const code of mayBePaid) {
+    it(`${code}: may be paid or begun, keep the lock and the order`, () => {
+      expect(beginFailureHandling(code)).toEqual({ unlock: false, keepOrder: true });
+    });
+  }
+  it("a network error (no code) and an unknown code keep the lock and the order", () => {
+    expect(beginFailureHandling(null)).toEqual({ unlock: false, keepOrder: true });
+    expect(beginFailureHandling(undefined)).toEqual({ unlock: false, keepOrder: true });
+    expect(beginFailureHandling("something_new")).toEqual({ unlock: false, keepOrder: true });
   });
 });
