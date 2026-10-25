@@ -110,6 +110,38 @@ describe("/links", () => {
     expect(metaHeaders).not.toHaveProperty("x-tus-end-user-ip");
   });
 
+  it("caches the bio read for 60 seconds (next.revalidate) and still sends only the site key", async () => {
+    process.env.COURSES_SERVICE_KEY = "tsk_test_key";
+    answer(200, ANSWER);
+    await LinksPage();
+    const init = fetchMock.mock.calls[0][1] as RequestInit & { next?: { revalidate?: number } };
+    expect(init.next).toEqual({ revalidate: 60 });
+    expect(init.headers).toEqual({ "x-service-key": "tsk_test_key" });
+  });
+
+  it.each(["//evil.example", "/\\evil.example", "\\\\evil.example"])(
+    "never renders %j as a link target (block link, social icon, latest post)",
+    async (evil) => {
+      answer(200, {
+        marker: "ush-bio-1",
+        page: { title: "T", intro: "I" },
+        blocks: [
+          { id: "b1", kind: "link", label: "Block", href: evil },
+          { id: "b2", kind: "social_icons", label: "Icons", href: null, ref: { networks: [{ network: "x", label: "Net", href: evil }] } },
+          { id: "b3", kind: "latest_posts", label: "Posts", href: null, posts: [{ imageUrl: "https://cdn.test/p.jpg", href: evil }] },
+        ],
+      });
+      const html = renderToStaticMarkup(await LinksPage());
+      expect(html).not.toContain("evil.example");
+      expect(html).not.toMatch(/href="\s*[/\\]{2}/);
+      expect(html).not.toContain("p.jpg");
+      expect(html).not.toContain('aria-label="Net"');
+      // The block keeps its label, as plain text, not as a link.
+      expect(html).toContain("Block");
+      expect(html).not.toMatch(/<a [^>]*>Block</);
+    },
+  );
+
   it("sends no key header when the site key is unset", async () => {
     answer(200, ANSWER);
     await LinksPage();

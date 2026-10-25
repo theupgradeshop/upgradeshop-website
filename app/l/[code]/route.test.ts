@@ -59,6 +59,37 @@ describe("GET /l/[code]", () => {
     expect(String(fetchMock.mock.calls[0][0])).not.toContain("evil");
   });
 
+  it("carries nothing from the request: Location is exactly the dashboard's, and only the site-key headers go out", async () => {
+    process.env.COURSES_SERVICE_KEY = "tsk_test_key";
+    resolver(302, "https://shop.example/offer?x=1");
+    const res = await call("aB3dE9", "?utm_source=x&url=https://evil.example", {
+      cookie: "session=secret",
+      authorization: "Bearer visitor-token",
+      "x-forwarded-host": "evil.example",
+      referer: "https://evil.example/",
+      "x-real-ip": "203.0.113.9",
+    });
+    expect(res.headers.get("location")).toBe("https://shop.example/offer?x=1");
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://platform.test/api/public/marketing-social/l/aB3dE9?host=site.test");
+    expect(Object.keys(init.headers as Record<string, string>).sort()).toEqual(["x-service-key", "x-tus-end-user-ip"]);
+    expect(JSON.stringify(init.headers)).not.toMatch(/secret|visitor-token|evil/);
+  });
+
+  it("forwards no request header at all when the site key is unset, and appends no incoming query", async () => {
+    resolver(302, "https://shop.example/offer");
+    const res = await call("aB3dE9", "?utm_source=x&url=https://evil.example", {
+      cookie: "session=secret",
+      authorization: "Bearer visitor-token",
+      "x-forwarded-host": "evil.example",
+    });
+    expect(res.headers.get("location")).toBe("https://shop.example/offer");
+    expect(res.headers.get("location")).not.toMatch(/utm_source|evil/);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).not.toMatch(/utm_source|evil/);
+    expect(init.headers ?? {}).toEqual({});
+  });
+
   it("is a 404 when the dashboard says 404 or sends no usable Location", async () => {
     resolver(404);
     expect((await call("aB3dE9")).status).toBe(404);
