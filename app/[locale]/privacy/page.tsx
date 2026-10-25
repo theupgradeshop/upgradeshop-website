@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: October 23, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: October 25, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
               1. Who We Are
             </h2>
             <p className="leading-relaxed mb-4">
-              The Upgrade Shop (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is a fully managed digital and software agency for small businesses. We build and run a business&rsquo;s website, CRM, email, WhatsApp, online store, courses, funnels and other digital tools for the owner. A real person, the account manager, looks after every package, and each account has its own AI assistant that works alongside the team. We are registered in Israel under company registration number 300330123, with registered address at Har Hatzofim 11, Holon, Israel.
+              The Upgrade Shop (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is a done-for-you digital team for small businesses. We build and run a business&rsquo;s website, CRM, email, WhatsApp, online store, courses, funnels and other digital tools for the owner. A real person, the account manager, looks after every package, and each account has its own AI assistant that works alongside the team. We are registered in Israel under company registration number 300330123, with registered address at Har Hatzofim 11, Holon, Israel.
             </p>
             <p className="leading-relaxed">
               Customers use our service through the dashboard at <strong>app.upgradeshop.ai</strong>. This policy also covers our public website at <strong>upgradeshop.ai</strong>, including the waitlist form, the contact form and the chat with Max, our own AI assistant on that website. The terms that govern the service are in our <a href="/terms-of-use" className="underline">Terms of Use</a>.

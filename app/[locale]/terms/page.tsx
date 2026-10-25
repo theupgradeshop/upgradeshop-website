@@ -33,7 +33,7 @@ export default function TermsPage() {
           Terms of Use
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: October 23, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: October 25, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -59,7 +59,7 @@ export default function TermsPage() {
               2. What We Provide
             </h2>
             <p className="leading-relaxed mb-4">
-              The Upgrade Shop is a fully managed digital and software agency for small businesses. We build, run and keep upgrading the digital side of your business for you: your website, CRM, email, WhatsApp messaging, social media, online store, digital courses, funnels, marketing, and more. People on our team (an account manager with every package, and a marketer and a designer at higher tiers) work with your own AI assistant, and everything is available through a single dashboard. If you need something we do not have yet, we can build it (see Section 14).
+              The Upgrade Shop is a done-for-you digital team for small businesses. We build, run and keep upgrading the digital side of your business for you: your website, CRM, email, WhatsApp messaging, social media, online store, digital courses, funnels, marketing, and more. People on our team (an account manager with every package, and a marketer and a designer at higher tiers) work with your own AI assistant, and everything is available through a single dashboard. If you need something we do not have yet, we can build it (see Section 14).
             </p>
             <p className="leading-relaxed mb-4">
               The services (together, the &ldquo;Service&rdquo; or the &ldquo;Platform&rdquo;) are made up of the modules, team support and features that your package or module subscription includes. Modules include, for example:
@@ -156,7 +156,7 @@ export default function TermsPage() {
               4.2 Tiers
             </h3>
             <p className="leading-relaxed mb-4">
-              Each package comes in three tiers, in this order: Managed, Growth Partner, and Digital Team. The tiers differ by who does the work on your account, not by how often someone looks at it:
+              Each package comes in three tiers, in this order: Managed, Growth Partner, and Full Team. The tiers differ by who does the work on your account, not by how often someone looks at it:
             </p>
             <ul className="list-disc list-inside space-y-2 mb-4 ml-2">
               <li>
@@ -166,7 +166,7 @@ export default function TermsPage() {
                 <strong>Growth Partner.</strong> Your account manager does the work (for example automations, follow-ups, pages, emails, and fixes). A marketer reviews your marketing with your account manager from time to time, and a designer is available for anything new. You set priorities and approve.
               </li>
               <li>
-                <strong>Digital Team.</strong> A whole team works on your account and leads it: your account manager, a marketer and a designer, and others where we say so. The Marketing module is included. You approve the direction.
+                <strong>Full Team.</strong> A whole team works on your account and leads it: your account manager, a marketer and a designer, and others where we say so. The Marketing module is included. You approve the direction.
               </li>
             </ul>
             <p className="leading-relaxed mb-4">
