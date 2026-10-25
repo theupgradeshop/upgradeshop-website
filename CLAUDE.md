@@ -326,3 +326,15 @@ project/
 ```
 
 **Note**: No `customer-data/` folder needed - work directly with loaded data in memory.
+
+---
+
+# Link in bio (`/links`) and short links (`/l/[code]`)
+
+Ported from the base template (template b882579). Full behaviour: `/home/master/templates/base_website_template/CLAUDE.md`, section "Link in bio (`/links`) and short links (`/l/[code]`)". Adaptations on this site:
+
+- `/links` lives at `app/[locale]/links/page.tsx` (this site routes through next-intl, `localePrefix: "as-needed"`, so a page outside `[locale]` would be rewritten to `/en/links` and 404). It renders without `SiteShell`: `app/[locale]/layout.tsx` already renders Header, `<main>` and Footer. `/he/links` serves the same bio page. Its test is `.test.ts` (this site's vitest only includes `*.test.ts`, node environment).
+- `/l/[code]` is `app/l/[code]/route.ts` (outside `[locale]`, as in the template); `middleware.ts` returns early on `/l/` before the RETIRED / language routing. Tests: `middleware.test.ts` (mocks next-intl's middleware), `app/l/[code]/route.test.ts`.
+- This site has no `lib/portal-login.ts`: `siteKeyHeaders` / `siteKeyOnlyHeaders` (template bodies) are in `lib/site-key-headers.ts`, using this site's `lib/client-ip.ts` (same rule as the template's `clientIp`). `lib/platform-env.ts`, `lib/safe-css-color.ts`, `lib/safe-href.ts` are copied unchanged.
+- No `lib/builtin-routes.ts` here (no dashboard redirect lookup in the middleware), so nothing was added for it.
+- `COURSES_SERVICE_KEY` is optional. This site's globals.css has no `.t-*` role classes, so `t-button`/`t-heading`/`t-body`/`t-subheading` on the page are inert; the buttons take their colour/shape from inline `--primary`/`--radius` styles.

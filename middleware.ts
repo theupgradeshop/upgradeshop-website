@@ -16,6 +16,9 @@ const RETIRED = /^\/(?:(en|he)\/)?(?:pricing|products(?:\/[^/]+)?)\/?$/;
 const NOINDEX = /^\/(?:(?:en|he)\/)?(?:checkout|pay)(?:\/|$)/;
 
 export default function middleware(request: NextRequest) {
+  // /l/<code> is the Link in bio short-link route handler (app/l/[code]/route.ts): never language-prefixed,
+  // redirected or rewritten.
+  if (request.nextUrl.pathname.startsWith("/l/")) return NextResponse.next();
   const match = RETIRED.exec(request.nextUrl.pathname);
   if (match) {
     const url = request.nextUrl.clone();
