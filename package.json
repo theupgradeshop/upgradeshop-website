@@ -39,6 +39,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^22",
     "@types/nodemailer": "^7.0.3",
     "@types/pg": "^8.15.6",
@@ -47,6 +49,7 @@
     "autoprefixer": "^10.4.27",
     "eslint": "^9",
     "eslint-config-next": "^16.2.1",
+    "jsdom": "^28.1.0",
     "postcss": "^8.5.8",
     "tailwindcss": "^3.4.17",
     "typescript": "^5",

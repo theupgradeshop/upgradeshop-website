@@ -1,7 +1,4 @@
-/**
- * Coupon in a link on the payment page. jsdom + @testing-library/react are not dependencies of this site: run with
- * another checkout's node_modules (a mirror of this site on top of it) and `--globals`, environment jsdom.
- */
+/** Coupon in a link on the payment page. Run with `npm test`. */
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, waitFor, fireEvent, cleanup } from "@testing-library/react";
 
