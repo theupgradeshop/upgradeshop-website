@@ -98,13 +98,28 @@ describe("PaymentPageCheckout: coupon in a link", () => {
     await waitFor(() => expect(localStorage.getItem(PENDING_COUPON_KEY)).toBeNull());
   });
 
-  it("a typed coupon replaces the pending one", async () => {
+  it("a typed coupon the quote accepts replaces the pending one", async () => {
     savePendingCoupon("LINK");
     stubPlatform((code) => ({ status: "applied", code }));
     render(<PaymentPageCheckout paymentPage={page()} slug="bundle-page" />);
     await waitFor(() => expect(couponBox().value).toBe("LINK"));
+    await screen.findByText(/Coupon applied: LINK/);
+    expect(localStorage.getItem(PENDING_COUPON_KEY)).not.toBeNull();
     fireEvent.change(couponBox(), { target: { value: "TYPED" } });
     fireEvent.click(screen.getByRole("button", { name: /Apply/ }));
-    expect(localStorage.getItem(PENDING_COUPON_KEY)).toBeNull();
+    await waitFor(() => expect(quoteBodies.some((b) => b.couponCode === "TYPED")).toBe(true), { timeout: 3000 });
+    await waitFor(() => expect(localStorage.getItem(PENDING_COUPON_KEY)).toBeNull());
+  });
+
+  it("a typed coupon the quote refuses leaves the link coupon pending", async () => {
+    savePendingCoupon("LINK");
+    stubPlatform((code) => (code === "BAD" ? { status: "refused", code, reason: "not_valid" } : { status: "applied", code }));
+    render(<PaymentPageCheckout paymentPage={page()} slug="bundle-page" />);
+    await screen.findByText(/Coupon applied: LINK/);
+    fireEvent.change(couponBox(), { target: { value: "BAD" } });
+    fireEvent.click(screen.getByRole("button", { name: /Apply/ }));
+    await waitFor(() => expect(quoteBodies.some((b) => b.couponCode === "BAD")).toBe(true), { timeout: 3000 });
+    await screen.findByText(/This code was not applied/);
+    expect(JSON.parse(localStorage.getItem(PENDING_COUPON_KEY)!).code).toBe("LINK");
   });
 });

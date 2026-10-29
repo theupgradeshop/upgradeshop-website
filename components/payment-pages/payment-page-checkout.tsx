@@ -478,24 +478,38 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
     if (!quoteActive || quoteCode || paymentPage.coupon || initialQuote?.coupon) return;
     const pending = readPendingCoupon();
     if (!pending) return;
+    linkCodeRef.current = pending.code;
     setQuoteCode(pending.code);
     setCouponInput(pending.code);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // A coupon the quote refused or dropped ends the link-coupon journey; a paid or free order does too.
+  // The pending link code is cleared only on the quote's verdict: a typed code the quote ACCEPTED replaces it, and the
+  // link code itself being refused or dropped ends its journey. A refused typed code leaves the link coupon pending.
+  // `quotedInputRef` holds the input the current quote answers.
+  const linkCodeRef = useRef("");
+  const typedCodeRef = useRef("");
   const quoteCouponStatus = quote?.coupon?.status;
   useEffect(() => {
-    if (quoteCouponStatus === "refused" || quoteCouponStatus === "dropped") clearPendingCoupon();
-  }, [quoteCouponStatus]);
+    const sent = quotedInputRef.current.couponCode.trim().toUpperCase();
+    if (!sent) return;
+    if (quoteCouponStatus === "applied") {
+      if (sent === typedCodeRef.current) {
+        clearPendingCoupon();
+        typedCodeRef.current = "";
+      }
+    } else if ((quoteCouponStatus === "refused" || quoteCouponStatus === "dropped") && sent === linkCodeRef.current) {
+      clearPendingCoupon();
+    }
+  }, [quote]);
   useEffect(() => {
     if (success) clearPendingCoupon();
   }, [success]);
 
-  // A coupon the buyer types replaces the link coupon.
+  // A coupon the buyer types replaces the link coupon once the quote accepts it (effect above).
   const applyTypedCoupon = () => {
     const typed = couponInput.trim();
-    if (typed) clearPendingCoupon();
+    typedCodeRef.current = typed.toUpperCase();
     setQuoteCode(typed);
   };
 
@@ -955,8 +969,8 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
           return;
         }
         if (failure.kind === "coupon_refused") {
+          if (quotedInputRef.current.couponCode.trim().toUpperCase() === linkCodeRef.current) clearPendingCoupon();
           quotedInputRef.current = { ...quotedInputRef.current, couponCode: "" };
-          clearPendingCoupon();
           setQuoteCode("");
           setCouponInput("");
           setError(failure.reason ? couponReasonLabel(failure.reason) : t.couponRefused);
