@@ -338,3 +338,7 @@ Ported from the base template (template b882579). Full behaviour: `/home/master/
 - This site has no `lib/portal-login.ts`: `siteKeyHeaders` / `siteKeyOnlyHeaders` (template bodies) are in `lib/site-key-headers.ts`, using this site's `lib/client-ip.ts` (same rule as the template's `clientIp`). `lib/platform-env.ts`, `lib/safe-css-color.ts`, `lib/safe-href.ts` are copied unchanged.
 - No `lib/builtin-routes.ts` here (no dashboard redirect lookup in the middleware), so nothing was added for it.
 - `COURSES_SERVICE_KEY` is optional. This site's globals.css has no `.t-*` role classes, so `t-button`/`t-heading`/`t-body`/`t-subheading` on the page are inert; the buttons take their colour/shape from inline `--primary`/`--radius` styles.
+
+## Coupon in a link
+
+`?coupon=CODE` on any page is parked by `components/coupon-link-capture.tsx` (root layout, `lib/coupon-link.ts`); `components/payment-pages/payment-page-checkout.tsx` feeds it into the quote path (`setQuoteCode`) on arrival, never over the page's own coupon; cleared on a typed apply, remove, a refused/dropped quote coupon, a `coupon_refused` submit and success. Component tests (`*.coupon-link.test.tsx`, `coupon-link-capture.test.tsx`) need jsdom and @testing-library, which this site does not install: run them on another checkout's node_modules (they are excluded from tsc).

@@ -20,6 +20,7 @@ import {
   Lock,
 } from "lucide-react";
 import { formatPriceSimple as formatPrice, formatQuoteAmount } from "@/lib/currency";
+import { clearPendingCoupon, readPendingCoupon } from "@/lib/coupon-link";
 import {
   quoteModeOf,
   currencyOf,
@@ -469,6 +470,34 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
   const effectiveTotal = Math.max(0, paymentPage.total - (appliedCoupon?.discountAmount || 0));
   const hasRestrictions =
     paymentPage.restrictions?.expiresAt || paymentPage.restrictions?.usageRemaining !== null;
+
+  // Coupon in a link (?coupon=CODE, lib/coupon-link.ts): on arrival the pending code is fed into the same quote path
+  // a typed code takes, so the dashboard's quote validates it (never applied unvalidated). The page's own
+  // pre-assigned coupon wins, and so does anything already applied.
+  useEffect(() => {
+    if (!quoteActive || quoteCode || paymentPage.coupon || initialQuote?.coupon) return;
+    const pending = readPendingCoupon();
+    if (!pending) return;
+    setQuoteCode(pending.code);
+    setCouponInput(pending.code);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // A coupon the quote refused or dropped ends the link-coupon journey; a paid or free order does too.
+  const quoteCouponStatus = quote?.coupon?.status;
+  useEffect(() => {
+    if (quoteCouponStatus === "refused" || quoteCouponStatus === "dropped") clearPendingCoupon();
+  }, [quoteCouponStatus]);
+  useEffect(() => {
+    if (success) clearPendingCoupon();
+  }, [success]);
+
+  // A coupon the buyer types replaces the link coupon.
+  const applyTypedCoupon = () => {
+    const typed = couponInput.trim();
+    if (typed) clearPendingCoupon();
+    setQuoteCode(typed);
+  };
 
   // Record page view
   useEffect(() => {
@@ -927,6 +956,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
         }
         if (failure.kind === "coupon_refused") {
           quotedInputRef.current = { ...quotedInputRef.current, couponCode: "" };
+          clearPendingCoupon();
           setQuoteCode("");
           setCouponInput("");
           setError(failure.reason ? couponReasonLabel(failure.reason) : t.couponRefused);
@@ -1159,7 +1189,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
-                          setQuoteCode(couponInput.trim());
+                          applyTypedCoupon();
                         }
                       }}
                       className="text-sm"
@@ -1170,7 +1200,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
                       variant="outline"
                       size="sm"
                       disabled={quoteLocked}
-                      onClick={() => setQuoteCode(couponInput.trim())}
+                      onClick={applyTypedCoupon}
                       className="shrink-0"
                     >
                       {t.applyCoupon}
@@ -1183,7 +1213,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
                       {quoteCode && !quoteLocked && (
                         <button
                           type="button"
-                          onClick={() => { setQuoteCode(""); setCouponInput(""); }}
+                          onClick={() => { clearPendingCoupon(); setQuoteCode(""); setCouponInput(""); }}
                           className="text-green-600 hover:text-green-800 text-xs underline ms-2"
                         >
                           {t.remove}

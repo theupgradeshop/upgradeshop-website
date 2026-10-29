@@ -4,6 +4,7 @@ import "./globals.css";
 import { fetchWebsiteConfig } from "@/lib/analytics-api";
 import { SITE_URL } from "@/lib/site-url";
 import { getLayoutRobots } from "@/lib/staging-robots";
+import { CouponLinkCapture } from "@/components/coupon-link-capture";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -49,6 +50,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${newsreader.variable} ${anton.variable}`}>
       <body className="font-sans antialiased min-h-screen flex flex-col">
+        {/* Remembers ?coupon=CODE from a link for the payment page (client-only, renders nothing) */}
+        <CouponLinkCapture />
         {children}
       </body>
     </html>
