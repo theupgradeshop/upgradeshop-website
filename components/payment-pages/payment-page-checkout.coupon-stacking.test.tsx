@@ -8,6 +8,9 @@ vi.mock("next/image", () => ({ default: (p: Record<string, unknown>) => <span da
 import { PaymentPageCheckout } from "./payment-page-checkout";
 import { savePendingCoupon, PENDING_COUPON_KEY } from "@/lib/coupon-link";
 
+// Each applied code waits out the 400 ms requote debounce: give a loaded machine room.
+vi.setConfig({ testTimeout: 20000 });
+
 beforeAll(() => {
   // Radix's Checkbox measures itself with ResizeObserver, which jsdom lacks.
   globalThis.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} } as unknown as typeof ResizeObserver;
@@ -91,6 +94,13 @@ const apply = (code: string) => {
   fireEvent.click(screen.getByRole("button", { name: /^Apply/ }));
 };
 const rows = () => screen.queryAllByTestId("applied-coupon");
+/** n rows are shown AND the field has been freed (it is cleared in an effect after the quote renders). */
+const settled = (n: number) =>
+  waitFor(() => {
+    expect(rows().length).toBe(n);
+    const b = box();
+    if (b) expect(b.value).toBe("");
+  }, { timeout: 4000 });
 
 beforeEach(() => {
   localStorage.clear();
@@ -118,9 +128,9 @@ async function applyTwo() {
   render(<PaymentPageCheckout paymentPage={page()} slug="bundle-page" />);
   await waitFor(() => expect(box()).toBeTruthy());
   apply("AAA");
-  await waitFor(() => expect(rows().length).toBe(1), { timeout: 3000 });
+  await settled(1);
   apply("BBB");
-  await waitFor(() => expect(rows().length).toBe(2), { timeout: 3000 });
+  await settled(2);
 }
 
 describe("PaymentPageCheckout: more than one coupon code", () => {
@@ -135,15 +145,15 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     expect(rows()[0].textContent).toContain("10");
     expect(rows()[1].textContent).toContain("BBB");
     expect(rows()[1].textContent).toContain("20");
-    // The field is free for the next code after one was taken.
-    expect(box()!.value).toBe("");
+    // The field is freed in an effect after the quote renders, so wait for it.
+    await waitFor(() => expect(box()!.value).toBe(""), { timeout: 3000 });
   });
 
   it("a refused new code keeps the applied ones, shows the server's message and stays in the field", async () => {
     stubPlatform({ bad: { CCC: { reason: "not_combinable", message: "CCC can't be combined with AAA" } } });
     await applyTwo();
     apply("CCC");
-    expect(await screen.findByText("CCC can't be combined with AAA")).toBeTruthy();
+    expect(await screen.findByText("CCC can't be combined with AAA", {}, { timeout: 4000 })).toBeTruthy();
     expect(quoteBodies[quoteBodies.length - 1].couponCodes).toEqual(["AAA", "BBB", "CCC"]);
     expect(rows().length).toBe(2);
     expect(box()!.value).toBe("CCC");
@@ -153,7 +163,7 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     stubPlatform({ bad: { NOPE: { reason: "not_valid" } } });
     await applyTwo();
     apply("NOPE");
-    expect(await screen.findByText(/This code was not applied: This code is not valid\./)).toBeTruthy();
+    expect(await screen.findByText(/This code was not applied: This code is not valid\./, {}, { timeout: 4000 })).toBeTruthy();
     expect(rows().length).toBe(2);
   });
 
@@ -162,14 +172,14 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     render(<PaymentPageCheckout paymentPage={page()} slug="bundle-page" />);
     await waitFor(() => expect(box()).toBeTruthy());
     apply("AAA");
-    await waitFor(() => expect(rows().length).toBe(1), { timeout: 3000 });
+    await settled(1);
     expect(box()).toBeTruthy(); // AAA combines
     apply("BBB");
-    await waitFor(() => expect(rows().length).toBe(2), { timeout: 3000 });
+    await settled(2);
     expect(box()).toBeNull(); // BBB does not
     // Removing the code that cannot combine re-quotes the rest and brings the field back.
     fireEvent.click(screen.getByRole("button", { name: /Remove coupon BBB/ }));
-    await waitFor(() => expect(rows().length).toBe(1), { timeout: 3000 });
+    await settled(1);
     expect(quoteBodies[quoteBodies.length - 1]).toMatchObject({ couponCode: "AAA" });
     expect(quoteBodies[quoteBodies.length - 1].couponCodes).toBeUndefined();
     await waitFor(() => expect(box()).toBeTruthy());
@@ -180,7 +190,7 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     render(<PaymentPageCheckout paymentPage={page()} slug="bundle-page" />);
     await waitFor(() => expect(box()).toBeTruthy());
     apply("AAA");
-    await waitFor(() => expect(rows().length).toBe(1), { timeout: 3000 });
+    await settled(1);
     expect(box()).toBeNull();
   });
 
@@ -190,7 +200,7 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     await waitFor(() => expect(box()).toBeTruthy());
     for (let i = 1; i <= 5; i++) {
       apply(`C${i}`);
-      await waitFor(() => expect(rows().length).toBe(i), { timeout: 3000 });
+      await settled(i);
       if (i < 5) expect(box()).toBeTruthy();
     }
     expect(box()).toBeNull();
@@ -200,7 +210,7 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     stubPlatform({ bad: { CCC: { reason: "not_valid" } } });
     await applyTwo();
     apply("CCC");
-    await screen.findByText(/This code was not applied/);
+    await screen.findByText(/This code was not applied/, {}, { timeout: 4000 });
     await pay();
     expect(checkoutBodies[0].couponCode).toBe("AAA");
     expect(checkoutBodies[0].couponCodes).toEqual(["AAA", "BBB"]);
@@ -211,7 +221,7 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     render(<PaymentPageCheckout paymentPage={page()} slug="bundle-page" />);
     await waitFor(() => expect(box()).toBeTruthy());
     apply("AAA");
-    await waitFor(() => expect(rows().length).toBe(1), { timeout: 3000 });
+    await settled(1);
     await pay();
     expect(checkoutBodies[0].couponCode).toBe("AAA");
     expect("couponCodes" in checkoutBodies[0]).toBe(false);
@@ -222,7 +232,7 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     await applyTwo();
     checkoutAnswer = { status: 400, body: { code: "coupon_not_combinable", error: "BBB can't be combined with AAA", couponCode: "BBB", conflictsWith: ["AAA"] } };
     await pay();
-    expect(await screen.findByText("BBB can't be combined with AAA")).toBeTruthy();
+    expect(await screen.findByText("BBB can't be combined with AAA", {}, { timeout: 4000 })).toBeTruthy();
     await waitFor(() => {
       const last = quoteBodies[quoteBodies.length - 1];
       expect(last.couponCode).toBe("AAA");
@@ -235,7 +245,7 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     await applyTwo();
     checkoutAnswer = { status: 400, body: { code: "coupon_not_combinable", couponCode: "BBB", conflictsWith: ["AAA"] } };
     await pay();
-    expect(await screen.findByText("This code cannot be combined with the other codes.")).toBeTruthy();
+    expect(await screen.findByText("This code cannot be combined with the other codes.", {}, { timeout: 4000 })).toBeTruthy();
   });
 
   it("too_many_coupons at checkout shows the sentence and keeps every code", async () => {
@@ -243,7 +253,7 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     await applyTwo();
     checkoutAnswer = { status: 400, body: { code: "too_many_coupons", error: "At most 5 codes" } };
     await pay();
-    expect(await screen.findByText("At most 5 codes")).toBeTruthy();
+    expect(await screen.findByText("At most 5 codes", {}, { timeout: 4000 })).toBeTruthy();
     expect(rows().length).toBe(2);
   });
 
@@ -254,7 +264,7 @@ describe("PaymentPageCheckout: more than one coupon code", () => {
     await waitFor(() => expect(rows().length).toBe(1), { timeout: 3000 });
     expect(localStorage.getItem(PENDING_COUPON_KEY)).not.toBeNull();
     apply("TYPED");
-    await waitFor(() => expect(rows().length).toBe(2), { timeout: 3000 });
+    await settled(2);
     expect(quoteBodies[quoteBodies.length - 1].couponCodes).toEqual(["LINK", "TYPED"]);
     await waitFor(() => expect(localStorage.getItem(PENDING_COUPON_KEY)).toBeNull());
   });

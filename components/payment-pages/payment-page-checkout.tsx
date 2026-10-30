@@ -519,7 +519,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
       clearPendingCoupon();
       typedCodeRef.current = "";
       // The code was taken: the field is free for the next one.
-      if (listed) setCouponInput("");
+      if (listed) setCouponInput((v) => (v.trim().toUpperCase() === typed ? "" : v));
     }
     const link = linkCodeRef.current;
     if (!link || !sent.includes(link)) return;
