@@ -28,13 +28,29 @@ export type CouponReason =
   | "not_for_this_email"
   | "limit_reached"
   | "minimum_not_met"
-  | "maximum_exceeded";
+  | "maximum_exceeded"
+  | "not_combinable"
+  | "too_many_coupons";
 
 export interface QuoteCoupon {
   status: "applied" | "dropped" | "refused" | "pending_email";
   code?: string;
   reason?: CouponReason;
+  /** The buyer-language sentence the server sends for not_combinable and too_many_coupons. */
+  message?: string;
+  /** One-coupon answer: whether this coupon may be combined with others (a missing flag reads as false). */
+  allowCombining?: boolean;
 }
+
+/** One applied coupon with ITS share of the discount, after the page's cap: shown as sent, never recomputed. */
+export interface QuoteCouponShare {
+  code: string;
+  discount: number;
+  allowCombining?: boolean;
+}
+
+/** The most buyer codes a quote or checkout takes (the server answers too_many_coupons beyond it). */
+export const MAX_COUPON_CODES = 5;
 
 export interface BundleSelection {
   selectedVariantId?: string | null;
@@ -81,6 +97,8 @@ export interface PaymentQuote {
   total: number;
   recurring: { billingCycle: string; amount: number }[];
   coupon: QuoteCoupon | null;
+  /** Every applied coupon with its own discount; absent when none applied (or on a dashboard that predates stacking). */
+  coupons?: QuoteCouponShare[];
   selections: { bundleSelections: BundleSelections };
   catalogue?: CatalogueBundle[];
   /** ISO 4217 code every amount is priced in: the page's own, else the account's, else null (never a guess). */
@@ -89,7 +107,10 @@ export interface PaymentQuote {
 
 export interface RequoteInput {
   selections: BundleSelections;
+  /** The first code (the whole input when one code is asked). */
   couponCode: string;
+  /** All the codes asked, first included; set only for 2 or more. */
+  couponCodes?: string[];
   email: string;
 }
 
@@ -125,11 +146,76 @@ export function isQuotableEmail(email: string): boolean {
   return /^[\x21-\x7e]+@[\x21-\x7e]+\.[\x21-\x7e]+$/.test(e) && e.split("@").length === 2;
 }
 
+const sameCode = (a: string, b: string) => a.trim().toUpperCase() === b.trim().toUpperCase();
+
+/** The codes an input asks with, in order: blanks dropped, duplicates (any case) collapsed to the first spelling. */
+export function inputCodes(input: { couponCode: string; couponCodes?: string[] }): string[] {
+  const all = input.couponCodes && input.couponCodes.length ? input.couponCodes : [input.couponCode];
+  const out: string[] = [];
+  for (const raw of all) {
+    const code = (raw ?? "").trim();
+    if (code && !out.some((c) => sameCode(c, code))) out.push(code);
+  }
+  return out;
+}
+
+/** A list of codes as the input fields: `couponCode` is the first, `couponCodes` is set only for 2 or more. */
+export function codesToInput(codes: string[]): { couponCode: string; couponCodes?: string[] } {
+  return codes.length > 1 ? { couponCode: codes[0], couponCodes: codes } : { couponCode: codes[0] ?? "" };
+}
+
+/** The input with its codes replaced by `codes` (no stale `couponCodes` left behind). */
+export function withCodes(input: RequoteInput, codes: string[]): RequoteInput {
+  return { selections: input.selections, email: input.email, ...codesToInput(codes) };
+}
+
+/** One string for a list of codes, for effect keys and comparisons (never array identity). */
+export function codesKey(codes: string[]): string {
+  return codes.map((c) => c.trim().toUpperCase()).join("|");
+}
+
+/**
+ * The applied coupons the quote reports. A quote from a dashboard that predates stacking carries only `coupon`; it is read
+ * as one applied coupon that cannot combine. `listed` says whether the server sent the list (stacking-aware answer).
+ */
+export function quoteAppliedCoupons(quote: PaymentQuote): { listed: boolean; coupons: QuoteCouponShare[] } {
+  if (quote.coupons && quote.coupons.length) {
+    return { listed: true, coupons: quote.coupons.map((c) => ({ ...c, allowCombining: c.allowCombining === true })) };
+  }
+  if (quote.coupon?.status === "applied" && quote.coupon.code) {
+    return {
+      listed: false,
+      coupons: [{ code: quote.coupon.code, discount: quote.couponDiscount, allowCombining: quote.coupon.allowCombining === true }],
+    };
+  }
+  return { listed: false, coupons: [] };
+}
+
+/** The buyer's own applied codes in the quote (the page's pre-assigned coupon, if listed, is not the buyer's). */
+export function appliedBuyerCodes(quote: PaymentQuote, pageCouponCode?: string | null): string[] {
+  const { listed, coupons } = quoteAppliedCoupons(quote);
+  if (!listed) return [];
+  return coupons.map((c) => c.code).filter((code) => !(pageCouponCode && sameCode(code, pageCouponCode)));
+}
+
+/**
+ * Whether the "add another code" field shows: always while the buyer has no code applied; after that only when every
+ * applied coupon allows combining and fewer than MAX_COUPON_CODES are applied. A quote that does not list its coupons
+ * keeps the single-code behaviour (a typed code replaces the applied one).
+ */
+export function canAddAnotherCode(quote: PaymentQuote, pageCouponCode?: string | null): boolean {
+  const { listed, coupons } = quoteAppliedCoupons(quote);
+  if (!listed) return true;
+  if (appliedBuyerCodes(quote, pageCouponCode).length === 0) return true;
+  return coupons.length < MAX_COUPON_CODES && coupons.every((c) => c.allowCombining === true);
+}
+
 export function buildQuoteBody(domain: string, input: RequoteInput, language?: string): Record<string, unknown> {
   const body: Record<string, unknown> = { domain, bundleSelections: input.selections };
   if (language) body.language = language;
-  const code = input.couponCode.trim();
-  if (code) body.couponCode = code;
+  const codes = inputCodes(input);
+  if (codes.length) body.couponCode = codes[0];
+  if (codes.length > 1) body.couponCodes = codes;
   if (isQuotableEmail(input.email)) body.email = input.email.trim();
   return body;
 }
@@ -266,13 +352,13 @@ export function payHold(state: {
   /** The input the shown quote was priced with. */
   quotedInput: RequoteInput;
   /** The coupon code and email the buyer has now (email already reduced to a quotable one or ""). */
-  current: { couponCode: string; email: string };
+  current: { couponCode: string; couponCodes?: string[]; email: string };
 }): PayHold {
   if (state.pending) return "pending";
   if (!selectionsMatch(state.quote.selections.bundleSelections, state.selections)) return "selections_changed";
   if (state.failed) return null;
   const inputsDiffer =
-    state.current.couponCode.trim() !== state.quotedInput.couponCode.trim() ||
+    codesKey(inputCodes(state.current)) !== codesKey(inputCodes(state.quotedInput)) ||
     state.current.email.trim() !== state.quotedInput.email.trim();
   if (inputsDiffer) return "pending";
   if (state.quote.coupon?.status === "pending_email") return "pending_email";
@@ -300,15 +386,25 @@ export function buildCheckoutBody(input: CheckoutBodyInput): Record<string, unkn
     bundleSelections: input.quote.selections.bundleSelections,
   };
   if (input.language) body.language = input.language;
-  const code = input.quotedInput.couponCode.trim();
-  if (code && input.quote.coupon?.status === "applied") body.couponCode = code;
+  const asked = inputCodes(input.quotedInput);
+  let sent: string[] = [];
+  if (input.quote.coupons && input.quote.coupons.length) {
+    const applied = input.quote.coupons.map((c) => c.code);
+    sent = asked.filter((code) => applied.some((a) => sameCode(a, code)));
+  } else if (input.quote.coupon?.status === "applied") {
+    sent = asked;
+  }
+  if (sent.length) body.couponCode = sent[0];
+  if (sent.length > 1) body.couponCodes = sent;
   return body;
 }
 
 export type CheckoutFailure =
   | { kind: "quote_changed"; quote: PaymentQuote }
   | { kind: "quote_required" }
-  | { kind: "coupon_refused"; reason: CouponReason | null }
+  | { kind: "coupon_refused"; reason: CouponReason | null; couponCode?: string }
+  | { kind: "coupon_not_combinable"; couponCode: string | null; conflictsWith: string[]; message: string | null }
+  | { kind: "too_many_coupons"; message: string | null }
   | { kind: "error"; code: string | null; message: string | null };
 
 export function interpretCheckoutFailure(status: number, body: any): CheckoutFailure {
@@ -318,7 +414,22 @@ export function interpretCheckoutFailure(status: number, body: any): CheckoutFai
   }
   if (code === "quote_required") return { kind: "quote_required" };
   if (code === "coupon_refused") {
-    return { kind: "coupon_refused", reason: typeof body?.reason === "string" ? (body.reason as CouponReason) : null };
+    return {
+      kind: "coupon_refused",
+      reason: typeof body?.reason === "string" ? (body.reason as CouponReason) : null,
+      ...(typeof body?.couponCode === "string" ? { couponCode: body.couponCode } : {}),
+    };
+  }
+  if (code === "coupon_not_combinable") {
+    return {
+      kind: "coupon_not_combinable",
+      couponCode: typeof body?.couponCode === "string" ? body.couponCode : null,
+      conflictsWith: Array.isArray(body?.conflictsWith) ? body.conflictsWith.filter((c: unknown) => typeof c === "string") : [],
+      message: typeof body?.error === "string" && body.error ? body.error : null,
+    };
+  }
+  if (code === "too_many_coupons") {
+    return { kind: "too_many_coupons", message: typeof body?.error === "string" && body.error ? body.error : null };
   }
   return { kind: "error", code, message: typeof body?.error === "string" ? body.error : null };
 }

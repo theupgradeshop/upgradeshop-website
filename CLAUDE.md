@@ -342,3 +342,5 @@ Ported from the base template (template b882579). Full behaviour: `/home/master/
 ## Coupon in a link
 
 `?coupon=CODE` on any page is parked by `components/coupon-link-capture.tsx` (root layout, `lib/coupon-link.ts`); `components/payment-pages/payment-page-checkout.tsx` feeds it into the quote path (`setQuoteCode`) on arrival, never over the page's own coupon; cleared on a typed apply, remove, a refused/dropped quote coupon, a `coupon_refused` submit and success. Component tests (`*.coupon-link.test.tsx`, `coupon-link-capture.test.tsx`) need jsdom and @testing-library, which this site does not install: run them on another checkout's node_modules (they are excluded from tsc).
+
+More than one code on the quote path (DC13 U6): `lib/payment-quote.ts` asks with `couponCode` (first) + `couponCodes` (2+ only); rows are the quote's `coupons`; the add-another field shows only while every `coupons[].allowCombining` is true and fewer than 5 apply; checkout sends only the codes the quote applied; `coupon_not_combinable` / `too_many_coupons` show the server `error` sentence else the page words. The legacy non-quote branch stays single-code.

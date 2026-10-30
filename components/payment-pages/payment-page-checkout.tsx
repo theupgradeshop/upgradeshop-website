@@ -26,6 +26,13 @@ import {
   currencyOf,
   isQuotableEmail,
   selectionsKey,
+  inputCodes,
+  codesToInput,
+  codesKey,
+  withCodes,
+  appliedBuyerCodes,
+  canAddAnotherCode,
+  quoteAppliedCoupons,
   createRequoter,
   payHold,
   buildCheckoutBody,
@@ -121,6 +128,11 @@ const translations: Record<string, Record<string, string>> = {
     reason_limit_reached: "This code has reached its usage limit.",
     reason_minimum_not_met: "This purchase is below the minimum for this code.",
     reason_maximum_exceeded: "This purchase is above the maximum for this code.",
+    reason_not_combinable: "This code cannot be combined with the other codes.",
+    reason_too_many_coupons: "Too many codes. Remove one and try again.",
+    couponNotCombinable: "This code cannot be combined with the other codes.",
+    tooManyCoupons: "Too many codes. Remove one and try again.",
+    removeCoupon: "Remove coupon",
     itemDiscount: "Item discount",
     globalDiscount: "Discount",
     couponDiscount: "Coupon discount",
@@ -211,6 +223,11 @@ const translations: Record<string, Record<string, string>> = {
     reason_limit_reached: "הקוד הגיע למגבלת השימוש.",
     reason_minimum_not_met: "הרכישה נמוכה מהמינימום הנדרש לקוד.",
     reason_maximum_exceeded: "הרכישה גבוהה מהמקסימום המותר לקוד.",
+    reason_not_combinable: "לא ניתן לשלב את הקוד עם הקודים האחרים.",
+    reason_too_many_coupons: "יותר מדי קודים. הסירו קוד ונסו שוב.",
+    couponNotCombinable: "לא ניתן לשלב את הקוד עם הקודים האחרים.",
+    tooManyCoupons: "יותר מדי קודים. הסירו קוד ונסו שוב.",
+    removeCoupon: "הסרת הקופון",
     itemDiscount: "הנחת פריט",
     globalDiscount: "הנחה",
     couponDiscount: "הנחת קופון",
@@ -364,7 +381,9 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
   const [catalogue] = useState<CatalogueBundle[]>(initialQuote?.catalogue ?? []);
   const [selections, setSelections] = useState<BundleSelections>(initialQuote?.selections.bundleSelections ?? {});
   const [couponInput, setCouponInput] = useState("");
-  const [quoteCode, setQuoteCode] = useState("");
+  // The codes the quote is asked with (a typed code, a link code); what is APPLIED is only what the quote reports.
+  const [codes, setCodes] = useState<string[]>([]);
+  const quoteCode = codesKey(codes);
   const [quotePending, setQuotePending] = useState(false);
   const [requoteFailed, setRequoteFailed] = useState(false);
   const [requoteUnavailable, setRequoteUnavailable] = useState(false);
@@ -475,11 +494,11 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
   // a typed code takes, so the dashboard's quote validates it (never applied unvalidated). The page's own
   // pre-assigned coupon wins, and so does anything already applied.
   useEffect(() => {
-    if (!quoteActive || quoteCode || paymentPage.coupon || initialQuote?.coupon) return;
+    if (!quoteActive || codes.length || paymentPage.coupon || initialQuote?.coupon) return;
     const pending = readPendingCoupon();
     if (!pending) return;
     linkCodeRef.current = pending.code;
-    setQuoteCode(pending.code);
+    setCodes([pending.code]);
     setCouponInput(pending.code);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -489,28 +508,45 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
   // `quotedInputRef` holds the input the current quote answers.
   const linkCodeRef = useRef("");
   const typedCodeRef = useRef("");
-  const quoteCouponStatus = quote?.coupon?.status;
   useEffect(() => {
-    const sent = quotedInputRef.current.couponCode.trim().toUpperCase();
-    if (!sent) return;
-    if (quoteCouponStatus === "applied") {
-      if (sent === typedCodeRef.current) {
-        clearPendingCoupon();
-        typedCodeRef.current = "";
-      }
-    } else if ((quoteCouponStatus === "refused" || quoteCouponStatus === "dropped") && sent === linkCodeRef.current) {
+    const sent = inputCodes(quotedInputRef.current).map((c) => c.toUpperCase());
+    if (!sent.length || !quote) return;
+    const status = quote.coupon?.status;
+    const { listed, coupons: shares } = quoteAppliedCoupons(quote);
+    const appliedNow = shares.map((c) => c.code.toUpperCase());
+    const typed = typedCodeRef.current;
+    if (typed && sent.includes(typed) && (appliedNow.includes(typed) || (status === "applied" && sent.length === 1))) {
       clearPendingCoupon();
+      typedCodeRef.current = "";
+      // The code was taken: the field is free for the next one.
+      if (listed) setCouponInput("");
     }
+    const link = linkCodeRef.current;
+    if (!link || !sent.includes(link)) return;
+    const refusedCode = quote.coupon?.code ? quote.coupon.code.toUpperCase() : sent.length === 1 ? sent[0] : "";
+    if ((status === "refused" && refusedCode === link) || status === "dropped") clearPendingCoupon();
   }, [quote]);
   useEffect(() => {
     if (success) clearPendingCoupon();
   }, [success]);
 
   // A coupon the buyer types replaces the link coupon once the quote accepts it (effect above).
+  // The quote is asked with [the codes it applied, the new one last]; a quote that lists no coupons is single-code (replace).
   const applyTypedCoupon = () => {
     const typed = couponInput.trim();
+    if (!typed) return;
     typedCodeRef.current = typed.toUpperCase();
-    setQuoteCode(typed);
+    const base = quote ? appliedBuyerCodes(quote, paymentPage.coupon?.code) : [];
+    setCodes(inputCodes({ couponCode: "", couponCodes: [...base, typed] }));
+  };
+
+  // Removing a row asks the quote again with the rest.
+  const removeCoupon = (code: string) => {
+    const base = quote && quoteAppliedCoupons(quote).listed ? appliedBuyerCodes(quote, paymentPage.coupon?.code) : codes;
+    const rest = base.filter((c) => c.trim().toUpperCase() !== code.trim().toUpperCase());
+    if (!rest.length) clearPendingCoupon();
+    setCodes(rest);
+    setCouponInput("");
   };
 
   // Record page view
@@ -582,7 +618,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
     setQuotePending(false);
   }, [quoteLocked]);
   const quotableEmail = isQuotableEmail(email) ? email.trim() : "";
-  currentInputRef.current = { selections, couponCode: quoteCode, email: quotableEmail };
+  currentInputRef.current = { selections, ...codesToInput(codes), email: quotableEmail };
   const requoteKey = JSON.stringify([selectionsKey(selections), quoteCode, quotableEmail]);
   // The "price updated" notice is about the choices the buyer had; changing any of them dismisses it.
   // The key the door's own quote_changed answer put the choices at is not a buyer change and keeps the notice.
@@ -599,7 +635,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
     }
     if (lastRequoteKeyRef.current === requoteKey) return;
     lastRequoteKeyRef.current = requoteKey;
-    requoterRef.current?.schedule({ selections, couponCode: quoteCode, email: quotableEmail });
+    requoterRef.current?.schedule({ selections, ...codesToInput(codes), email: quotableEmail });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requoteKey, quoteActive, quoteLocked]);
 
@@ -803,7 +839,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
         failed: requoteFailed,
         selections,
         quotedInput: quotedInputRef.current,
-        current: { couponCode: quoteCode, email: quotableEmail },
+        current: { ...codesToInput(codes), email: quotableEmail },
       })
     : null;
 
@@ -968,12 +1004,29 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
           setLoading(false);
           return;
         }
-        if (failure.kind === "coupon_refused") {
-          if (quotedInputRef.current.couponCode.trim().toUpperCase() === linkCodeRef.current) clearPendingCoupon();
-          quotedInputRef.current = { ...quotedInputRef.current, couponCode: "" };
-          setQuoteCode("");
+        if (failure.kind === "coupon_refused" || failure.kind === "coupon_not_combinable") {
+          // The refused code goes (with no code named, every code goes, as before); the others stay applied.
+          const asked = inputCodes(quotedInputRef.current);
+          const named = failure.couponCode;
+          const rest = named ? asked.filter((c) => c.toUpperCase() !== named.trim().toUpperCase()) : [];
+          if (asked.some((c) => c.toUpperCase() === linkCodeRef.current) && !rest.some((c) => c.toUpperCase() === linkCodeRef.current)) {
+            clearPendingCoupon();
+          }
+          quotedInputRef.current = withCodes(quotedInputRef.current, rest);
+          setCodes(rest);
           setCouponInput("");
-          setError(failure.reason ? couponReasonLabel(failure.reason) : t.couponRefused);
+          setError(
+            failure.kind === "coupon_not_combinable"
+              ? failure.message || t.couponNotCombinable
+              : failure.reason
+                ? couponReasonLabel(failure.reason)
+                : t.couponRefused
+          );
+          setLoading(false);
+          return;
+        }
+        if (failure.kind === "too_many_coupons") {
+          setError(failure.message || t.tooManyCoupons);
           setLoading(false);
           return;
         }
@@ -1193,47 +1246,55 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
 
                 {/* Coupon — typed here, priced by the quote (POST /quote with couponCode). */}
                 <div className="space-y-2">
-                  <Label htmlFor="couponCode">{t.couponCode}</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="couponCode"
-                      value={couponInput}
-                      disabled={quoteLocked}
-                      onChange={(e) => setCouponInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          applyTypedCoupon();
-                        }
-                      }}
-                      className="text-sm"
-                      dir="ltr"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={quoteLocked}
-                      onClick={applyTypedCoupon}
-                      className="shrink-0"
-                    >
-                      {t.applyCoupon}
-                    </Button>
-                  </div>
-                  {quote.coupon?.status === "applied" && (
-                    <p className="text-sm text-green-700">
-                      {t.couponApplied}
-                      {quote.coupon.code ? `: ${quote.coupon.code}` : ""}
-                      {quoteCode && !quoteLocked && (
-                        <button
+                  {(quote.coupon?.status === "applied" || (quote.coupon?.status === "refused" && quoteAppliedCoupons(quote).listed)) &&
+                    quoteAppliedCoupons(quote).coupons.map((applied) => (
+                      <div key={applied.code} data-testid="applied-coupon" className="flex items-center justify-between gap-2 text-sm text-green-700">
+                        <span>{`${t.couponApplied}: ${applied.code}`}</span>
+                        <span className="flex items-center gap-2">
+                          {quoteAppliedCoupons(quote).listed && <span>{money(-applied.discount)}</span>}
+                          {!quoteLocked && !(paymentPage.coupon?.code && applied.code.toUpperCase() === paymentPage.coupon.code.toUpperCase()) && (
+                            <button
+                              type="button"
+                              onClick={() => removeCoupon(applied.code)}
+                              aria-label={`${t.removeCoupon} ${applied.code}`}
+                              className="text-green-600 hover:text-green-800 text-xs underline"
+                            >
+                              {t.remove}
+                            </button>
+                          )}
+                        </span>
+                      </div>
+                    ))}
+                  {canAddAnotherCode(quote, paymentPage.coupon?.code) && (
+                    <>
+                      <Label htmlFor="couponCode">{t.couponCode}</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="couponCode"
+                          value={couponInput}
+                          disabled={quoteLocked}
+                          onChange={(e) => setCouponInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              applyTypedCoupon();
+                            }
+                          }}
+                          className="text-sm"
+                          dir="ltr"
+                        />
+                        <Button
                           type="button"
-                          onClick={() => { clearPendingCoupon(); setQuoteCode(""); setCouponInput(""); }}
-                          className="text-green-600 hover:text-green-800 text-xs underline ms-2"
+                          variant="outline"
+                          size="sm"
+                          disabled={quoteLocked}
+                          onClick={applyTypedCoupon}
+                          className="shrink-0"
                         >
-                          {t.remove}
-                        </button>
-                      )}
-                    </p>
+                          {t.applyCoupon}
+                        </Button>
+                      </div>
+                    </>
                   )}
                   {quote.coupon?.status === "pending_email" && (
                     <p className="text-sm text-muted-foreground">{t.couponPendingEmail}</p>
@@ -1246,8 +1307,14 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
                   )}
                   {quote.coupon?.status === "refused" && (
                     <p className="text-sm text-red-600">
-                      {t.couponRefused}
-                      {quote.coupon.reason ? `: ${couponReasonLabel(quote.coupon.reason)}` : ""}
+                      {quote.coupon.message ? (
+                        quote.coupon.message
+                      ) : (
+                        <>
+                          {t.couponRefused}
+                          {quote.coupon.reason ? `: ${couponReasonLabel(quote.coupon.reason)}` : ""}
+                        </>
+                      )}
                     </p>
                   )}
                 </div>
