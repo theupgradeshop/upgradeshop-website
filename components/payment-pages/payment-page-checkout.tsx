@@ -341,6 +341,37 @@ interface PaymentPageCheckoutProps {
   locale?: string;
 }
 
+// The proof of this browser's last attempt on a page (the order id and its ownership token), kept for the tab and sent
+// back as `retryOf` so a buyer retrying their own unpaid attempt on a page with a usage limit takes over the unit they
+// already hold. Same key as the dashboard's own pay page. Storage can be unavailable or blocked: then there is simply no proof.
+const retryProofKey = (slug: string) => `ush-pay-retry:${slug}`;
+function saveRetryProof(slug: string, orderId: string, ownershipToken: string) {
+  try {
+    window.sessionStorage.setItem(retryProofKey(slug), JSON.stringify({ orderId, ownershipToken }));
+  } catch {
+    /* no storage: no proof */
+  }
+}
+function clearRetryProof(slug: string) {
+  try {
+    window.sessionStorage.removeItem(retryProofKey(slug));
+  } catch {
+    /* no storage: nothing to clear */
+  }
+}
+function readRetryProof(slug: string): { orderId: string; ownershipToken: string } | null {
+  try {
+    const raw = window.sessionStorage.getItem(retryProofKey(slug));
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed.orderId === "string" && typeof parsed.ownershipToken === "string"
+      ? { orderId: parsed.orderId, ownershipToken: parsed.ownershipToken }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+
 export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCheckoutProps) {
   const lang = paymentPage.language || locale || "en";
   const t = translations[lang] || translations.en;
@@ -529,6 +560,9 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
   useEffect(() => {
     if (success) clearPendingCoupon();
   }, [success]);
+  useEffect(() => {
+    if (success) clearRetryProof(slug);
+  }, [success, slug]);
 
   // A coupon the buyer types replaces the link coupon once the quote accepts it (effect above).
   // The quote is asked with [the codes it applied, the new one last]; a quote that lists no coupons is single-code (replace).
@@ -974,10 +1008,11 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
         quote !== null
           ? buildCheckoutBody({ domain, customerData, viewId, language: lang, quote, quotedInput: quotedInputRef.current })
           : { domain, customerData, viewId, couponCode: appliedCoupon?.code || null };
+      const retryOf = readRetryProof(slug);
       const res = await fetch(`${PLATFORM_URL}/api/public/payment-pages/${slug}/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(checkoutBody),
+        body: JSON.stringify(retryOf ? { ...checkoutBody, retryOf } : checkoutBody),
       });
 
       if (!res.ok) {
@@ -1038,6 +1073,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
       setPriceNotice(false);
 
       const result = await res.json();
+      if (typeof result.ownershipToken === "string" && result.order?.id) saveRetryProof(slug, result.order.id, result.ownershipToken);
 
       if (!result.requiresPayment) {
         // Free order (or a coupon that zeroed it out) — done immediately.
