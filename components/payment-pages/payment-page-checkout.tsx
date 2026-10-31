@@ -371,7 +371,6 @@ function readRetryProof(slug: string): { orderId: string; ownershipToken: string
   }
 }
 
-
 export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCheckoutProps) {
   const lang = paymentPage.language || locale || "en";
   const t = translations[lang] || translations.en;
@@ -1073,7 +1072,7 @@ export function PaymentPageCheckout({ paymentPage, slug, locale }: PaymentPageCh
       setPriceNotice(false);
 
       const result = await res.json();
-      if (typeof result.ownershipToken === "string" && result.order?.id) saveRetryProof(slug, result.order.id, result.ownershipToken);
+      if (typeof result.ownershipToken === "string" && typeof result.order?.id === "string") saveRetryProof(slug, result.order.id, result.ownershipToken);
 
       if (!result.requiresPayment) {
         // Free order (or a coupon that zeroed it out) — done immediately.
