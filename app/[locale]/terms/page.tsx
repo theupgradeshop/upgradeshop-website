@@ -33,7 +33,7 @@ export default function TermsPage() {
           Terms of Use
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: October 25, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: November 3, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -272,10 +272,10 @@ export default function TermsPage() {
               8. Founder Price and the Waitlist
             </h2>
             <p className="leading-relaxed mb-4">
-              Everyone who joined the waitlist before launch gets the Founder Price: 20% off the subscription price, monthly or annual, and 20% off the setup fee. It lasts for as long as you stay subscribed. A price change never touches it, and nothing ends it except cancelling. If you cancel and come back later, you pay the current full price.
+              Anyone can join the waitlist, and there is no limit on how many people do. Every waitlist member hears from us when we open. Before we open to everyone, we invite some waitlist members, by email, to subscribe early as founders. There are 50 founder spots. They go to the first 50 businesses that subscribe from an invitation, and once 50 have subscribed, the Founder Price is no longer offered. A founder gets the Founder Price: 20% off the subscription price, monthly or annual, and 20% off the setup fee. It lasts for as long as you stay subscribed. A price change never touches it, and nothing ends it except cancelling. If you cancel and come back later, you pay the current full price. Joining the waitlist does not by itself give you the Founder Price or an invitation.
             </p>
             <p className="leading-relaxed">
-              When you join the waitlist, you give us your name, email address, and WhatsApp number. We use them to tell you about the launch and your Founder Price, as described in our <a href="/privacy-policy" className="underline">Privacy Policy</a>. You can ask us to stop at any time. Joining the waitlist does not oblige you to buy anything, and it does not guarantee a place or a date.
+              When you join the waitlist, you give us your name, email address, and WhatsApp number. We use them to tell you about the launch and, if you are invited, the Founder Price, as described in our <a href="/privacy-policy" className="underline">Privacy Policy</a>. You can ask us to stop at any time. Joining the waitlist does not oblige you to buy anything, and it does not guarantee a place or a date.
             </p>
           </section>
 
