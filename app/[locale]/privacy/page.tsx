@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: October 25, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: November 4, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -144,6 +144,7 @@ export default function PrivacyPage() {
               <li><strong>Chat with Max:</strong> Max is an AI assistant, not a person. We log the conversation to run and improve the chat. We keep conversations anonymous unless you give us your name, email address or phone number. Please do not type sensitive personal information, such as health or payment card details, into the chat.</li>
               <li><strong>Checkout:</strong> the details needed to take payment and issue your invoice, handled as described in Section 7.</li>
               <li><strong>Browser storage:</strong> the website stores your language choice in a cookie and in your browser&rsquo;s local storage so that it remembers it on your next visit. If you start our checkout, the form keeps what you have typed in your browser&rsquo;s local storage so that you don&rsquo;t lose it; it stays on your device. We do not run advertising cookies or third-party analytics on upgradeshop.ai.</li>
+              <li><strong>Form protection:</strong> our forms are protected by Cloudflare Turnstile, an invisible check that a person, not an automated program, is sending the form. When a page with a form loads, Cloudflare collects technical information about your browser and device to do this check. Cloudflare&rsquo;s use of that information is described in its <a href="https://www.cloudflare.com/turnstile-privacy-policy/" className="underline">Turnstile Privacy Addendum</a>.</li>
             </ul>
           </section>
 
@@ -470,7 +471,7 @@ export default function PrivacyPage() {
                   <tr><td className="py-2 pr-4">DeepSeek</td><td className="py-2 pr-4">AI models for background tasks (classification, extraction, contact summaries, translation). You can ask us to stop using it on your account (Section 8)</td><td className="py-2">China</td></tr>
                   <tr><td className="py-2 pr-4">Google (Gemini)</td><td className="py-2 pr-4">AI models for document extraction, logo analysis, images, short labels</td><td className="py-2">United States</td></tr>
                   <tr><td className="py-2 pr-4">Amazon Web Services (SES)</td><td className="py-2 pr-4">Email sending, and receiving and forwarding mail sent to your domain (SES, S3)</td><td className="py-2">EU region</td></tr>
-                  <tr><td className="py-2 pr-4">Cloudflare</td><td className="py-2 pr-4">File and media storage (R2), DNS</td><td className="py-2">United States, global network</td></tr>
+                  <tr><td className="py-2 pr-4">Cloudflare</td><td className="py-2 pr-4">File and media storage (R2), DNS, and the robot check on our forms (Turnstile)</td><td className="py-2">United States, global network</td></tr>
                   <tr><td className="py-2 pr-4">Bunny.net</td><td className="py-2 pr-4">Course video hosting and delivery</td><td className="py-2">Slovenia (EU), global network</td></tr>
                   <tr><td className="py-2 pr-4">Gumlet</td><td className="py-2 pr-4">Course video hosting (existing courses)</td><td className="py-2">India</td></tr>
                   <tr><td className="py-2 pr-4">ElevenLabs</td><td className="py-2 pr-4">AI dubbing of course videos</td><td className="py-2">United States</td></tr>
