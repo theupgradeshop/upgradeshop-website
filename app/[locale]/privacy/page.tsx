@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: November 4, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: November 8, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -466,7 +466,7 @@ export default function PrivacyPage() {
                 </thead>
                 <tbody className="divide-y divide-foreground/10">
                   <tr><td className="py-2 pr-4">Hetzner Online GmbH</td><td className="py-2 pr-4">Servers and database hosting</td><td className="py-2">Germany (EU)</td></tr>
-                  <tr><td className="py-2 pr-4">Anthropic</td><td className="py-2 pr-4">AI models for the assistants and dashboard AI features</td><td className="py-2">United States</td></tr>
+                  <tr><td className="py-2 pr-4">Anthropic</td><td className="py-2 pr-4">AI models for the assistants and dashboard AI features, and for scoring open answers and photos on AI-scored forms (Forms Pro)</td><td className="py-2">United States</td></tr>
                   <tr><td className="py-2 pr-4">OpenAI</td><td className="py-2 pr-4">AI models (fallback, classification, memory embeddings)</td><td className="py-2">United States</td></tr>
                   <tr><td className="py-2 pr-4">DeepSeek</td><td className="py-2 pr-4">AI models for background tasks (classification, extraction, contact summaries, translation). You can ask us to stop using it on your account (Section 8)</td><td className="py-2">China</td></tr>
                   <tr><td className="py-2 pr-4">Google (Gemini)</td><td className="py-2 pr-4">AI models for document extraction, logo analysis, images, short labels</td><td className="py-2">United States</td></tr>
