@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { secretMatches } from "@/lib/secret-match";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
 
@@ -7,7 +8,7 @@ export async function GET(request: NextRequest) {
     const apiKey = request.headers.get("X-API-Key");
 
     // Verify API key
-    if (apiKey !== process.env.UPLOAD_API_KEY) {
+    if (!secretMatches(apiKey, process.env.UPLOAD_API_KEY)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

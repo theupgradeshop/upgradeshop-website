@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { secretMatches } from "@/lib/secret-match";
 import { rename, mkdir, access } from "fs/promises";
 import { join, dirname } from "path";
 
@@ -9,7 +10,7 @@ export async function PUT(request: NextRequest) {
     console.log("[Move API] Request received - source:", sourcePath, "dest:", destPath);
 
     // Verify API key
-    if (apiKey !== process.env.UPLOAD_API_KEY) {
+    if (!secretMatches(apiKey, process.env.UPLOAD_API_KEY)) {
       console.error("[Move API] Invalid API key");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

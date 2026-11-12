@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { secretMatches } from "@/lib/secret-match";
 import { writeFile, mkdir, access } from "fs/promises";
 import { join } from "path";
 import { constants } from "fs";
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
     console.log("[Upload API] Request received - file:", file?.name, "path:", path, "destination:", destination);
 
     // Verify API key
-    if (apiKey !== process.env.UPLOAD_API_KEY) {
+    if (!secretMatches(apiKey, process.env.UPLOAD_API_KEY)) {
       console.error("[Upload API] Invalid API key");
       return NextResponse.json({ error: "Invalid API key" }, { status: 401 });
     }
