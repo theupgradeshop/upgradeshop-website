@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { splitName } from "@/lib/first-name";
 import { clientIp } from "@/lib/client-ip";
+import { createIpRateLimiter } from "@/lib/ip-rate-limit";
 
 const PLATFORM_URL =
   process.env.NEXT_PUBLIC_PLATFORM_URL || "https://app.staging.upgradeshop.ai";
@@ -15,19 +16,7 @@ function siteDomain(): string {
 }
 
 // Simple in-memory rate limiting (5 requests per IP per 10 minutes)
-const RATE_LIMIT_WINDOW = 10 * 60 * 1000; // 10 minutes
-const RATE_LIMIT_MAX = 5;
-const ipRequests = new Map<string, number[]>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const requests = ipRequests.get(ip) || [];
-  const recent = requests.filter((t) => now - t < RATE_LIMIT_WINDOW);
-  if (recent.length >= RATE_LIMIT_MAX) return true;
-  recent.push(now);
-  ipRequests.set(ip, recent);
-  return false;
-}
+const isRateLimited = createIpRateLimiter(10 * 60 * 1000, 5);
 
 export async function POST(request: Request) {
   try {

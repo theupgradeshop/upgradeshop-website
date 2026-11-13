@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { siteKeyHeaders } from "@/lib/site-key-headers";
+import { clientIp } from "@/lib/client-ip";
+import { createIpRateLimiter } from "@/lib/ip-rate-limit";
+import { fetchSurveyFormConfig, SURVEY_FORM_ID } from "@/lib/survey-form";
 
 /**
  * Forms-module form proxy. Forwards a submission to the dashboard (POST /api/forms/submissions) with the form's
@@ -7,8 +10,14 @@ import { siteKeyHeaders } from "@/lib/site-key-headers";
  * CRM mapping itself; nothing of that is taken from the browser.
  * Env: COURSES_SERVICE_KEY (site key, already set for the waitlist), SITE_DOMAIN / NEXT_PUBLIC_SITE_URL, platform URL.
  */
-const CONFIG_ID_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const LANGUAGES = ["en", "he"];
+const MAX_VALUE_LENGTH = 2000;
+const MAX_EMAIL_LENGTH = 254;
+const MAX_SUBMISSION_AGE_MS = 24 * 60 * 60 * 1000;
+// A visitor's clock may run a little ahead of the server's.
+const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
+const isRateLimited = createIpRateLimiter(10 * 60 * 1000, 5);
 
 const PLATFORM_URL =
   process.env.UPGRADESHOP_API_URL ||
@@ -28,14 +37,26 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 
 export async function POST(request: Request) {
   try {
+    if (isRateLimited(clientIp(request))) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body = await request.json();
-    const { config_id, honeypot_field, submission_time, page_title, language } = body ?? {};
-    if (typeof config_id !== "string" || !CONFIG_ID_UUID.test(config_id) || !isPlainObject(body.form_data)) {
+    const { config_id, honeypot_field, submission_time, language } = body ?? {};
+    // Only the survey form is forwarded; the proxy never adds the site key to another config_id.
+    if (config_id !== SURVEY_FORM_ID || !isPlainObject(body.form_data)) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
+    const config = await fetchSurveyFormConfig();
+    if (!config || config.formId !== SURVEY_FORM_ID) {
+      return NextResponse.json({ error: "Form unavailable" }, { status: 503 });
+    }
+    // Keep only the configured questions, with capped values.
+    const allowedKeys = new Set(config.fields.map((f) => f.key));
     const formData: Record<string, string> = {};
     for (const [k, v] of Object.entries(body.form_data)) {
-      if (typeof v === "string" && v !== "" && k.length <= 80) formData[k] = v.slice(0, 5000);
+      if (!allowedKeys.has(k) || typeof v !== "string" || v === "") continue;
+      formData[k] = v.slice(0, k === "email" ? MAX_EMAIL_LENGTH : MAX_VALUE_LENGTH);
     }
     const email = formData.email ?? "";
     if (!EMAIL_REGEX.test(email)) {
@@ -45,11 +66,16 @@ export async function POST(request: Request) {
     // Bot protection: silent success, bots must not learn they were blocked.
     if (typeof honeypot_field === "string" && honeypot_field.trim() !== "") return NextResponse.json({ success: true });
     if (!submission_time) return NextResponse.json({ success: true });
-    const elapsed = (Date.now() - parseInt(String(submission_time), 10)) / 1000;
-    if (Number.isNaN(elapsed) || (elapsed >= 0 && elapsed < 3)) return NextResponse.json({ success: true });
+    const startedAt = parseInt(String(submission_time), 10);
+    const now = Date.now();
+    if (Number.isNaN(startedAt) || startedAt > now + MAX_CLOCK_SKEW_MS || now - startedAt > MAX_SUBMISSION_AGE_MS) {
+      return NextResponse.json({ error: "Invalid submission time" }, { status: 400 });
+    }
+    if ((now - startedAt) / 1000 < 3) return NextResponse.json({ success: true });
 
     const userIp =
       request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",").pop()?.trim() || "";
+    const safeLanguage = typeof language === "string" && LANGUAGES.includes(language) ? language : "en";
 
     const res = await fetch(`${PLATFORM_URL}/api/forms/submissions`, {
       method: "POST",
@@ -64,9 +90,9 @@ export async function POST(request: Request) {
         submitter_email: email,
         submitter_phone: formData.phone || null,
         form_data: formData,
-        config_id,
-        page_title: typeof page_title === "string" && page_title ? page_title : "Survey",
-        ...(typeof language === "string" && language.trim() ? { language: language.trim() } : {}),
+        config_id: SURVEY_FORM_ID,
+        page_title: "Survey",
+        language: safeLanguage,
         honeypot_field: honeypot_field || "",
         submission_time: String(submission_time),
         wa_whatsapp_consent: false,

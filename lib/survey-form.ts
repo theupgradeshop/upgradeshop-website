@@ -6,6 +6,8 @@
 import { fetchPageSections } from "@/lib/pages-api";
 
 export const SURVEY_PAGE_SLUG = "survey";
+/** The only form the /api/form-submit proxy forwards (Forms-module formId of "Help us set our prices"). */
+export const SURVEY_FORM_ID = "7f03813f-fc06-4b4b-bc34-595c45933a06";
 
 export interface SurveyFormField {
   key: string;
