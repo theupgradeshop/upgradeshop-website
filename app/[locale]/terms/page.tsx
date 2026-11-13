@@ -367,7 +367,7 @@ export default function TermsPage() {
               12. Digital Managers and Our Experts
             </h2>
             <p className="leading-relaxed mb-4">
-              Your digital manager and our design and marketing experts, when they review work on your account, act on your account under your authority and on your instructions. They may be our employees or independent contractors, and all of them are bound by confidentiality. What each tier&rsquo;s people do is described in Section 4.2.
+              Your digital manager, our design and marketing experts when they review work on your account, and other members of our team where needed, act on your account under your authority and on your instructions. They may be our employees or independent contractors, and all of them are bound by confidentiality. What each tier&rsquo;s people do is described in Section 4.2.
             </p>
             <p className="leading-relaxed mb-4">
               You understand and agree that:
