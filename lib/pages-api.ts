@@ -10,12 +10,7 @@ const PLATFORM_URL =
   process.env.NEXT_PUBLIC_UPGRADESHOP_API_URL ||
   process.env.NEXT_PUBLIC_PLATFORM_URL ||
   "https://app.upgradeshop.ai";
-import { runtimeSiteDomain } from "@/lib/platform-env";
-
-/** Runtime SITE_DOMAIN first (staging), then the baked public domain, then the default; read per call. */
-function siteDomain(): string {
-  return runtimeSiteDomain() || process.env.NEXT_PUBLIC_SITE_DOMAIN || "upgradeshop.ai";
-}
+const DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN || "upgradeshop.ai";
 
 export interface SectionField {
   id: string;
@@ -68,7 +63,7 @@ export async function fetchPageSections(
 ): Promise<PageSectionsResponse> {
   try {
     const url = new URL(`${PLATFORM_URL}/api/public/pages/${slug}`);
-    url.searchParams.set("domain", siteDomain());
+    url.searchParams.set("domain", DOMAIN);
     if (previewToken) {
       url.searchParams.set("preview", previewToken);
     }

@@ -6,17 +6,7 @@ export const PLATFORM_URL =
   process.env.NEXT_PUBLIC_UPGRADESHOP_API_URL ||
   process.env.NEXT_PUBLIC_PLATFORM_URL ||
   "https://app.upgradeshop.ai";
-/**
- * Runtime `SITE_DOMAIN` (trimmed), or "" when unset. Server-side only: the baked NEXT_PUBLIC_SITE_DOMAIN is the
- * production domain even on staging, where the container's runtime SITE_DOMAIN names the staging host
- * (same rule as app/api/waitlist/route.ts).
- */
-export function runtimeSiteDomain(): string {
-  return process.env.SITE_DOMAIN?.trim() || "";
-}
-
 export const DOMAIN =
-  runtimeSiteDomain() ||
   process.env.NEXT_PUBLIC_SITE_DOMAIN ||
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, "") ||
   "";

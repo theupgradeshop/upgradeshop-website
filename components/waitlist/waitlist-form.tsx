@@ -32,7 +32,6 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
   const [isSuccess, setIsSuccess] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [submittedFirstName, setSubmittedFirstName] = useState("");
-  const [submittedEmail, setSubmittedEmail] = useState("");
 
   const defaultCountryCode = locale === "he" ? countries.find(c => c.iso === "IL")?.dialCode ?? "" : "";
 
@@ -85,7 +84,6 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
       }
 
       setSubmittedFirstName(getFirstName(data.name));
-      setSubmittedEmail(data.email.trim());
       setIsSuccess(true);
     } catch {
       setServerError(t("errorGeneric"));
@@ -117,20 +115,6 @@ export function WaitlistForm({ className, variant = "light" }: WaitlistFormProps
           )}
         >
           {t("successMessage")}
-        </p>
-        <p
-          className={cn(
-            "text-base mt-4",
-            isDark ? "text-primary-foreground/80" : "text-foreground/70"
-          )}
-        >
-          {t("surveyPrompt")}{" "}
-          <a
-            href={`${locale === "he" ? "/he" : ""}/survey?email=${encodeURIComponent(submittedEmail)}`}
-            className="underline font-medium"
-          >
-            {t("surveyLink")}
-          </a>
         </p>
       </div>
     );

@@ -24,8 +24,6 @@
     "successTitle": "You're on the list.",
     "successTitleNamed": "You're on the list, {name}.",
     "successMessage": "We'll be in touch on WhatsApp and email before we open. It's handled.",
-    "surveyPrompt": "One more thing: two minutes to help us set our prices, and you're among the first we invite as a founder.",
-    "surveyLink": "Take the survey",
     "errorGeneric": "Something went wrong. Please try again.",
     "errorDuplicate": "You're already on the waitlist!",
     "errorRateLimited": "Too many attempts. Please try again in a few minutes."
