@@ -33,7 +33,7 @@ export default function TermsPage() {
           Terms of Use
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: November 3, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: November 13, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -59,7 +59,7 @@ export default function TermsPage() {
               2. What We Provide
             </h2>
             <p className="leading-relaxed mb-4">
-              The Upgrade Shop is a done-for-you digital team for small businesses. We build, run and keep upgrading the digital side of your business for you: your website, CRM, email, WhatsApp messaging, social media, online store, digital courses, funnels, marketing, and more. People on our team (an account manager with every package, and a marketer and a designer at higher tiers) work with your own AI assistant, and everything is available through a single dashboard. If you need something we do not have yet, we can build it (see Section 14).
+              The Upgrade Shop is a done-for-you digital team for small businesses. We build, run and keep upgrading the digital side of your business for you: your website, CRM, email, WhatsApp messaging, social media, online store, digital courses, funnels, marketing, and more. A digital manager runs your account with every package and works with your own AI assistant, our design and marketing experts review the bigger work, and everything is available through a single dashboard. If you need something we do not have yet, we can build it (see Section 14).
             </p>
             <p className="leading-relaxed mb-4">
               The services (together, the &ldquo;Service&rdquo; or the &ldquo;Platform&rdquo;) are made up of the modules, team support and features that your package or module subscription includes. Modules include, for example:
@@ -150,7 +150,7 @@ export default function TermsPage() {
               4.1 Packages
             </h3>
             <p className="leading-relaxed mb-4">
-              We sell the Service as packages built for a type of business, and as single modules. The packages are named on our website and <a href="https://upgradeshop.ai/pricing" className="underline">pricing page</a>, and we may add or retire packages over time. Every package includes the modules listed for it, your own AI assistant, and an account manager.
+              We sell the Service as packages built for a type of business, and as single modules. The packages are named on our website and <a href="https://upgradeshop.ai/pricing" className="underline">pricing page</a>, and we may add or retire packages over time. Every package includes the modules listed for it, your own AI assistant, and a digital manager.
             </p>
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               4.2 Tiers
@@ -160,29 +160,29 @@ export default function TermsPage() {
             </p>
             <ul className="list-disc list-inside space-y-2 mb-4 ml-2">
               <li>
-                <strong>Managed.</strong> Your account manager makes sure your account and your AI assistant work well, suggests improvements, and answers your requests. No person does the day-to-day work: you and your AI assistant do.
+                <strong>Managed.</strong> Your digital manager makes sure everything works, helps improve your AI assistant, suggests improvements, and answers your requests. No person does the day-to-day work: you and your AI assistant do.
               </li>
               <li>
-                <strong>Growth Partner.</strong> Your account manager does the work (for example automations, follow-ups, pages, emails, and fixes). A marketer reviews your marketing with your account manager from time to time, and a designer is available for anything new. You set priorities and approve.
+                <strong>Growth Partner.</strong> Your digital manager does the work (for example workflows, follow-ups, pages, emails, campaigns, and fixes), following your approval preferences. Our design and marketing experts review bigger work. You set priorities and approve.
               </li>
               <li>
-                <strong>Full Team.</strong> A whole team works on your account and leads it: your account manager, a marketer and a designer, and others where we say so. The Marketing module is included. You approve the direction.
+                <strong>Full Team.</strong> Your digital manager works on your account every day. Our design and marketing experts hold a monthly strategy meeting with them and advise. Paid ads are run on your own ad budget. The Marketing module is included. You approve the direction.
               </li>
             </ul>
             <p className="leading-relaxed mb-4">
               Design work beyond what your tier includes is quoted first, as described in Section 5. A human video editor is an optional add-on at every tier. The Marketing module is an add-on at Managed and Growth Partner. What each tier and package includes and what it costs is set out on our <a href="https://upgradeshop.ai/pricing" className="underline">pricing page</a>, and that page is part of these Terms for that purpose.
             </p>
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
-              4.3 Account Manager
+              4.3 Digital Manager
             </h3>
             <p className="leading-relaxed mb-4">
-              An account manager comes with every package, at every tier, and is the same person throughout. We do not promise any exclusivity, or any particular number of accounts that a person looks after.
+              A digital manager comes with every package, at every tier, and is the same person throughout. We do not promise any exclusivity, or any particular number of accounts that a person looks after.
             </p>
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               4.4 Single Modules
             </h3>
             <p className="leading-relaxed">
-              A module bought on its own, outside a package, comes with the AI assistant and normal support (Section 15). It does not come with an account manager.
+              A module bought on its own, outside a package, comes with the AI assistant and normal support (Section 15). It does not come with a digital manager.
             </p>
           </section>
 
@@ -192,7 +192,7 @@ export default function TermsPage() {
               5. Action Points
             </h2>
             <p className="leading-relaxed mb-4">
-              Action Points (&ldquo;AP&rdquo;) measure the work done on your behalf that is not covered by your subscription: the AI assistant&rsquo;s work, third-party compute (such as transcription, translation, and AI processing), and human requests that we quote. The proactive work your account manager and team do for your tier is covered by your subscription and is not counted in AP.
+              Action Points (&ldquo;AP&rdquo;) measure the work done on your behalf that is not covered by your subscription: the AI assistant&rsquo;s work, third-party compute (such as transcription, translation, and AI processing), and human requests that we quote. The proactive work your digital manager does for your tier is covered by your subscription and is not counted in AP.
             </p>
             <p className="leading-relaxed mb-4">
               Each package and module includes an AP allowance for each billing period. Top-up packs can be bought, and they add to the same single pool for your account. Allowances, pack sizes and rates are shown on our <a href="https://upgradeshop.ai/pricing" className="underline">pricing page</a>.
@@ -236,7 +236,7 @@ export default function TermsPage() {
               7.1 Cancelling
             </h3>
             <p className="leading-relaxed mb-4">
-              You can cancel at any time, by asking your account manager or support, or from your account settings where that option is available. There is no lock-in: you pay for one billing period at a time.
+              You can cancel at any time, by asking your digital manager or support, or from your account settings where that option is available. There is no lock-in: you pay for one billing period at a time.
             </p>
             <h3 className="font-display text-xl font-semibold text-foreground mb-3">
               7.2 Refunds
@@ -246,7 +246,7 @@ export default function TermsPage() {
                 <strong>Setup fee.</strong> You can ask for a refund of the setup fee within 14 days of paying it, as long as design work on your account has not started yet. Once design work has started, the setup fee is not refunded, because that work is being done for you.
               </li>
               <li>
-                <strong>First payment.</strong> You can ask for a refund of your first subscription payment (a month or a year, depending on your billing) within 14 days of the first charge, through your account manager, our support, or Paddle at paddle.net. A refund closes the account.
+                <strong>First payment.</strong> You can ask for a refund of your first subscription payment (a month or a year, depending on your billing) within 14 days of the first charge, through your digital manager, our support, or Paddle at paddle.net. A refund closes the account.
               </li>
               <li>
                 <strong>After 14 days.</strong> Cancelling takes effect at the end of the billing period you have already paid for, and you keep the service until then. We do not give partial refunds for the rest of a period, unless the law requires it.
@@ -364,10 +364,10 @@ export default function TermsPage() {
           {/* 12 */}
           <section>
             <h2 className="font-display text-2xl font-bold text-foreground mb-4">
-              12. Account Managers and Our Team
+              12. Digital Managers and Our Experts
             </h2>
             <p className="leading-relaxed mb-4">
-              Your account manager and the other members of our team act on your account under your authority and on your instructions. They may be our employees or independent contractors, and all of them are bound by confidentiality. What each tier&rsquo;s people do is described in Section 4.2.
+              Your digital manager and our design and marketing experts, when they review work on your account, act on your account under your authority and on your instructions. They may be our employees or independent contractors, and all of them are bound by confidentiality. What each tier&rsquo;s people do is described in Section 4.2.
             </p>
             <p className="leading-relaxed mb-4">
               You understand and agree that:
@@ -590,7 +590,7 @@ export default function TermsPage() {
             </p>
             <ul className="list-disc list-inside space-y-2 mb-4 ml-2">
               <li>
-                process that data only to provide the Service to you and on your documented instructions (your use of the Platform and your instructions to your account manager and your AI assistant are your instructions);
+                process that data only to provide the Service to you and on your documented instructions (your use of the Platform and your instructions to your digital manager and your AI assistant are your instructions);
               </li>
               <li>
                 make sure that everyone we allow to access it, including our team and contractors, is bound by confidentiality;
@@ -703,7 +703,7 @@ export default function TermsPage() {
               26.2 The Exit Package
             </h3>
             <p className="leading-relaxed mb-4">
-              You are entitled to the exit package. Ask for it through your account manager or support, and we will deliver it within 14 days of your request. It has three parts:
+              You are entitled to the exit package. Ask for it through your digital manager or support, and we will deliver it within 14 days of your request. It has three parts:
             </p>
             <ul className="list-disc list-inside space-y-2 mb-4 ml-2">
               <li>
