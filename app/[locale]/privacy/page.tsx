@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: November 13, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: November 18, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -469,6 +469,7 @@ export default function PrivacyPage() {
                   <tr><td className="py-2 pr-4">Anthropic</td><td className="py-2 pr-4">AI models for the assistants and dashboard AI features, and for scoring open answers and photos on AI-scored forms (Forms Pro)</td><td className="py-2">United States</td></tr>
                   <tr><td className="py-2 pr-4">OpenAI</td><td className="py-2 pr-4">AI models (fallback, classification, memory embeddings)</td><td className="py-2">United States</td></tr>
                   <tr><td className="py-2 pr-4">DeepSeek</td><td className="py-2 pr-4">AI models for background tasks (classification, extraction, contact summaries, translation). You can ask us to stop using it on your account (Section 8)</td><td className="py-2">China</td></tr>
+                  <tr><td className="py-2 pr-4">Reoon Email Verifier</td><td className="py-2 pr-4">Checking that the email addresses on your contact list are valid before your first email campaign, only when you confirm it in the pre-send check</td><td className="py-2">Bangladesh (company and team); data stored and processed in the European Union</td></tr>
                   <tr><td className="py-2 pr-4">Google (Gemini)</td><td className="py-2 pr-4">AI models for document extraction, logo analysis, images, short labels</td><td className="py-2">United States</td></tr>
                   <tr><td className="py-2 pr-4">Amazon Web Services (SES)</td><td className="py-2 pr-4">Email sending, and receiving and forwarding mail sent to your domain (SES, S3)</td><td className="py-2">EU region</td></tr>
                   <tr><td className="py-2 pr-4">Cloudflare</td><td className="py-2 pr-4">File and media storage (R2), DNS, and the robot check on our forms (Turnstile)</td><td className="py-2">United States, global network</td></tr>
