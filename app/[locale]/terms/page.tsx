@@ -33,7 +33,7 @@ export default function TermsPage() {
           Terms of Use
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: November 13, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: November 18, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -247,6 +247,9 @@ export default function TermsPage() {
               </li>
               <li>
                 <strong>First payment.</strong> You can ask for a refund of your first subscription payment (a month or a year, depending on your billing) within 14 days of the first charge, through your digital manager, our support, or Paddle at paddle.net. A refund closes the account.
+              </li>
+              <li>
+                <strong>Email sends you have used.</strong> If you are on a CRM + Email Marketing plan or bought an email pack, a refund is not available for email sends you have already used, except where the law gives you a right to a refund. This does not affect the refund of a package&rsquo;s first payment described above.
               </li>
               <li>
                 <strong>After 14 days.</strong> Cancelling takes effect at the end of the billing period you have already paid for, and you keep the service until then. We do not give partial refunds for the rest of a period, unless the law requires it.
