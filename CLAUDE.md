@@ -345,3 +345,7 @@ Ported from the base template (template b882579). Full behaviour: `/home/master/
 Payment-page retry (2026-10-31, customer-websites-bba7): `payment-page-checkout.tsx` keeps `{orderId, ownershipToken}` of the last real checkout answer in sessionStorage `ush-pay-retry:<slug>` (same key as the dashboard pay page) and sends it as `retryOf` on the next real checkout, so a buyer retrying their own unpaid attempt on a page with `usage_limit` takes over the unit they hold instead of `403 limit_reached`. A reused placed/held order sends no new checkout, so it neither reads nor writes the proof. Cleared when `success` is set; unreadable storage means no `retryOf`.
 
 More than one code on the quote path (DC13 U6): `lib/payment-quote.ts` asks with `couponCode` (first) + `couponCodes` (2+ only); rows are the quote's `coupons`; the add-another field shows only while every `coupons[].allowCombining` is true and fewer than 5 apply; checkout sends only the codes the quote applied; `coupon_not_combinable` / `too_many_coupons` show the server `error` sentence else the page words. The legacy non-quote branch stays single-code.
+
+# Container healthcheck
+
+`docker-compose.yml` healthcheck probes `/api/health` (static JSON, no dashboard call), never `/`: a probe of the home page renders the root layout and its dashboard `website-config` fetch every 30 s. `tests/docker-healthcheck.test.ts` guards it. A changed healthcheck applies only when the container is recreated.

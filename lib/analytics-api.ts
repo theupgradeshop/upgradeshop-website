@@ -1,6 +1,7 @@
 // Analytics API client for fetching configuration from UpgradeShop platform
 
 const PLATFORM_URL = process.env.NEXT_PUBLIC_PLATFORM_URL || process.env.NEXT_PUBLIC_UPGRADESHOP_API_URL || "https://app.upgradeshop.ai";
+export const WEBSITE_CONFIG_TIMEOUT_MS = 5000;
 const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN || "upgradeshop.ai";
 
 export interface AnalyticsConfig {
@@ -25,6 +26,9 @@ export async function fetchWebsiteConfig(): Promise<WebsiteConfigResponse | null
     const url = `${PLATFORM_URL}/api/public/website-config?domain=${SITE_DOMAIN}`;
     const response = await fetch(url, {
       next: { revalidate: 60 },
+      // Bounded: the root layout awaits this in generateMetadata, so an unanswered dashboard
+      // must cost a few seconds, never undici's 5-minute headers timeout.
+      signal: AbortSignal.timeout(WEBSITE_CONFIG_TIMEOUT_MS),
     });
 
     if (!response.ok) {
