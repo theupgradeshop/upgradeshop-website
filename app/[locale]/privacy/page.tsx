@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-foreground/60 mb-2">Effective date: October 19, 2026</p>
-        <p className="text-foreground/60 mb-12">Last updated: November 22, 2026</p>
+        <p className="text-foreground/60 mb-12">Last updated: November 23, 2026</p>
 
         <div className="space-y-12 text-foreground/80">
 
@@ -98,6 +98,7 @@ export default function PrivacyPage() {
             <ul className="list-disc list-inside mb-4 space-y-1 ml-2">
               <li>Name, email address, and password (or OAuth token from Google sign-in)</li>
               <li>Business name, website URL, and contact details you provide during onboarding</li>
+              <li>Business verification documents (business registration, proof of address, ID of the legal representative), only where a country&rsquo;s phone rules require them to get your number. We send them to Telnyx (Section 12) and delete our own copy once they have been forwarded</li>
               <li>Profile picture if connected via Google</li>
             </ul>
 
@@ -478,6 +479,7 @@ export default function PrivacyPage() {
                   <tr><td className="py-2 pr-4">ElevenLabs</td><td className="py-2 pr-4">AI dubbing of course videos</td><td className="py-2">United States</td></tr>
                   <tr><td className="py-2 pr-4">Paddle.com Market Limited</td><td className="py-2 pr-4">Reseller and Merchant of Record for our subscriptions: payments, tax and fraud prevention (Paddle acts under its own privacy notice)</td><td className="py-2">United Kingdom</td></tr>
                   <tr><td className="py-2 pr-4">SUMIT</td><td className="py-2 pr-4">Payment processing for accounts billed before our move to Paddle</td><td className="py-2">Israel</td></tr>
+                  <tr><td className="py-2 pr-4">Telnyx</td><td className="py-2 pr-4">Phone numbers for your account&rsquo;s WhatsApp number, including the verification call or text, and, where a country&rsquo;s phone rules require it, checking your business documents</td><td className="py-2">United States (Telnyx LLC, Austin, Texas); primary processing facilities in the United States</td></tr>
                 </tbody>
               </table>
             </div>
